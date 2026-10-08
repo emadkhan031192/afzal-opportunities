@@ -137,8 +137,7 @@ class _SavedScreenState extends State<SavedScreen> {
                           index: index,
                           isSaved: true,
                           onTap: () => _openDetails(ad),
-                          onToggleSave: () =>
-                              widget.bookmarks.toggle(ad.id),
+                          onToggleSave: () => widget.bookmarks.toggle(ad.id),
                         ),
                       );
                     }, childCount: saved.length),

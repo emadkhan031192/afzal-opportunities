@@ -132,9 +132,7 @@ class _SplashScreenState extends State<SplashScreen> {
                                       height: 120,
                                       decoration: BoxDecoration(
                                         color: BrandColors.splashPurple,
-                                        borderRadius: BorderRadius.circular(
-                                          24,
-                                        ),
+                                        borderRadius: BorderRadius.circular(24),
                                       ),
                                     ),
                                   ),
@@ -254,10 +252,7 @@ class _PaperPlane extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return CustomPaint(
-      size: Size(size, size),
-      painter: _PaperPlanePainter(),
-    );
+    return CustomPaint(size: Size(size, size), painter: _PaperPlanePainter());
   }
 }
 

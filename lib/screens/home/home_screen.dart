@@ -279,11 +279,7 @@ class _HomeScreenState extends State<HomeScreen> {
               shape: BoxShape.circle,
             ),
             child: IconButton(
-              icon: const Icon(
-                Icons.tune,
-                color: Colors.white,
-                size: 20,
-              ),
+              icon: const Icon(Icons.tune, color: Colors.white, size: 20),
               tooltip: 'Filter advertisements',
               onPressed: _openFilterSheet,
             ),
@@ -312,8 +308,7 @@ class _HomeScreenState extends State<HomeScreen> {
           ),
           const Spacer(),
           GestureDetector(
-            onTap: () =>
-                setState(() => _closingSoonOnly = !_closingSoonOnly),
+            onTap: () => setState(() => _closingSoonOnly = !_closingSoonOnly),
             child: Row(
               mainAxisSize: MainAxisSize.min,
               children: [

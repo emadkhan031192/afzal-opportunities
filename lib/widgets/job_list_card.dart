@@ -106,10 +106,7 @@ class JobListCard extends StatelessWidget {
                   mainAxisSize: MainAxisSize.min,
                   crossAxisAlignment: CrossAxisAlignment.end,
                   children: [
-                    _DeadlineChip(
-                      info: info,
-                      dark: blue,
-                    ),
+                    _DeadlineChip(info: info, dark: blue),
                     GestureDetector(
                       onTap: onToggleSave,
                       child: Padding(
