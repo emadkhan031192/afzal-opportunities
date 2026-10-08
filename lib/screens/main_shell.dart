@@ -1,13 +1,14 @@
 import 'package:flutter/material.dart';
 
-import '../core/constants/app_constants.dart';
 import '../core/theme/theme_controller.dart';
 import '../services/advertisement_service.dart';
 import '../services/bookmark_service.dart';
 import 'home/home_screen.dart';
 import 'saved/saved_screen.dart';
 
-/// Root scaffold: branded app bar with theme toggle + bottom navigation.
+/// Root scaffold: bottom navigation between the discovery feed and saved
+/// advertisements. The branded header (logo, greeting, theme toggle) lives
+/// inside the home feed itself.
 class MainShell extends StatefulWidget {
   const MainShell({
     super.key,
@@ -29,46 +30,23 @@ class _MainShellState extends State<MainShell> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
+      body: SafeArea(
+        child: IndexedStack(
+          index: _index,
           children: [
-            const Text(
-              AppConstants.appName,
-              style: TextStyle(fontSize: 19, fontWeight: FontWeight.w800),
+            HomeScreen(
+              service: _service,
+              bookmarks: widget.bookmarkService,
+              themeController: widget.themeController,
+              onOpenSaved: () => setState(() => _index = 1),
             ),
-            Text(
-              AppConstants.brandName,
-              style: TextStyle(
-                fontSize: 12,
-                fontWeight: FontWeight.w500,
-                color: Theme.of(context).textTheme.bodySmall?.color,
-              ),
+            SavedScreen(
+              service: _service,
+              bookmarks: widget.bookmarkService,
+              onBrowse: () => setState(() => _index = 0),
             ),
           ],
         ),
-        actions: [
-          AnimatedBuilder(
-            animation: widget.themeController,
-            builder: (context, _) {
-              final isDark = widget.themeController.isDark;
-              return IconButton(
-                icon: Icon(isDark ? Icons.light_mode : Icons.dark_mode),
-                tooltip: isDark
-                    ? 'Switch to light mode'
-                    : 'Switch to night mode',
-                onPressed: widget.themeController.toggle,
-              );
-            },
-          ),
-        ],
-      ),
-      body: IndexedStack(
-        index: _index,
-        children: [
-          HomeScreen(service: _service, bookmarks: widget.bookmarkService),
-          SavedScreen(service: _service, bookmarks: widget.bookmarkService),
-        ],
       ),
       bottomNavigationBar: BottomNavigationBar(
         currentIndex: _index,

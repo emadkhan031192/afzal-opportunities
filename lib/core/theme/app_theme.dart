@@ -4,16 +4,16 @@ import 'brand_colors.dart';
 
 /// Light ("white mode") and night ("dark mode") themes for Afzal Opportunities.
 ///
-/// Night theme: night blue-black backgrounds, white typography, mint-green
-/// highlights and elegant cards with subtle borders and 16dp rounded corners.
-/// Light theme: white backgrounds, night-blue typography, mint accents and
+/// Night theme: night navy-black backgrounds, white typography, mint-green
+/// highlights and elegant cards with subtle borders and 24dp rounded corners.
+/// Light theme: white backgrounds, night-navy typography, mint accents and
 /// light-grey cards.
 class AppTheme {
   const AppTheme._();
 
-  static const double cardRadius = 16;
+  static const double cardRadius = 24;
 
-  /// Night theme: dark streaming-style browsing experience.
+  /// Night theme: dark modern browsing experience.
   static ThemeData nightTheme() {
     final base = ThemeData.dark(useMaterial3: true);
     return base.copyWith(
@@ -25,7 +25,7 @@ class AppTheme {
         onSecondary: BrandColors.nightBlack,
         surface: BrandColors.nightBlue,
         onSurface: BrandColors.white,
-        error: Color(0xFFE5484D),
+        error: BrandColors.dangerStrong,
         onError: BrandColors.white,
       ),
       appBarTheme: const AppBarTheme(
@@ -66,7 +66,7 @@ class AppTheme {
           foregroundColor: BrandColors.nightBlack,
           textStyle: const TextStyle(fontWeight: FontWeight.w700),
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(14),
+            borderRadius: BorderRadius.circular(16),
           ),
           padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
         ),
@@ -76,7 +76,7 @@ class AppTheme {
           foregroundColor: BrandColors.mint,
           side: const BorderSide(color: BrandColors.mint),
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(14),
+            borderRadius: BorderRadius.circular(16),
           ),
           padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
         ),
@@ -99,21 +99,43 @@ class AppTheme {
         contentTextStyle: TextStyle(color: BrandColors.white),
         behavior: SnackBarBehavior.floating,
       ),
+      inputDecorationTheme: InputDecorationTheme(
+        filled: true,
+        fillColor: BrandColors.nightBlue,
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(16),
+          borderSide: BorderSide.none,
+        ),
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(16),
+          borderSide: BorderSide.none,
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(16),
+          borderSide: const BorderSide(color: BrandColors.mint, width: 1.5),
+        ),
+        hintStyle: const TextStyle(color: BrandColors.muted),
+        prefixIconColor: BrandColors.muted,
+        contentPadding: const EdgeInsets.symmetric(
+          horizontal: 16,
+          vertical: 14,
+        ),
+      ),
       textTheme: const TextTheme(
         displaySmall: TextStyle(
-          fontSize: 30,
+          fontSize: 32,
           fontWeight: FontWeight.w800,
           color: BrandColors.white,
           height: 1.2,
         ),
         headlineMedium: TextStyle(
-          fontSize: 24,
+          fontSize: 26,
           fontWeight: FontWeight.w800,
           color: BrandColors.white,
           height: 1.25,
         ),
         headlineSmall: TextStyle(
-          fontSize: 21,
+          fontSize: 22,
           fontWeight: FontWeight.w700,
           color: BrandColors.white,
           height: 1.3,
@@ -165,13 +187,13 @@ class AppTheme {
     return base.copyWith(
       scaffoldBackgroundColor: BrandColors.white,
       colorScheme: const ColorScheme.light(
-        primary: Color(0xFF2E9E76),
+        primary: BrandColors.mintDark,
         onPrimary: BrandColors.white,
-        secondary: Color(0xFF2E9E76),
+        secondary: BrandColors.mintDark,
         onSecondary: BrandColors.white,
         surface: BrandColors.lightBackground,
         onSurface: BrandColors.nightBlue,
-        error: Color(0xFFC62828),
+        error: BrandColors.dangerStrong,
         onError: BrandColors.white,
       ),
       appBarTheme: const AppBarTheme(
@@ -203,7 +225,7 @@ class AppTheme {
       ),
       bottomNavigationBarTheme: const BottomNavigationBarThemeData(
         backgroundColor: BrandColors.white,
-        selectedItemColor: Color(0xFF2E9E76),
+        selectedItemColor: BrandColors.mintDark,
         unselectedItemColor: BrandColors.mutedOnLight,
         type: BottomNavigationBarType.fixed,
         elevation: 4,
@@ -214,26 +236,26 @@ class AppTheme {
           foregroundColor: BrandColors.nightBlack,
           textStyle: const TextStyle(fontWeight: FontWeight.w700),
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(14),
+            borderRadius: BorderRadius.circular(16),
           ),
           padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
         ),
       ),
       outlinedButtonTheme: OutlinedButtonThemeData(
         style: OutlinedButton.styleFrom(
-          foregroundColor: const Color(0xFF2E9E76),
-          side: const BorderSide(color: Color(0xFF2E9E76)),
+          foregroundColor: BrandColors.mintDark,
+          side: const BorderSide(color: BrandColors.mintDark),
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(14),
+            borderRadius: BorderRadius.circular(16),
           ),
           padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
         ),
       ),
       textButtonTheme: TextButtonThemeData(
-        style: TextButton.styleFrom(foregroundColor: const Color(0xFF2E9E76)),
+        style: TextButton.styleFrom(foregroundColor: BrandColors.mintDark),
       ),
       progressIndicatorTheme: const ProgressIndicatorThemeData(
-        color: Color(0xFF2E9E76),
+        color: BrandColors.mintDark,
       ),
       dividerColor: BrandColors.nightBlue.withValues(alpha: 0.08),
       dialogTheme: const DialogThemeData(
@@ -247,21 +269,43 @@ class AppTheme {
         contentTextStyle: TextStyle(color: BrandColors.white),
         behavior: SnackBarBehavior.floating,
       ),
+      inputDecorationTheme: InputDecorationTheme(
+        filled: true,
+        fillColor: BrandColors.lightBackground,
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(16),
+          borderSide: BorderSide.none,
+        ),
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(16),
+          borderSide: BorderSide.none,
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(16),
+          borderSide: const BorderSide(color: BrandColors.mintDark, width: 1.5),
+        ),
+        hintStyle: const TextStyle(color: BrandColors.mutedOnLight),
+        prefixIconColor: BrandColors.mutedOnLight,
+        contentPadding: const EdgeInsets.symmetric(
+          horizontal: 16,
+          vertical: 14,
+        ),
+      ),
       textTheme: const TextTheme(
         displaySmall: TextStyle(
-          fontSize: 30,
+          fontSize: 32,
           fontWeight: FontWeight.w800,
           color: BrandColors.nightBlue,
           height: 1.2,
         ),
         headlineMedium: TextStyle(
-          fontSize: 24,
+          fontSize: 26,
           fontWeight: FontWeight.w800,
           color: BrandColors.nightBlue,
           height: 1.25,
         ),
         headlineSmall: TextStyle(
-          fontSize: 21,
+          fontSize: 22,
           fontWeight: FontWeight.w700,
           color: BrandColors.nightBlue,
           height: 1.3,

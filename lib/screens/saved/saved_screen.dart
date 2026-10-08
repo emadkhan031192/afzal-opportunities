@@ -14,10 +14,12 @@ class SavedScreen extends StatefulWidget {
     super.key,
     required this.service,
     required this.bookmarks,
+    this.onBrowse,
   });
 
   final AdvertisementService service;
   final BookmarkService bookmarks;
+  final VoidCallback? onBrowse;
 
   @override
   State<SavedScreen> createState() => _SavedScreenState();
@@ -49,6 +51,7 @@ class _SavedScreenState extends State<SavedScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     return AnimatedBuilder(
       animation: widget.bookmarks,
       builder: (context, _) {
@@ -72,31 +75,72 @@ class _SavedScreenState extends State<SavedScreen> {
                   .toList();
               if (saved.isEmpty) {
                 return ListView(
-                  children: const [
-                    SizedBox(height: 80),
-                    EmptyView(
+                  children: [
+                    const SizedBox(height: 80),
+                    const EmptyView(
                       icon: Icons.bookmark_border,
                       title: 'No saved advertisements',
                       message:
                           'Tap the bookmark icon on any advertisement to save it here.',
                     ),
+                    Padding(
+                      padding: const EdgeInsets.only(top: 8),
+                      child: Center(
+                        child: ElevatedButton.icon(
+                          onPressed: widget.onBrowse,
+                          icon: const Icon(Icons.explore_outlined),
+                          label: const Text('Browse advertisements'),
+                        ),
+                      ),
+                    ),
                   ],
                 );
               }
-              return ListView.builder(
-                padding: const EdgeInsets.fromLTRB(16, 16, 16, 24),
-                itemCount: saved.length,
-                itemBuilder: (context, index) {
-                  final ad = saved[index];
-                  return Padding(
-                    padding: const EdgeInsets.only(bottom: 12),
-                    child: AdCard(
-                      ad: ad,
-                      bookmarks: widget.bookmarks,
-                      onTap: () => _openDetails(ad),
+              return CustomScrollView(
+                physics: const AlwaysScrollableScrollPhysics(),
+                slivers: [
+                  SliverToBoxAdapter(
+                    child: Padding(
+                      padding: const EdgeInsets.fromLTRB(20, 20, 20, 4),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            'Saved',
+                            style: theme.textTheme.headlineSmall?.copyWith(
+                              fontWeight: FontWeight.w800,
+                            ),
+                          ),
+                          const SizedBox(height: 4),
+                          Text(
+                            '${saved.length} saved advertisement${saved.length == 1 ? '' : 's'}',
+                            style: theme.textTheme.bodyMedium?.copyWith(
+                              color: theme.textTheme.bodySmall?.color,
+                            ),
+                          ),
+                        ],
+                      ),
                     ),
-                  );
-                },
+                  ),
+                  SliverList(
+                    delegate: SliverChildBuilderDelegate((context, index) {
+                      final ad = saved[index];
+                      return Padding(
+                        padding: EdgeInsets.fromLTRB(
+                          16,
+                          index == 0 ? 12 : 0,
+                          16,
+                          12,
+                        ),
+                        child: AdCard(
+                          ad: ad,
+                          bookmarks: widget.bookmarks,
+                          onTap: () => _openDetails(ad),
+                        ),
+                      );
+                    }, childCount: saved.length),
+                  ),
+                ],
               );
             },
           ),
