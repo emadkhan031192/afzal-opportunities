@@ -825,16 +825,21 @@ async function submitForm(targetStatus) {
       description: values.description,
       location: values.location,
       posterUrl: uploadedPosterUrl || null,
-      sourceUrl: values.sourceUrl,
-      applicationUrl: values.applicationUrl,
       lastDate: values.lastDate,
       status: targetStatus,
       isFeatured: values.isFeatured,
       updatedAt: now,
     };
 
+    // Optional URL fields: the security rules reject explicit nulls
+    // ("Missing or insufficient permissions"), so omit them when creating
+    // and delete them when cleared on update.
+    const del = firebase.firestore.FieldValue.delete();
+
     if (editingId) {
       const snap = await docRef.get();
+      data.sourceUrl = values.sourceUrl || del;
+      data.applicationUrl = values.applicationUrl || del;
       if (snap.exists) {
         await docRef.update(data); // never fabricate createdAt/createdBy on edit
       } else {
@@ -845,6 +850,8 @@ async function submitForm(targetStatus) {
         await docRef.set(data);
       }
     } else {
+      if (values.sourceUrl) data.sourceUrl = values.sourceUrl;
+      if (values.applicationUrl) data.applicationUrl = values.applicationUrl;
       data.createdAt = now;
       data.createdBy = user.uid;
       if (targetStatus === "published") data.publishedAt = now;

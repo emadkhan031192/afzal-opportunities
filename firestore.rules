@@ -46,8 +46,14 @@ service cloud.firestore {
         && request.resource.data.description.size() > 0
         && request.resource.data.status in ['draft', 'published', 'archived']
         // Optional URL fields, when present, must be https URLs.
-        && (!('sourceUrl' in request.resource.data) || request.resource.data.sourceUrl is string)
-        && (!('applicationUrl' in request.resource.data) || request.resource.data.applicationUrl is string)
+        // (Explicit nulls are allowed: the admin panel omits empty URLs on
+        // create and deletes them on update, but null must not fail here.)
+        && (!('sourceUrl' in request.resource.data)
+            || request.resource.data.sourceUrl == null
+            || request.resource.data.sourceUrl is string)
+        && (!('applicationUrl' in request.resource.data)
+            || request.resource.data.applicationUrl == null
+            || request.resource.data.applicationUrl is string)
         // lastDate, when present, must be a "YYYY-MM-DD" string.
         && (!('lastDate' in request.resource.data)
             || request.resource.data.lastDate is string
