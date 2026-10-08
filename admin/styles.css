@@ -60,6 +60,7 @@ code { background: #EBEDF2; padding: 1px 6px; border-radius: 6px; font-size: 0.8
 .btn.primary:hover { background: var(--mint-dark); border-color: var(--mint-dark); }
 .btn.ghost { background: transparent; border-color: transparent; color: var(--muted); }
 .btn.ghost:hover { color: var(--night-blue); background: #EBEDF2; box-shadow: none; }
+.btn.small { padding: 0.45rem 0.9rem; font-size: 0.85rem; }
 .btn.danger { background: var(--danger); border-color: var(--danger); color: #fff; }
 
 /* ---------- Login view ---------- */

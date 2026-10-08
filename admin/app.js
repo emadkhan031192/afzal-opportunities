@@ -674,23 +674,61 @@ $("f-poster").addEventListener("change", (e) => {
   });
   posterUploadTask = task;
 
+  // If the upload stalls (e.g. Firebase Storage is not enabled on the
+  // project — it needs the Blaze plan), don't block publishing forever:
+  // cancel it and explain clearly.
+  let lastProgressAt = Date.now();
+  const stallTimer = setInterval(() => {
+    if (posterUploadTask !== task) {
+      clearInterval(stallTimer);
+      return;
+    }
+    if (Date.now() - lastProgressAt > 45000) {
+      clearInterval(stallTimer);
+      task.cancel();
+      posterUploadTask = null;
+      $("upload-status").textContent = "";
+      $("upload-progress-wrap").hidden = true;
+      setFieldError(
+        "poster",
+        "Poster upload timed out — Firebase Storage is not enabled on this " +
+          "project (it needs the Blaze plan upgrade). Remove the poster or " +
+          "publish without one."
+      );
+    }
+  }, 5000);
+
   $("upload-progress-wrap").hidden = false;
   $("upload-status").textContent = "Uploading...";
   task.on(
     "state_changed",
     (snap) => {
+      lastProgressAt = Date.now();
       const pct = Math.round((snap.bytesTransferred / snap.totalBytes) * 100);
       $("upload-progress-bar").style.width = pct + "%";
       $("upload-status").textContent = `Uploading... ${pct}%`;
     },
     (err) => {
+      clearInterval(stallTimer);
       console.error("Poster upload failed:", err);
-      setFieldError("poster", `Upload failed: ${err.message || err}`);
+      const code = (err && err.code) || "";
+      const storageDown =
+        code.indexOf("bucket-not-found") !== -1 ||
+        code.indexOf("project-not-found") !== -1 ||
+        code.indexOf("unknown") !== -1;
+      setFieldError(
+        "poster",
+        storageDown
+          ? "Upload failed: Firebase Storage is not enabled on this project " +
+              "(it needs the Blaze plan upgrade). Remove the poster or publish without one."
+          : `Upload failed: ${err.message || err}`
+      );
       $("upload-status").textContent = "";
       $("upload-progress-wrap").hidden = true;
       posterUploadTask = null;
     },
     async () => {
+      clearInterval(stallTimer);
       uploadedPosterUrl = await task.snapshot.ref.getDownloadURL();
       $("upload-status").textContent = "Upload complete.";
       $("upload-progress-wrap").hidden = true;
@@ -700,6 +738,21 @@ $("f-poster").addEventListener("change", (e) => {
     }
   );
   void ref; // ref kept for clarity of the Storage path convention
+});
+
+/* ---------- Remove poster ---------- */
+$("btn-remove-poster").addEventListener("click", () => {
+  posterUploadTask && posterUploadTask.cancel();
+  posterUploadTask = null;
+  uploadedPosterUrl = "";
+  $("f-poster").value = "";
+  $("poster-preview").removeAttribute("src");
+  $("poster-preview-wrap").hidden = true;
+  $("upload-progress-wrap").hidden = true;
+  $("upload-progress-bar").style.width = "0%";
+  $("upload-status").textContent = "";
+  setFieldError("poster");
+  updatePreview();
 });
 
 /* ---------- Live preview ---------- */
