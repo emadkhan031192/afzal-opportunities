@@ -1,0 +1,36 @@
+rules_version = '2';
+
+// Afzal Opportunities — Firebase Storage security rules.
+//
+// Poster images live under posters/{adId}/{filename}.
+// - Public read: the Flutter app and admin panel must be able to display
+//   published posters without authentication.
+// - Writes: only authenticated administrators (presence of /admins/{uid}
+//   document in Firestore) may upload.
+// - Upload guardrails (enforced server-side here, not just in the UI):
+//     * content type must be an image (jpg/png/webp in practice)
+//     * file size must be under 5 MB
+service firebase.storage {
+  match /b/{bucket}/o {
+
+    function isAdmin() {
+      return request.auth != null
+        && firestore.exists(/databases/(default)/documents/admins/$(request.auth.uid));
+    }
+
+    match /posters/{adId}/{filename} {
+      // Posters are publicly readable so the app can render them.
+      allow read: if true;
+
+      // Admin-only upload/update/delete, images up to 5 MB.
+      allow write: if isAdmin()
+        && request.resource.contentType.matches('image/.*')
+        && request.resource.size < 5 * 1024 * 1024;
+    }
+
+    // Everything else in the bucket is private by default.
+    match /{allPaths=**} {
+      allow read, write: if false;
+    }
+  }
+}

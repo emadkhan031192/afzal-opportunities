@@ -1,0 +1,40 @@
+# Miscellaneous
+*.class
+*.log
+*.pyc
+*.swp
+.DS_Store
+.atom/
+.buildlog/
+.history
+.svn/
+*.iml
+.idea/
+
+# Flutter / Dart
+.dart_tool/
+.flutter-plugins
+.flutter-plugins-dependencies
+.packages
+build/
+.pub-cache/
+.pub/
+
+# Android signing secrets — NEVER commit these
+local.properties
+**/android/**/local.properties
+*.jks
+*.keystore
+key.properties
+**/key.properties
+
+# Firebase config downloaded from the console — never commit
+google-services.json
+**/google-services.json
+GoogleService-Info.plist
+**/GoogleService-Info.plist
+
+# VS Code
+.vscode/*
+!.vscode/extensions.json
+!.vscode/settings.json

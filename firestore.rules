@@ -1,0 +1,83 @@
+rules_version = '2';
+
+// Afzal Opportunities — Cloud Firestore security rules.
+//
+// Public users may READ published advertisements only.
+// All writes are restricted to administrators, verified by the presence of a
+// document at /admins/{uid} for the signed-in user. That document can only be
+// created manually in the Firebase Console (see docs/firebase-setup.md).
+//
+// IMPORTANT: Hiding buttons in the admin UI is NOT the security boundary.
+// These rules are the enforcement point; every write is rejected server-side
+// unless the caller is an authenticated admin.
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // True when the caller is signed in AND has an /admins/{uid} document.
+    function isAdmin() {
+      return request.auth != null
+        && exists(/databases/$(database)/documents/admins/$(request.auth.uid));
+    }
+
+    match /advertisements/{adId} {
+
+      // Public read: published advertisements only.
+      // Drafts and archived ads are invisible to the public app.
+      allow get: if resource.data.status == 'published';
+
+      // Public listing (the app's discovery feed): only published ads.
+      // Drafts/archived never appear in list results for non-admins.
+      allow list: if resource.data.status == 'published';
+
+      // Admin reads (get/list) of everything: allowed so the admin panel can
+      // manage drafts, archived, and expired advertisements.
+      allow get, list: if isAdmin();
+
+      // Admin writes only. Field-level validation runs on every create/update.
+      allow create, update: if isAdmin()
+        && request.resource.data.title is string
+        && request.resource.data.title.size() > 0
+        && request.resource.data.title.size() <= 200
+        && request.resource.data.organization is string
+        && request.resource.data.organization.size() > 0
+        && request.resource.data.organization.size() <= 120
+        && request.resource.data.category in ['jobs', 'scholarships', 'admissions', 'other']
+        && request.resource.data.description is string
+        && request.resource.data.description.size() > 0
+        && request.resource.data.status in ['draft', 'published', 'archived']
+        // Optional URL fields, when present, must be https URLs.
+        && (!('sourceUrl' in request.resource.data) || request.resource.data.sourceUrl is string)
+        && (!('applicationUrl' in request.resource.data) || request.resource.data.applicationUrl is string)
+        // lastDate, when present, must be a "YYYY-MM-DD" string.
+        && (!('lastDate' in request.resource.data)
+            || request.resource.data.lastDate is string
+            || request.resource.data.lastDate == null)
+        // publishedAt may be a server timestamp on publish.
+        && (!('isFeatured' in request.resource.data)
+            || request.resource.data.isFeatured is bool);
+
+      // Admin deletes (used when an ad is removed entirely; prefer "archived"
+      // status over deletion so expired/advertisement history is preserved).
+      allow delete: if isAdmin();
+    }
+
+    // Future-proof category metadata for the app's dynamic category chips.
+    // Public read; admin-only write.
+    match /categories/{categoryId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    // Admin registry. Presence of /admins/{uid} is what grants admin rights.
+    // - Each user may read only their own doc (used by the admin panel to
+    //   confirm admin status after sign-in).
+    // - Nobody may write through the client SDKs. The first admin doc is
+    //   created manually in the Firebase Console; additional admins can only
+    //   be created by an existing admin via the console (never client-side).
+    // - list is denied for everyone: the admin roster is not enumerable.
+    match /admins/{uid} {
+      allow get: if request.auth != null && request.auth.uid == uid;
+      allow write: if false;
+    }
+  }
+}

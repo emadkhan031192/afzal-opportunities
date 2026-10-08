@@ -1,0 +1,14 @@
+{
+    "firestore": {
+        "rules": "firestore.rules"
+    },
+    "hosting": {
+        "ignore": [
+            "firebase.json"
+        ],
+        "public": "admin"
+    },
+    "storage": {
+        "rules": "storage.rules"
+    }
+}

@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="Afzal Opportunities — administration panel for publishing advertisements." />
+  <title>Afzal Opportunities — Admin</title>
+  <link rel="stylesheet" href="styles.css" />
+
+  <!-- Firebase JS compat SDKs (v10, via CDN). No build step required. -->
+  <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-storage-compat.js"></script>
+</head>
+<body>
+
+  <!-- ============ VIEW: Login ============ -->
+  <section id="view-login" class="view">
+    <div class="login-card">
+      <div class="brand-row">
+        <div class="brand-mark">AE</div>
+        <div>
+          <h1>Afzal Opportunities</h1>
+          <p class="muted">Admin Panel &middot; Afzal E Services</p>
+        </div>
+      </div>
+
+      <h2>Sign in</h2>
+      <p class="muted small">Authorized administrators only. Your account must have an <code>/admins/{uid}</code> document in Firestore.</p>
+
+      <form id="login-form" novalidate>
+        <label class="field">
+          <span>Email</span>
+          <input type="email" id="login-email" autocomplete="username" required />
+        </label>
+        <label class="field">
+          <span>Password</span>
+          <input type="password" id="login-password" autocomplete="current-password" required />
+        </label>
+        <p id="login-error" class="error" hidden></p>
+        <button type="submit" id="login-btn" class="btn primary">Sign in</button>
+      </form>
+    </div>
+  </section>
+
+  <!-- ============ VIEW: Dashboard ============ -->
+  <section id="view-dashboard" class="view" hidden>
+    <header class="topbar">
+      <div class="brand-row">
+        <div class="brand-mark">AE</div>
+        <div class="brand-text">
+          <strong>Afzal Opportunities</strong>
+          <span class="muted small">Admin Panel</span>
+        </div>
+      </div>
+      <div class="topbar-actions">
+        <span id="admin-email" class="muted small"></span>
+        <button id="btn-new" class="btn primary">+ New advertisement</button>
+        <button id="btn-logout" class="btn ghost">Sign out</button>
+      </div>
+    </header>
+
+    <main class="dashboard">
+      <nav class="tabs" role="tablist" aria-label="Advertisement status">
+        <button class="tab active" data-tab="published" role="tab" aria-selected="true">
+          Published <span class="count" id="count-published">0</span>
+        </button>
+        <button class="tab" data-tab="drafts" role="tab" aria-selected="false">
+          Drafts <span class="count" id="count-drafts">0</span>
+        </button>
+        <button class="tab" data-tab="archived" role="tab" aria-selected="false">
+          Archived <span class="count" id="count-archived">0</span>
+        </button>
+        <button class="tab" data-tab="expired" role="tab" aria-selected="false">
+          Expired <span class="count" id="count-expired">0</span>
+        </button>
+      </nav>
+
+      <div class="tab-toolbar">
+        <input type="search" id="search-input" placeholder="Search title or organization..." aria-label="Search advertisements" />
+        <span id="dashboard-status" class="muted small" role="status"></span>
+      </div>
+
+      <div id="list-loading" class="state-block" hidden>
+        <div class="spinner" aria-hidden="true"></div>
+        <p>Loading advertisements...</p>
+      </div>
+      <div id="list-error" class="state-block error-block" hidden>
+        <p><strong>Could not load advertisements.</strong></p>
+        <p class="muted small" id="list-error-detail"></p>
+        <button class="btn" id="btn-retry">Retry</button>
+      </div>
+      <div id="list-empty" class="state-block" hidden>
+        <p class="big">Nothing here yet</p>
+        <p class="muted small">This list is empty. Create a new advertisement to get started.</p>
+      </div>
+
+      <div id="ad-list" class="ad-grid" aria-live="polite"></div>
+    </main>
+  </section>
+
+  <!-- ============ VIEW: Editor ============ -->
+  <section id="view-editor" class="view" hidden>
+    <header class="topbar">
+      <button id="btn-back" class="btn ghost">&larr; Back</button>
+      <h2 id="editor-title">New advertisement</h2>
+      <span class="muted small" id="editor-id"></span>
+    </header>
+
+    <main class="editor">
+      <form id="editor-form" class="editor-form" novalidate>
+        <div class="form-grid">
+
+          <label class="field">
+            <span>Headline <em class="req">*</em></span>
+            <input type="text" id="f-title" maxlength="200" placeholder="e.g. Teaching Jobs at Govt. Degree College Mardan" required />
+            <small class="field-error" id="e-title" hidden></small>
+          </label>
+
+          <label class="field">
+            <span>Organization / Department <em class="req">*</em></span>
+            <input type="text" id="f-organization" maxlength="120" placeholder="e.g. Education Department KPK" required />
+            <small class="field-error" id="e-organization" hidden></small>
+          </label>
+
+          <label class="field">
+            <span>Category <em class="req">*</em></span>
+            <select id="f-category" required>
+              <option value="jobs">Jobs</option>
+              <option value="scholarships">Scholarships</option>
+              <option value="admissions">Admissions</option>
+              <option value="other">Other advertisements</option>
+            </select>
+            <small class="field-error" id="e-category" hidden></small>
+          </label>
+
+          <label class="field">
+            <span>Last date (optional, Asia/Karachi)</span>
+            <input type="date" id="f-lastDate" />
+            <small class="hint">Advertisement stays active through this entire date (Pakistan time). Leave empty if not specified.</small>
+            <small class="field-error" id="e-lastDate" hidden></small>
+          </label>
+
+          <label class="field full">
+            <span>Description <em class="req">*</em></span>
+            <textarea id="f-description" rows="6" placeholder="Full advertisement details as provided by the source..."></textarea>
+            <small class="field-error" id="e-description" hidden></small>
+          </label>
+
+          <label class="field full">
+            <span>Poster image</span>
+            <input type="file" id="f-poster" accept="image/jpeg,image/png,image/webp" />
+            <small class="hint">JPG, PNG or WebP only &middot; maximum 5 MB.</small>
+            <small class="field-error" id="e-poster" hidden></small>
+          </label>
+
+          <div class="field full" id="poster-preview-wrap" hidden>
+            <span class="field-label">Poster preview</span>
+            <img id="poster-preview" alt="Poster preview" />
+            <div class="progress" id="upload-progress-wrap" hidden>
+              <div class="progress-bar" id="upload-progress-bar"></div>
+            </div>
+            <p class="muted small" id="upload-status"></p>
+          </div>
+
+          <label class="field">
+            <span>Official source URL</span>
+            <input type="url" id="f-sourceUrl" placeholder="https://..." />
+            <small class="field-error" id="e-sourceUrl" hidden></small>
+          </label>
+
+          <label class="field">
+            <span>Application URL</span>
+            <input type="url" id="f-applicationUrl" placeholder="https://..." />
+            <small class="field-error" id="e-applicationUrl" hidden></small>
+          </label>
+
+          <label class="field">
+            <span>Location</span>
+            <input type="text" id="f-location" maxlength="120" placeholder="e.g. Mardan, KPK" />
+          </label>
+
+          <label class="field check">
+            <input type="checkbox" id="f-featured" />
+            <span>Featured (show in the featured banner of the app)</span>
+          </label>
+
+        </div>
+
+        <p id="form-error" class="error" hidden></p>
+
+        <div class="editor-actions">
+          <button type="button" class="btn" id="btn-save-draft">Save as draft</button>
+          <button type="button" class="btn primary" id="btn-publish">Publish</button>
+          <button type="button" class="btn ghost" id="btn-cancel">Cancel</button>
+        </div>
+      </form>
+
+      <aside class="editor-preview" aria-label="Live preview">
+        <h3>Live preview</h3>
+        <p class="muted small">This is how the advertisement card will look in the app.</p>
+        <div id="preview-card" class="preview-card">
+          <div class="preview-poster" id="preview-poster"><span class="preview-noimage">No poster</span></div>
+          <div class="preview-body">
+            <div class="preview-badges"><span class="badge badge-category" id="preview-category">Jobs</span><span class="badge badge-deadline" id="preview-deadline">LAST DATE NOT SPECIFIED</span><span class="badge badge-new" id="preview-new" hidden>NEW</span></div>
+            <h4 id="preview-title">Your headline will appear here</h4>
+            <p class="muted small" id="preview-org">Organization</p>
+            <p class="small" id="preview-location"></p>
+          </div>
+        </div>
+      </aside>
+    </main>
+  </section>
+
+  <!-- Confirmation dialog (generic) -->
+  <div id="confirm-overlay" class="overlay" hidden>
+    <div class="dialog" role="dialog" aria-modal="true" aria-labelledby="confirm-title">
+      <h3 id="confirm-title">Are you sure?</h3>
+      <p class="muted" id="confirm-message"></p>
+      <div class="dialog-actions">
+        <button class="btn ghost" id="confirm-cancel">Cancel</button>
+        <button class="btn primary" id="confirm-ok">Confirm</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast notifications -->
+  <div id="toast-wrap" aria-live="polite"></div>
+
+  <script src="app.js"></script>
+</body>
+</html>
