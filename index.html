@@ -149,9 +149,9 @@
           </label>
 
           <label class="field full">
-            <span>Poster image</span>
+            <span>Poster image <span class="muted small">(optional)</span></span>
             <input type="file" id="f-poster" accept="image/jpeg,image/png,image/webp" />
-            <small class="hint">JPG, PNG or WebP only &middot; maximum 5 MB.</small>
+            <small class="hint">JPG, PNG or WebP only &middot; maximum 5 MB. Poster uploads need Firebase Storage (Blaze plan) — you can publish without a poster.</small>
             <small class="field-error" id="e-poster" hidden></small>
           </label>
 
@@ -162,6 +162,7 @@
               <div class="progress-bar" id="upload-progress-bar"></div>
             </div>
             <p class="muted small" id="upload-status"></p>
+            <button type="button" class="btn ghost small" id="btn-remove-poster">Remove poster</button>
           </div>
 
           <label class="field">
