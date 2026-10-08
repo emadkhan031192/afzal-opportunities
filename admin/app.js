@@ -36,12 +36,17 @@
    Full walkthrough: see docs/firebase-setup.md
    ------------------------------------------------------------------ */
 const FIREBASE_CONFIG = {
-  apiKey: "REPLACE_WITH_YOUR_API_KEY",
-  authDomain: "REPLACE_WITH_YOUR_PROJECT_ID.firebaseapp.com",
-  projectId: "REPLACE_WITH_YOUR_PROJECT_ID",
-  storageBucket: "REPLACE_WITH_YOUR_PROJECT_ID.appspot.com",
-  messagingSenderId: "REPLACE_WITH_YOUR_SENDER_ID",
-  appId: "REPLACE_WITH_YOUR_APP_ID",
+  apiKey: "AIzaSyBJ2CaZHdCkHr9C815VQTJU3bRvi-OLJz4",
+  authDomain: "afzal-opportunities.firebaseapp.com",
+  projectId: "afzal-opportunities",
+  storageBucket: "afzal-opportunities.firebasestorage.app",
+  messagingSenderId: "727260702840",
+  // appId is intentionally omitted: it is optional in the Firebase JS SDK and
+  // only used by Installations-backed features (FCM/Analytics/Remote Config),
+  // which this panel does not use. Auth + Firestore + Storage work with the
+  // project-level values above. If you later register a Web app in the
+  // Firebase console (Project settings -> Your apps -> </>), you may paste
+  // its appId here, but it is not required.
 };
 
 /* ---------------- Constants ---------------- */
