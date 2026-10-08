@@ -3,7 +3,7 @@ description: >-
   Afzal Opportunities — a modern advertisement-discovery Android app
   by Afzal E Services. Browse jobs, scholarships, admissions and more.
 publish_to: "none"
-version: 1.1.0+2
+version: 1.2.0+3
 
 environment:
   sdk: ^3.9.0
@@ -19,6 +19,7 @@ dependencies:
   url_launcher: ^6.3.2
   intl: ^0.20.2
   cached_network_image: ^3.4.1
+  flutter_svg: ^2.1.0
 
 dev_dependencies:
   flutter_test:
@@ -26,9 +27,20 @@ dev_dependencies:
   integration_test:
     sdk: flutter
   flutter_lints: ^5.0.0
+  flutter_launcher_icons: ^0.14.3
+
+flutter_launcher_icons:
+  android: true
+  ios: false
+  image_path: "assets/icon/app_icon.png"
+  min_sdk_android: 21
+  adaptive_icon_background: "#000000"
+  adaptive_icon_foreground: "assets/icon/app_icon.png"
 
 flutter:
   uses-material-design: true
 
   assets:
     - assets/logo/afzal_e_services_logo.png
+    - assets/logo/a_mark.svg
+    - assets/icon/app_icon.png

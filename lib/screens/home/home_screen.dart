@@ -8,19 +8,17 @@ import '../../core/utils/feed_sort.dart';
 import '../../models/advertisement.dart';
 import '../../services/advertisement_service.dart';
 import '../../services/bookmark_service.dart';
-import '../../widgets/ad_card.dart';
-import '../../widgets/brand_logo.dart';
 import '../../widgets/category_chips.dart';
-import '../../widgets/deadline_badge.dart';
-import '../../widgets/featured_card.dart';
 import '../../widgets/filter_sheet.dart';
-import '../../widgets/poster_image.dart';
-import '../../widgets/section_header.dart';
+import '../../widgets/job_grid_card.dart';
+import '../../widgets/job_list_card.dart';
+import '../../widgets/mockup_header.dart';
 import '../../widgets/state_views.dart';
 import '../details/details_screen.dart';
 
-/// Discovery feed: branded header with greeting, live search, featured hero,
-/// closing-soon rail, category filters and the latest advertisements list.
+/// Discovery feed rebuilt from the user's designed Pages 2–4:
+/// brand header, "Latest advertisements" pills with a list/grid toggle,
+/// category chips, a closing-soon section and alternating pastel cards.
 class HomeScreen extends StatefulWidget {
   const HomeScreen({
     super.key,
@@ -44,6 +42,7 @@ class _HomeScreenState extends State<HomeScreen> {
   String _category = AppConstants.allCategoriesId;
   FeedSortMode _sort = FeedSortMode.latest;
   bool _closingSoonOnly = false;
+  bool _gridView = false;
   String _query = '';
   late Future<List<Advertisement>> _future;
 
@@ -108,6 +107,11 @@ class _HomeScreenState extends State<HomeScreen> {
       _closingSoonOnly ||
       _query.trim().isNotEmpty;
 
+  String get _sectionTitle {
+    if (_category == AppConstants.allCategoriesId) return 'Jobs';
+    return AppConstants.categoryLabel(_category);
+  }
+
   @override
   Widget build(BuildContext context) {
     return RefreshIndicator(
@@ -133,29 +137,8 @@ class _HomeScreenState extends State<HomeScreen> {
 
   Widget _buildFeed(BuildContext context, List<Advertisement> all) {
     final now = DateTime.now();
-    final active = filterActiveAds(all, now: now);
+    var latest = filterActiveAds(all, now: now);
 
-    Advertisement? featured;
-    for (final ad in active) {
-      if (ad.isFeatured) {
-        featured = ad;
-        break;
-      }
-    }
-
-    final closingSoon =
-        sortFeedAds(active, FeedSortMode.nearestDeadline, now: now).where((ad) {
-          final daysLeft = getDeadlineInfo(
-            lastDate: ad.lastDate,
-            now: now,
-          ).daysLeft;
-          return daysLeft != null &&
-              daysLeft >= 0 &&
-              daysLeft <= 7 &&
-              ad.id != featured?.id;
-        }).toList();
-
-    var latest = active;
     if (_closingSoonOnly) {
       latest = latest.where((ad) {
         final daysLeft = getDeadlineInfo(
@@ -176,50 +159,26 @@ class _HomeScreenState extends State<HomeScreen> {
           )
           .toList();
     }
-    if (featured != null) {
-      final featuredId = featured.id;
-      latest = latest.where((ad) => ad.id != featuredId).toList();
-    }
     latest = sortFeedAds(latest, _sort, now: now);
 
     return CustomScrollView(
       physics: const AlwaysScrollableScrollPhysics(),
       slivers: [
-        SliverToBoxAdapter(child: _topBar(context)),
-        SliverToBoxAdapter(child: _greeting(context)),
-        SliverToBoxAdapter(child: _searchRow(context)),
-        if (featured != null)
-          SliverToBoxAdapter(
-            child: Padding(
-              padding: const EdgeInsets.fromLTRB(16, 12, 16, 0),
-              child: FeaturedCard(
-                ad: featured,
-                onTap: () => _openDetails(featured!),
-              ),
-            ),
+        SliverToBoxAdapter(
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(16, 16, 16, 0),
+            child: MockupHeader(sectionTitle: _sectionTitle),
           ),
-        if (closingSoon.isNotEmpty) ...[
-          const SliverToBoxAdapter(
-            child: SectionHeader(
-              title: 'Closing soon',
-              icon: Icons.timer_outlined,
-            ),
-          ),
-          SliverToBoxAdapter(child: _closingSoonRail(closingSoon)),
-        ],
+        ),
+        SliverToBoxAdapter(child: _pillsRow()),
+        SliverToBoxAdapter(child: _searchRow()),
         SliverToBoxAdapter(
           child: CategoryChips(
             selected: _category,
             onSelected: (id) => setState(() => _category = id),
           ),
         ),
-        SliverToBoxAdapter(
-          child: SectionHeader(
-            title: 'Latest advertisements',
-            icon: Icons.fiber_new_outlined,
-            trailing: _countBadge(latest.length),
-          ),
-        ),
+        SliverToBoxAdapter(child: _sectionHeader()),
         if (latest.isEmpty)
           SliverFillRemaining(
             hasScrollBody: false,
@@ -243,158 +202,88 @@ class _HomeScreenState extends State<HomeScreen> {
               ],
             ),
           )
+        else if (_gridView)
+          _gridSliver(latest)
         else
-          _adsSliver(latest),
+          _listSliver(latest),
       ],
     );
   }
 
-  Widget _topBar(BuildContext context) {
-    final theme = Theme.of(context);
+  /// Blue pills row: static "Latest advertisements" label + tappable
+  /// list/grid view toggle, as in the mockups.
+  Widget _pillsRow() {
     return Padding(
-      padding: const EdgeInsets.fromLTRB(16, 16, 16, 0),
+      padding: const EdgeInsets.fromLTRB(16, 18, 16, 0),
       child: Row(
         children: [
-          const BrandLogo(height: 36),
+          _Pill(label: 'Latest advertisements', onTap: null),
           const SizedBox(width: 10),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Text(
-                  AppConstants.brandName,
-                  style: theme.textTheme.titleMedium?.copyWith(
-                    fontWeight: FontWeight.w800,
-                  ),
-                ),
-                Text(AppConstants.appName, style: theme.textTheme.bodySmall),
-              ],
-            ),
+          _Pill(
+            label: _gridView ? 'Grid View' : 'List View',
+            onTap: () => setState(() => _gridView = !_gridView),
           ),
-          _savedButton(),
-          const SizedBox(width: 4),
-          _themeButton(),
         ],
       ),
     );
   }
 
-  Widget _savedButton() {
-    return AnimatedBuilder(
-      animation: widget.bookmarks,
-      builder: (context, _) {
-        final count = widget.bookmarks.ids.length;
-        return Stack(
-          clipBehavior: Clip.none,
-          children: [
-            IconButton(
-              icon: const Icon(Icons.bookmark_border),
-              tooltip: 'Saved advertisements',
-              onPressed: widget.onOpenSaved,
-            ),
-            if (count > 0)
-              Positioned(
-                right: 6,
-                top: 6,
-                child: Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 6,
-                    vertical: 2,
-                  ),
-                  decoration: BoxDecoration(
-                    color: BrandColors.mint,
-                    borderRadius: BorderRadius.circular(999),
-                  ),
-                  child: Text(
-                    '$count',
-                    style: const TextStyle(
-                      fontSize: 10,
-                      fontWeight: FontWeight.w800,
-                      color: BrandColors.nightBlack,
-                    ),
-                  ),
-                ),
-              ),
-          ],
-        );
-      },
-    );
-  }
-
-  Widget _themeButton() {
-    return AnimatedBuilder(
-      animation: widget.themeController,
-      builder: (context, _) {
-        final isDark = widget.themeController.isDark;
-        return IconButton(
-          icon: Icon(isDark ? Icons.light_mode : Icons.dark_mode),
-          tooltip: isDark ? 'Switch to light mode' : 'Switch to night mode',
-          onPressed: widget.themeController.toggle,
-        );
-      },
-    );
-  }
-
-  Widget _greeting(BuildContext context) {
+  /// Compact search + filter row kept under the pills so discovery tools
+  /// stay one tap away without disturbing the mockup layout.
+  Widget _searchRow() {
     final theme = Theme.of(context);
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(16, 16, 16, 0),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            'Assalam-o-Alaikum 👋',
-            style: theme.textTheme.headlineSmall?.copyWith(
-              fontWeight: FontWeight.w800,
-            ),
-          ),
-          const SizedBox(height: 4),
-          Text(
-            'Find your next opportunity',
-            style: theme.textTheme.bodyMedium?.copyWith(
-              color: theme.textTheme.bodySmall?.color,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _searchRow(BuildContext context) {
+    final dark = theme.brightness == Brightness.dark;
     return Padding(
       padding: const EdgeInsets.fromLTRB(16, 12, 16, 0),
       child: Row(
         children: [
           Expanded(
-            child: TextField(
-              controller: _searchController,
-              onChanged: (value) => setState(() => _query = value),
-              textInputAction: TextInputAction.search,
-              decoration: InputDecoration(
-                hintText: 'Search advertisements…',
-                prefixIcon: const Icon(Icons.search),
-                suffixIcon: _query.isEmpty
-                    ? null
-                    : IconButton(
-                        icon: const Icon(Icons.clear),
-                        tooltip: 'Clear search',
-                        onPressed: () {
-                          _searchController.clear();
-                          setState(() => _query = '');
-                        },
-                      ),
+            child: SizedBox(
+              height: 44,
+              child: TextField(
+                controller: _searchController,
+                onChanged: (value) => setState(() => _query = value),
+                textInputAction: TextInputAction.search,
+                decoration: InputDecoration(
+                  hintText: 'Search advertisements…',
+                  prefixIcon: const Icon(Icons.search, size: 20),
+                  contentPadding: const EdgeInsets.symmetric(vertical: 8),
+                  filled: true,
+                  fillColor: dark
+                      ? Colors.white.withValues(alpha: 0.07)
+                      : BrandColors.lightBackground,
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(999),
+                    borderSide: BorderSide.none,
+                  ),
+                  suffixIcon: _query.isEmpty
+                      ? null
+                      : IconButton(
+                          icon: const Icon(Icons.clear, size: 18),
+                          tooltip: 'Clear search',
+                          onPressed: () {
+                            _searchController.clear();
+                            setState(() => _query = '');
+                          },
+                        ),
+                ),
               ),
             ),
           ),
           const SizedBox(width: 8),
           Container(
-            decoration: BoxDecoration(
-              color: BrandColors.mint,
-              borderRadius: BorderRadius.circular(16),
+            width: 44,
+            height: 44,
+            decoration: const BoxDecoration(
+              color: BrandColors.mockupBlue,
+              shape: BoxShape.circle,
             ),
             child: IconButton(
-              icon: const Icon(Icons.tune, color: BrandColors.nightBlack),
+              icon: const Icon(
+                Icons.tune,
+                color: Colors.white,
+                size: 20,
+              ),
               tooltip: 'Filter advertisements',
               onPressed: _openFilterSheet,
             ),
@@ -404,152 +293,125 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  Widget _countBadge(int count) {
+  /// Section header: "Closing soon" with a "See all" toggle (the mockup's
+  /// "Popular Agency" slot repurposed for the real closing-soon filter).
+  Widget _sectionHeader() {
     final theme = Theme.of(context);
     final dark = theme.brightness == Brightness.dark;
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-      decoration: BoxDecoration(
-        color: dark
-            ? BrandColors.mint.withValues(alpha: 0.16)
-            : BrandColors.mint.withValues(alpha: 0.2),
-        borderRadius: BorderRadius.circular(999),
-      ),
-      child: Text(
-        '$count',
-        style: TextStyle(
-          fontSize: 12,
-          fontWeight: FontWeight.w800,
-          color: dark ? BrandColors.mint : BrandColors.mintDark,
-        ),
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(20, 18, 20, 12),
+      child: Row(
+        children: [
+          Text(
+            _closingSoonOnly ? 'Closing soon' : 'Latest advertisements',
+            style: TextStyle(
+              fontSize: 20,
+              fontWeight: FontWeight.w800,
+              color: dark ? Colors.white : BrandColors.nightBlue,
+            ),
+          ),
+          const Spacer(),
+          GestureDetector(
+            onTap: () =>
+                setState(() => _closingSoonOnly = !_closingSoonOnly),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                if (_closingSoonOnly)
+                  const Padding(
+                    padding: EdgeInsets.only(right: 4),
+                    child: Icon(
+                      Icons.close,
+                      size: 16,
+                      color: BrandColors.mutedOnLight,
+                    ),
+                  ),
+                Text(
+                  _closingSoonOnly ? 'Show all' : 'See all',
+                  style: const TextStyle(
+                    fontSize: 14,
+                    fontWeight: FontWeight.w600,
+                    color: BrandColors.mutedOnLight,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
       ),
     );
   }
 
-  Widget _closingSoonRail(List<Advertisement> ads) {
-    return SizedBox(
-      height: 128,
-      child: ListView.separated(
-        scrollDirection: Axis.horizontal,
-        physics: const PageScrollPhysics(),
-        padding: const EdgeInsets.symmetric(horizontal: 16),
-        itemCount: ads.length,
-        separatorBuilder: (context, index) => const SizedBox(width: 12),
-        itemBuilder: (context, index) {
+  Widget _listSliver(List<Advertisement> ads) {
+    return SliverPadding(
+      padding: const EdgeInsets.fromLTRB(16, 0, 16, 24),
+      sliver: SliverList(
+        delegate: SliverChildBuilderDelegate((context, index) {
           final ad = ads[index];
-          return SizedBox(
-            width: 280,
-            child: _RailCard(ad: ad, onTap: () => _openDetails(ad)),
-          );
-        },
-      ),
-    );
-  }
-
-  Widget _adsSliver(List<Advertisement> ads) {
-    return SliverLayoutBuilder(
-      builder: (context, constraints) {
-        if (constraints.crossAxisExtent > 700) {
-          return SliverPadding(
-            padding: const EdgeInsets.fromLTRB(16, 0, 16, 24),
-            sliver: SliverGrid(
-              delegate: SliverChildBuilderDelegate((context, index) {
-                final ad = ads[index];
-                return AdCard(
-                  ad: ad,
-                  bookmarks: widget.bookmarks,
-                  onTap: () => _openDetails(ad),
-                );
-              }, childCount: ads.length),
-              gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
-                maxCrossAxisExtent: 420,
-                mainAxisExtent: 224,
-                mainAxisSpacing: 12,
-                crossAxisSpacing: 12,
-              ),
+          return AnimatedBuilder(
+            animation: widget.bookmarks,
+            builder: (context, _) => JobListCard(
+              ad: ad,
+              index: index,
+              isSaved: widget.bookmarks.isBookmarked(ad.id),
+              onTap: () => _openDetails(ad),
+              onToggleSave: () => widget.bookmarks.toggle(ad.id),
             ),
           );
-        }
-        return SliverPadding(
-          padding: const EdgeInsets.fromLTRB(16, 0, 16, 24),
-          sliver: SliverList(
-            delegate: SliverChildBuilderDelegate((context, index) {
-              final ad = ads[index];
-              return Padding(
-                padding: const EdgeInsets.only(bottom: 12),
-                child: AdCard(
-                  ad: ad,
-                  bookmarks: widget.bookmarks,
-                  onTap: () => _openDetails(ad),
-                ),
-              );
-            }, childCount: ads.length),
-          ),
-        );
-      },
+        }, childCount: ads.length),
+      ),
+    );
+  }
+
+  Widget _gridSliver(List<Advertisement> ads) {
+    return SliverPadding(
+      padding: const EdgeInsets.fromLTRB(16, 0, 16, 24),
+      sliver: SliverGrid(
+        delegate: SliverChildBuilderDelegate((context, index) {
+          final ad = ads[index];
+          return JobGridCard(
+            ad: ad,
+            index: index,
+            onTap: () => _openDetails(ad),
+          );
+        }, childCount: ads.length),
+        gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+          crossAxisCount: 2,
+          mainAxisSpacing: 12,
+          crossAxisSpacing: 12,
+          childAspectRatio: 0.62,
+        ),
+      ),
     );
   }
 }
 
-/// Compact card used in the "Closing soon" horizontal rail.
-class _RailCard extends StatelessWidget {
-  const _RailCard({required this.ad, required this.onTap});
+/// Rounded blue pill used for the "Latest advertisements" label and the
+/// list/grid view toggle.
+class _Pill extends StatelessWidget {
+  const _Pill({required this.label, this.onTap});
 
-  final Advertisement ad;
-  final VoidCallback onTap;
+  final String label;
+  final VoidCallback? onTap;
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final info = getDeadlineInfo(
-      lastDate: ad.lastDate,
-      publishedAt: ad.publishedAt,
-    );
-    return Card(
-      clipBehavior: Clip.antiAlias,
-      child: InkWell(
-        onTap: onTap,
-        child: Padding(
-          padding: const EdgeInsets.all(12),
-          child: Row(
-            children: [
-              PosterImage(
-                url: ad.posterUrl,
-                width: 72,
-                height: 72,
-                borderRadius: BorderRadius.circular(12),
-              ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Text(
-                      ad.title,
-                      maxLines: 2,
-                      overflow: TextOverflow.ellipsis,
-                      style: theme.textTheme.titleMedium?.copyWith(
-                        fontSize: 15,
-                        fontWeight: FontWeight.w700,
-                      ),
-                    ),
-                    const SizedBox(height: 4),
-                    Text(
-                      ad.organization,
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: theme.textTheme.bodySmall,
-                    ),
-                    const SizedBox(height: 6),
-                    DeadlineBadge(info: info, compact: true),
-                  ],
-                ),
-              ),
-            ],
-          ),
+    final pill = Container(
+      padding: const EdgeInsets.symmetric(horizontal: 22, vertical: 13),
+      decoration: BoxDecoration(
+        color: BrandColors.mockupBlue,
+        borderRadius: BorderRadius.circular(999),
+      ),
+      child: Text(
+        label,
+        style: const TextStyle(
+          fontSize: 16.5,
+          fontWeight: FontWeight.w700,
+          color: Colors.white,
         ),
       ),
     );
+    if (onTap == null) return pill;
+    return GestureDetector(onTap: onTap, child: pill);
   }
 }

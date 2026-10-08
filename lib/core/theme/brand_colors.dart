@@ -40,4 +40,25 @@ class BrandColors {
 
   /// Red foreground used for urgent/expired deadline badges.
   static const Color dangerStrong = Color(0xFFC62828);
+
+  // --- User-designed mockup palette (v1.2.0 redesign) --------------------
+  // Sampled from the user's own UI mockups (Oct 2026).
+
+  /// Mockup primary blue — pills and blue cards.
+  static const Color mockupBlue = Color(0xFF1F66CC);
+
+  /// Pastel yellow list card.
+  static const Color cardYellow = Color(0xFFFFD670);
+
+  /// Pastel pink grid card.
+  static const Color cardPink = Color(0xFFDC7376);
+
+  /// Darker chip tone used on pink grid cards.
+  static const Color cardPinkDark = Color(0xFFB05E5E);
+
+  /// Periwinkle purple — splash screen accents.
+  static const Color splashPurple = Color(0xFF6A70F1);
+
+  /// Light lavender — splash screen background.
+  static const Color splashBackground = Color(0xFFD8D9E8);
 }

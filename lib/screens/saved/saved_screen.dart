@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import '../../models/advertisement.dart';
 import '../../services/advertisement_service.dart';
 import '../../services/bookmark_service.dart';
-import '../../widgets/ad_card.dart';
+import '../../widgets/job_list_card.dart';
 import '../../widgets/state_views.dart';
 import '../details/details_screen.dart';
 
@@ -130,12 +130,15 @@ class _SavedScreenState extends State<SavedScreen> {
                           16,
                           index == 0 ? 12 : 0,
                           16,
-                          12,
+                          0,
                         ),
-                        child: AdCard(
+                        child: JobListCard(
                           ad: ad,
-                          bookmarks: widget.bookmarks,
+                          index: index,
+                          isSaved: true,
                           onTap: () => _openDetails(ad),
+                          onToggleSave: () =>
+                              widget.bookmarks.toggle(ad.id),
                         ),
                       );
                     }, childCount: saved.length),

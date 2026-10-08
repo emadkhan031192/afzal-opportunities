@@ -149,6 +149,15 @@ class DetailsScreen extends StatelessWidget {
                               _openLink(context, ad.sourceUrl, 'source'),
                           icon: const Icon(Icons.link),
                           label: const Text('Official Source'),
+                          style: OutlinedButton.styleFrom(
+                            foregroundColor: BrandColors.mockupBlue,
+                            side: const BorderSide(
+                              color: BrandColors.mockupBlue,
+                            ),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(999),
+                            ),
+                          ),
                         ),
                       ),
                     if (hasSource && hasApplication) const SizedBox(width: 12),
@@ -162,6 +171,13 @@ class DetailsScreen extends StatelessWidget {
                           ),
                           icon: const Icon(Icons.open_in_new),
                           label: const Text('Apply Now'),
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: BrandColors.mockupBlue,
+                            foregroundColor: Colors.white,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(999),
+                            ),
+                          ),
                         ),
                       ),
                   ],
@@ -189,14 +205,14 @@ class DetailsScreen extends StatelessWidget {
                 gradient: LinearGradient(
                   begin: Alignment.topLeft,
                   end: Alignment.bottomRight,
-                  colors: [BrandColors.nightBlue, BrandColors.nightBlack],
+                  colors: [BrandColors.mockupBlue, BrandColors.nightBlue],
                 ),
               ),
               child: const Center(
                 child: Icon(
                   Icons.campaign_outlined,
                   size: 72,
-                  color: BrandColors.mint,
+                  color: Colors.white,
                 ),
               ),
             ),

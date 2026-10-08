@@ -11,7 +11,7 @@ class AppConstants {
   const AppConstants._();
 
   // Branding
-  static const String appName = 'Afzal Opportunities';
+  static const String appName = 'Afzal E Services';
   static const String brandName = 'Afzal E Services';
   static const String tagline = 'Jobs • Scholarships • Admissions';
 

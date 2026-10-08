@@ -4,6 +4,7 @@ import 'core/constants/app_constants.dart';
 import 'core/theme/app_theme.dart';
 import 'core/theme/theme_controller.dart';
 import 'screens/main_shell.dart';
+import 'screens/splash/splash_screen.dart';
 import 'services/bookmark_service.dart';
 
 /// Root widget: wires MaterialApp to the persisted theme choice.
@@ -44,10 +45,39 @@ class _AfzalAppState extends State<AfzalApp> {
       theme: AppTheme.lightTheme(),
       darkTheme: AppTheme.nightTheme(),
       themeMode: widget.themeController.mode,
-      home: MainShell(
+      home: _LaunchFlow(
         themeController: widget.themeController,
         bookmarkService: widget.bookmarkService,
       ),
+    );
+  }
+}
+
+/// Shows the branded splash screen first, then the main app shell.
+class _LaunchFlow extends StatefulWidget {
+  const _LaunchFlow({
+    required this.themeController,
+    required this.bookmarkService,
+  });
+
+  final ThemeController themeController;
+  final BookmarkService bookmarkService;
+
+  @override
+  State<_LaunchFlow> createState() => _LaunchFlowState();
+}
+
+class _LaunchFlowState extends State<_LaunchFlow> {
+  bool _splashDone = false;
+
+  @override
+  Widget build(BuildContext context) {
+    if (!_splashDone) {
+      return SplashScreen(onDone: () => setState(() => _splashDone = true));
+    }
+    return MainShell(
+      themeController: widget.themeController,
+      bookmarkService: widget.bookmarkService,
     );
   }
 }
