@@ -28,14 +28,17 @@ void main() {
   final now = DateTime.utc(2026, 10, 8, 12);
 
   group('filterActiveAds', () {
-    test('hides expired, draft and archived; keeps no-deadline published',
-        () {
+    test('hides expired, draft and archived; keeps no-deadline published', () {
       final ads = [
         ad(id: 'active', lastDate: DateTime(2026, 10, 20)),
         ad(id: 'no-deadline'),
         ad(id: 'expired', lastDate: DateTime(2026, 10, 1)),
         ad(id: 'draft', status: 'draft', lastDate: DateTime(2026, 10, 20)),
-          ad(id: 'archived', status: 'archived', lastDate: DateTime(2026, 10, 20)),
+        ad(
+          id: 'archived',
+          status: 'archived',
+          lastDate: DateTime(2026, 10, 20),
+        ),
       ];
       final result = filterActiveAds(ads, now: now);
       final ids = result.map((a) => a.id).toList();
@@ -91,9 +94,7 @@ void main() {
       expect(result.map((a) => a.id), ['near', 'mid', 'far', 'none']);
     });
 
-    test(
-      'relevance puts featured first, then NEW, then nearest deadline',
-      () {
+    test('relevance puts featured first, then NEW, then nearest deadline', () {
       final ads = [
         ad(
           id: 'plain-near',
@@ -118,10 +119,12 @@ void main() {
         ),
       ];
       final result = sortAds(ads, AdSortMode.relevance, now: now);
-      expect(
-        result.map((a) => a.id),
-        ['featured', 'fresh', 'plain-near', 'plain-far'],
-      );
+      expect(result.map((a) => a.id), [
+        'featured',
+        'fresh',
+        'plain-near',
+        'plain-far',
+      ]);
     });
 
     test('does not mutate the input list', () {

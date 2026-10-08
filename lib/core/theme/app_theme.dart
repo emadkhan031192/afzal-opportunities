@@ -41,9 +41,7 @@ class AppTheme {
         margin: EdgeInsets.zero,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(cardRadius),
-          side: BorderSide(
-            color: BrandColors.white.withValues(alpha: 0.08),
-          ),
+          side: BorderSide(color: BrandColors.white.withValues(alpha: 0.08)),
         ),
       ),
       chipTheme: base.chipTheme.copyWith(
@@ -51,12 +49,8 @@ class AppTheme {
         selectedColor: BrandColors.mint,
         labelStyle: const TextStyle(color: BrandColors.white),
         secondaryLabelStyle: const TextStyle(color: BrandColors.nightBlack),
-        side: BorderSide(
-          color: BrandColors.white.withValues(alpha: 0.12),
-        ),
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(999),
-        ),
+        side: BorderSide(color: BrandColors.white.withValues(alpha: 0.12)),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(999)),
         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
       ),
       bottomNavigationBarTheme: const BottomNavigationBarThemeData(
@@ -88,9 +82,7 @@ class AppTheme {
         ),
       ),
       textButtonTheme: TextButtonThemeData(
-        style: TextButton.styleFrom(
-          foregroundColor: BrandColors.mint,
-        ),
+        style: TextButton.styleFrom(foregroundColor: BrandColors.mint),
       ),
       progressIndicatorTheme: const ProgressIndicatorThemeData(
         color: BrandColors.mint,
@@ -205,12 +197,8 @@ class AppTheme {
         selectedColor: BrandColors.mint,
         labelStyle: const TextStyle(color: BrandColors.nightBlue),
         secondaryLabelStyle: const TextStyle(color: BrandColors.nightBlack),
-        side: BorderSide(
-          color: BrandColors.nightBlue.withValues(alpha: 0.12),
-        ),
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(999),
-        ),
+        side: BorderSide(color: BrandColors.nightBlue.withValues(alpha: 0.12)),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(999)),
         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
       ),
       bottomNavigationBarTheme: const BottomNavigationBarThemeData(
@@ -242,9 +230,7 @@ class AppTheme {
         ),
       ),
       textButtonTheme: TextButtonThemeData(
-        style: TextButton.styleFrom(
-          foregroundColor: const Color(0xFF2E9E76),
-        ),
+        style: TextButton.styleFrom(foregroundColor: const Color(0xFF2E9E76)),
       ),
       progressIndicatorTheme: const ProgressIndicatorThemeData(
         color: Color(0xFF2E9E76),

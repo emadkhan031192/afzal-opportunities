@@ -66,14 +66,8 @@ class _MainShellState extends State<MainShell> {
       body: IndexedStack(
         index: _index,
         children: [
-          HomeScreen(
-            service: _service,
-            bookmarks: widget.bookmarkService,
-          ),
-          SavedScreen(
-            service: _service,
-            bookmarks: widget.bookmarkService,
-          ),
+          HomeScreen(service: _service, bookmarks: widget.bookmarkService),
+          SavedScreen(service: _service, bookmarks: widget.bookmarkService),
         ],
       ),
       bottomNavigationBar: BottomNavigationBar(

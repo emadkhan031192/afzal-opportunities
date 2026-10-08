@@ -1,12 +1,12 @@
-/// Pure, testable deadline logic for Afzal Opportunities advertisements.
-///
-/// All calculations use Pakistan Standard Time (PKT, Asia/Karachi), a fixed
-/// UTC+5 offset with no daylight-saving changes. A [lastDate] is a date-only
-/// value: an advertisement stays active through 23:59:59 PKT on its last
-/// date, and expires only once the next PKT day begins.
-///
-/// This file is intentionally free of Flutter widget dependencies so it can
-/// be unit-tested in isolation.
+// Pure, testable deadline logic for Afzal Opportunities advertisements.
+//
+// All calculations use Pakistan Standard Time (PKT, Asia/Karachi), a fixed
+// UTC+5 offset with no daylight-saving changes. A [lastDate] is a date-only
+// value: an advertisement stays active through 23:59:59 PKT on its last
+// date, and expires only once the next PKT day begins.
+//
+// This file is intentionally free of Flutter widget dependencies so it can
+// be unit-tested in isolation.
 
 /// Visual tone for a deadline badge.
 enum DeadlineTone {

@@ -42,10 +42,7 @@ class _SavedScreenState extends State<SavedScreen> {
   void _openDetails(Advertisement ad) {
     Navigator.of(context).push(
       MaterialPageRoute<void>(
-        builder: (_) => DetailsScreen(
-          ad: ad,
-          bookmarks: widget.bookmarks,
-        ),
+        builder: (_) => DetailsScreen(ad: ad, bookmarks: widget.bookmarks),
       ),
     );
   }

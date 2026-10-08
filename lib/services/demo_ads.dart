@@ -24,8 +24,11 @@ class DemoAds {
   /// Date-only PKT date [daysFromToday] days from today.
   static DateTime _pktDate(int daysFromToday) {
     final pkt = DateTime.now().toUtc().add(const Duration(hours: 5));
-    return DateTime(pkt.year, pkt.month, pkt.day)
-        .add(Duration(days: daysFromToday));
+    return DateTime(
+      pkt.year,
+      pkt.month,
+      pkt.day,
+    ).add(Duration(days: daysFromToday));
   }
 
   static DateTime _hoursAgo(int hours) {

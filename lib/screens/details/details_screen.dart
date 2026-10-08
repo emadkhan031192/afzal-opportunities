@@ -13,16 +13,16 @@ import '../../widgets/poster_image.dart';
 /// Full advertisement view: headline, poster, description, dates,
 /// location and official links opened safely in an external browser.
 class DetailsScreen extends StatelessWidget {
-  const DetailsScreen({
-    super.key,
-    required this.ad,
-    required this.bookmarks,
-  });
+  const DetailsScreen({super.key, required this.ad, required this.bookmarks});
 
   final Advertisement ad;
   final BookmarkService bookmarks;
 
-  Future<void> _openLink(BuildContext context, String? url, String label) async {
+  Future<void> _openLink(
+    BuildContext context,
+    String? url,
+    String label,
+  ) async {
     final opened = await openUrl(url);
     if (!opened && context.mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -65,8 +65,7 @@ class DetailsScreen extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            if (hasPoster)
-              PosterImage(url: ad.posterUrl, height: 220),
+            if (hasPoster) PosterImage(url: ad.posterUrl, height: 220),
             Padding(
               padding: const EdgeInsets.all(20),
               child: Column(
@@ -151,11 +150,8 @@ class DetailsScreen extends StatelessWidget {
                       SizedBox(
                         width: double.infinity,
                         child: OutlinedButton.icon(
-                          onPressed: () => _openLink(
-                            context,
-                            ad.sourceUrl,
-                            'source',
-                          ),
+                          onPressed: () =>
+                              _openLink(context, ad.sourceUrl, 'source'),
                           icon: const Icon(Icons.link),
                           label: const Text('Open official source'),
                         ),

@@ -103,8 +103,7 @@ class Advertisement {
       if (posterUrl != null) 'posterUrl': posterUrl,
       if (sourceUrl != null) 'sourceUrl': sourceUrl,
       if (applicationUrl != null) 'applicationUrl': applicationUrl,
-      if (publishedAt != null)
-        'publishedAt': publishedAt!.toIso8601String(),
+      if (publishedAt != null) 'publishedAt': publishedAt!.toIso8601String(),
       if (lastDate != null) 'lastDate': _dateString(lastDate!),
       'isFeatured': isFeatured,
       if (createdAt != null) 'createdAt': createdAt!.toIso8601String(),
@@ -150,9 +149,7 @@ class Advertisement {
       return null;
     }
     if (value is! String) {
-      throw FormatException(
-        'Advertisement field "$key" must be a string.',
-      );
+      throw FormatException('Advertisement field "$key" must be a string.');
     }
     final trimmed = value.trim();
     return trimmed.isEmpty ? null : trimmed;
@@ -180,9 +177,13 @@ class Advertisement {
         );
       }
       final parsed = DateTime.tryParse(text);
-      if (parsed == null) {
+      // DateTime.tryParse normalizes out-of-range components (e.g. month 13
+      // becomes January of the next year) instead of failing, so reject
+      // anything that does not round-trip to the exact same calendar date.
+      if (parsed == null || _dateString(parsed) != text) {
         throw FormatException(
-          'Advertisement "$id" has malformed lastDate "$value".',
+          'Advertisement "$id" has malformed lastDate "$value". '
+          'Expected a real calendar date as "YYYY-MM-DD".',
         );
       }
       return DateTime(parsed.year, parsed.month, parsed.day);
@@ -217,9 +218,7 @@ class Advertisement {
       }
       return parsed;
     }
-    throw FormatException(
-      'Advertisement "$id" has unsupported $key value.',
-    );
+    throw FormatException('Advertisement "$id" has unsupported $key value.');
   }
 
   static String _dateString(DateTime date) {

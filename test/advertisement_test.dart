@@ -33,42 +33,27 @@ void main() {
 
     test('missing title throws FormatException', () {
       final json = validJson()..remove('title');
-      expect(
-        () => Advertisement.fromJson('x', json),
-        throwsFormatException,
-      );
+      expect(() => Advertisement.fromJson('x', json), throwsFormatException);
     });
 
     test('blank organization throws FormatException', () {
       final json = validJson()..['organization'] = '   ';
-      expect(
-        () => Advertisement.fromJson('x', json),
-        throwsFormatException,
-      );
+      expect(() => Advertisement.fromJson('x', json), throwsFormatException);
     });
 
     test('invalid category throws FormatException', () {
       final json = validJson()..['category'] = 'lottery';
-      expect(
-        () => Advertisement.fromJson('x', json),
-        throwsFormatException,
-      );
+      expect(() => Advertisement.fromJson('x', json), throwsFormatException);
     });
 
     test('missing description throws FormatException', () {
       final json = validJson()..remove('description');
-      expect(
-        () => Advertisement.fromJson('x', json),
-        throwsFormatException,
-      );
+      expect(() => Advertisement.fromJson('x', json), throwsFormatException);
     });
 
     test('invalid status throws FormatException', () {
       final json = validJson()..['status'] = 'deleted';
-      expect(
-        () => Advertisement.fromJson('x', json),
-        throwsFormatException,
-      );
+      expect(() => Advertisement.fromJson('x', json), throwsFormatException);
     });
 
     test('missing status defaults to draft', () {

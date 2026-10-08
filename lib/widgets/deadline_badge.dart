@@ -55,10 +55,7 @@ class DeadlineBadge extends StatelessWidget {
       case DeadlineTone.warning:
         return const _BadgePalette(Color(0xFFFFB020), Color(0xFF3A2700));
       case DeadlineTone.success:
-        return const _BadgePalette(
-          BrandColors.mint,
-          BrandColors.nightBlack,
-        );
+        return const _BadgePalette(BrandColors.mint, BrandColors.nightBlack);
       case DeadlineTone.info:
         return const _BadgePalette(Color(0xFF4C8DFF), Colors.white);
       case DeadlineTone.neutral:

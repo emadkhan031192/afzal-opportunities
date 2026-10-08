@@ -16,11 +16,7 @@ import '../details/details_screen.dart';
 /// Discovery feed: brand header, featured card, closing-soon rail,
 /// category filters, sort control and the latest advertisements list.
 class HomeScreen extends StatefulWidget {
-  const HomeScreen({
-    super.key,
-    required this.service,
-    required this.bookmarks,
-  });
+  const HomeScreen({super.key, required this.service, required this.bookmarks});
 
   final AdvertisementService service;
   final BookmarkService bookmarks;
@@ -50,10 +46,7 @@ class _HomeScreenState extends State<HomeScreen> {
   void _openDetails(Advertisement ad) {
     Navigator.of(context).push(
       MaterialPageRoute<void>(
-        builder: (_) => DetailsScreen(
-          ad: ad,
-          bookmarks: widget.bookmarks,
-        ),
+        builder: (_) => DetailsScreen(ad: ad, bookmarks: widget.bookmarks),
       ),
     );
   }
@@ -95,23 +88,20 @@ class _HomeScreenState extends State<HomeScreen> {
     }
     featured ??= ranked.isEmpty ? null : ranked.first;
 
-    final closingSoon =
-        sortAds(active, AdSortMode.nearestDeadline, now: now).where((ad) {
-      final daysLeft = getDeadlineInfo(
-        lastDate: ad.lastDate,
-        now: now,
-      ).daysLeft;
-      return daysLeft != null &&
-          daysLeft >= 0 &&
-          daysLeft <= 7 &&
-          ad.id != featured?.id;
-    }).toList();
+    final closingSoon = sortAds(active, AdSortMode.nearestDeadline, now: now)
+        .where((ad) {
+          final daysLeft = getDeadlineInfo(
+            lastDate: ad.lastDate,
+            now: now,
+          ).daysLeft;
+          return daysLeft != null &&
+              daysLeft >= 0 &&
+              daysLeft <= 7 &&
+              ad.id != featured?.id;
+        })
+        .toList();
 
-    var latest = sortAds(
-      filterByCategory(active, _category),
-      _sort,
-      now: now,
-    );
+    var latest = sortAds(filterByCategory(active, _category), _sort, now: now);
     if (featured != null) {
       final featuredId = featured.id;
       latest = latest.where((ad) => ad.id != featuredId).toList();
@@ -292,18 +282,15 @@ class _HomeScreenState extends State<HomeScreen> {
         if (constraints.crossAxisExtent > 700) {
           return SliverPadding(
             padding: const EdgeInsets.fromLTRB(16, 0, 16, 24),
-            child: SliverGrid(
-              delegate: SliverChildBuilderDelegate(
-                (context, index) {
-                  final ad = ads[index];
-                  return AdCard(
-                    ad: ad,
-                    bookmarks: widget.bookmarks,
-                    onTap: () => _openDetails(ad),
-                  );
-                },
-                childCount: ads.length,
-              ),
+            sliver: SliverGrid(
+              delegate: SliverChildBuilderDelegate((context, index) {
+                final ad = ads[index];
+                return AdCard(
+                  ad: ad,
+                  bookmarks: widget.bookmarks,
+                  onTap: () => _openDetails(ad),
+                );
+              }, childCount: ads.length),
               gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
                 maxCrossAxisExtent: 420,
                 mainAxisSpacing: 12,
@@ -315,21 +302,18 @@ class _HomeScreenState extends State<HomeScreen> {
         }
         return SliverPadding(
           padding: const EdgeInsets.fromLTRB(16, 0, 16, 24),
-          child: SliverList(
-            delegate: SliverChildBuilderDelegate(
-              (context, index) {
-                final ad = ads[index];
-                return Padding(
-                  padding: const EdgeInsets.only(bottom: 12),
-                  child: AdCard(
-                    ad: ad,
-                    bookmarks: widget.bookmarks,
-                    onTap: () => _openDetails(ad),
-                  ),
-                );
-              },
-              childCount: ads.length,
-            ),
+          sliver: SliverList(
+            delegate: SliverChildBuilderDelegate((context, index) {
+              final ad = ads[index];
+              return Padding(
+                padding: const EdgeInsets.only(bottom: 12),
+                child: AdCard(
+                  ad: ad,
+                  bookmarks: widget.bookmarks,
+                  onTap: () => _openDetails(ad),
+                ),
+              );
+            }, childCount: ads.length),
           ),
         );
       },

@@ -7,11 +7,7 @@ import 'deadline_badge.dart';
 
 /// Large hero card for the featured advertisement.
 class FeaturedCard extends StatelessWidget {
-  const FeaturedCard({
-    super.key,
-    required this.ad,
-    required this.onTap,
-  });
+  const FeaturedCard({super.key, required this.ad, required this.onTap});
 
   final Advertisement ad;
   final VoidCallback onTap;
@@ -69,10 +65,7 @@ class FeaturedCard extends StatelessWidget {
                 children: [
                   DeadlineBadge(info: info),
                   const Spacer(),
-                  const Icon(
-                    Icons.arrow_forward,
-                    color: BrandColors.mint,
-                  ),
+                  const Icon(Icons.arrow_forward, color: BrandColors.mint),
                 ],
               ),
             ],

@@ -81,9 +81,7 @@ class AdCard extends StatelessWidget {
                 builder: (context, _) {
                   final saved = bookmarks.isBookmarked(ad.id);
                   return IconButton(
-                    icon: Icon(
-                      saved ? Icons.bookmark : Icons.bookmark_border,
-                    ),
+                    icon: Icon(saved ? Icons.bookmark : Icons.bookmark_border),
                     color: saved ? BrandColors.mint : null,
                     tooltip: saved ? 'Remove bookmark' : 'Save advertisement',
                     onPressed: () => bookmarks.toggle(ad.id),

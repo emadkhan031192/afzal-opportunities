@@ -22,8 +22,7 @@ enum AdSortMode {
 /// Invalid documents are skipped (and logged) so one corrupt record can
 /// never break the feed.
 class AdvertisementService {
-  AdvertisementService({FirebaseFirestore? firestore})
-      : _firestore = firestore;
+  AdvertisementService({FirebaseFirestore? firestore}) : _firestore = firestore;
 
   final FirebaseFirestore? _firestore;
 
@@ -108,19 +107,13 @@ class AdvertisementService {
 
 /// Keeps only advertisements that are active right now
 /// (published and not past their last date, evaluated in PKT).
-List<Advertisement> filterActiveAds(
-  List<Advertisement> ads, {
-  DateTime? now,
-}) {
+List<Advertisement> filterActiveAds(List<Advertisement> ads, {DateTime? now}) {
   final clock = now ?? DateTime.now();
   return ads.where((ad) => ad.isActiveAt(clock)).toList();
 }
 
 /// Keeps advertisements of [category], or all when [category] is 'all'.
-List<Advertisement> filterByCategory(
-  List<Advertisement> ads,
-  String category,
-) {
+List<Advertisement> filterByCategory(List<Advertisement> ads, String category) {
   if (category == AppConstants.allCategoriesId) {
     return List<Advertisement>.of(ads);
   }
