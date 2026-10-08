@@ -1,0 +1,49 @@
+name: Deploy admin panel
+
+# Keeps the public admin panel (GitHub Pages, gh-pages branch) in sync
+# with admin/ on main.
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'admin/**'
+
+permissions:
+  contents: write
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out main
+        uses: actions/checkout@v4
+        with:
+          ref: main
+          path: main
+
+      - name: Check out gh-pages
+        uses: actions/checkout@v4
+        with:
+          ref: gh-pages
+          path: site
+
+      - name: Sync admin/ into gh-pages
+        run: |
+          cd site
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git rm -rq . 2>/dev/null || true
+          cp -r ../main/admin/. .
+          git add -A
+          if git diff --cached --quiet; then
+            echo "No changes to deploy."
+          else
+            git commit -m "Sync admin panel from main"
+            git push origin gh-pages
+          fi
+
+      - name: Verify deployment
+        run: |
+          sleep 30
+          curl -sf -o /dev/null https://emadkhan031192.github.io/afzal-opportunities/
+          echo "Admin panel is live."
