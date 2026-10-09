@@ -117,15 +117,21 @@ class _SettingsSheetState extends State<SettingsSheet> {
             ),
             const SizedBox(height: 16),
             _SectionTitle(s.language),
-            ...LocaleController.choices.map(
-              (choice) => RadioListTile<String>(
-                value: choice,
-                groupValue: widget.localeController.choice,
-                onChanged: (v) =>
-                    v == null ? null : widget.localeController.setChoice(v),
-                title: Text(_languageLabel(choice, s)),
-                contentPadding: EdgeInsets.zero,
-                dense: true,
+            RadioGroup<String>(
+              groupValue: widget.localeController.choice,
+              onChanged: (v) =>
+                  v == null ? null : widget.localeController.setChoice(v),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  for (final choice in LocaleController.choices)
+                    RadioListTile<String>(
+                      value: choice,
+                      title: Text(_languageLabel(choice, s)),
+                      contentPadding: EdgeInsets.zero,
+                      dense: true,
+                    ),
+                ],
               ),
             ),
             const SizedBox(height: 8),

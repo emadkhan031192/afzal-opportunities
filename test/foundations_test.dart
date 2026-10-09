@@ -132,20 +132,20 @@ void main() {
   group('cardTintForCategory', () {
     test('tints by category in light mode', () {
       expect(
-        cardTintForCategory('jobs', false).background.value,
-        isNot(cardTintForCategory('scholarships', false).background.value),
+        cardTintForCategory('jobs', false).background.toARGB32(),
+        isNot(cardTintForCategory('scholarships', false).background.toARGB32()),
       );
       expect(
-        cardTintForCategory('admissions', false).background.value,
-        isNot(cardTintForCategory('other', false).background.value),
+        cardTintForCategory('admissions', false).background.toARGB32(),
+        isNot(cardTintForCategory('other', false).background.toARGB32()),
       );
     });
 
     test('dark mode uses different backgrounds than light mode', () {
       for (final id in ['jobs', 'scholarships', 'admissions', 'other']) {
         expect(
-          cardTintForCategory(id, true).background.value,
-          isNot(cardTintForCategory(id, false).background.value),
+          cardTintForCategory(id, true).background.toARGB32(),
+          isNot(cardTintForCategory(id, false).background.toARGB32()),
           reason: 'dark tint should differ for $id',
         );
       }
@@ -153,8 +153,8 @@ void main() {
 
     test('unknown categories fall back to the jobs tint', () {
       expect(
-        cardTintForCategory('nope', false).background.value,
-        cardTintForCategory('jobs', false).background.value,
+        cardTintForCategory('nope', false).background.toARGB32(),
+        cardTintForCategory('jobs', false).background.toARGB32(),
       );
     });
   });
