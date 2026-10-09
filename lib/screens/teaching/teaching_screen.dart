@@ -9,10 +9,11 @@ import '../../models/teaching_vacancy.dart';
 import '../../services/bookmark_service.dart';
 import '../../services/notification_service.dart';
 import '../../services/teaching_service.dart';
-import '../../widgets/mockup_header.dart';
+import '../../widgets/app_header.dart';
 import '../../widgets/settings_sheet.dart';
 import '../../widgets/state_views.dart';
-import '../../widgets/teaching_vacancy_card.dart';
+import '../../widgets/vibrant_teaching_card.dart';
+import '../../widgets/welcome_carousel.dart';
 import 'auth/account_screen.dart';
 import 'vacancy_details_screen.dart';
 
@@ -97,22 +98,29 @@ class _TeachingScreenState extends State<TeachingScreen> {
         physics: const AlwaysScrollableScrollPhysics(),
         slivers: [
           SliverToBoxAdapter(
-            child: Padding(
-              padding: const EdgeInsets.fromLTRB(16, 16, 16, 0),
-              child: MockupHeader(
-                sectionTitle: s.teaching,
-                onOpenSettings: () => SettingsSheet.show(
-                  context,
-                  themeController: widget.themeController,
-                  localeController: widget.localeController,
-                  notificationService: widget.notificationService,
-                ),
+            child: AppHeader(
+              onOpenSettings: () => SettingsSheet.show(
+                context,
+                themeController: widget.themeController,
+                localeController: widget.localeController,
+                notificationService: widget.notificationService,
               ),
+              onOpenNotifications: () => SettingsSheet.show(
+                context,
+                themeController: widget.themeController,
+                localeController: widget.localeController,
+                notificationService: widget.notificationService,
+              ),
+              onOpenProfile: () => Navigator.of(context).push(
+                MaterialPageRoute<void>(builder: (_) => const AccountScreen()),
+              ),
+              hasUnreadNotifications: true,
             ),
           ),
+          const SliverToBoxAdapter(child: WelcomeCarousel(teaching: true)),
           SliverToBoxAdapter(
             child: Padding(
-              padding: const EdgeInsets.fromLTRB(16, 12, 16, 0),
+              padding: const EdgeInsets.fromLTRB(20, 12, 20, 0),
               child: Text(
                 s.teachingSubtitle,
                 style: theme.textTheme.bodyMedium?.copyWith(
@@ -133,10 +141,16 @@ class _TeachingScreenState extends State<TeachingScreen> {
                   );
                 }
                 if (snapshot.hasError) {
+                  final error = snapshot.error;
+                  final isPermissionDenied = error.toString().contains(
+                    'permission-denied',
+                  );
                   return Padding(
                     padding: const EdgeInsets.only(top: 60),
                     child: ErrorView(
-                      message: s.somethingWentWrong,
+                      message: isPermissionDenied
+                          ? s.teachingPermissionDenied
+                          : s.teachingLoadFailed,
                       onRetry: () async {
                         setState(() {});
                       },
@@ -169,12 +183,13 @@ class _TeachingScreenState extends State<TeachingScreen> {
                   builder: (context, _) => ListView.builder(
                     shrinkWrap: true,
                     physics: const NeverScrollableScrollPhysics(),
-                    padding: const EdgeInsets.fromLTRB(16, 4, 16, 24),
+                    padding: const EdgeInsets.fromLTRB(20, 4, 20, 24),
                     itemCount: vacancies.length,
                     itemBuilder: (context, index) {
                       final vacancy = vacancies[index];
-                      return TeachingVacancyCard(
+                      return VibrantTeachingCard(
                         vacancy: vacancy,
+                        index: index,
                         isSaved: widget.teachingBookmarks.isBookmarked(
                           vacancy.id,
                         ),

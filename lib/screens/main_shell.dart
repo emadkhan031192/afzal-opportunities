@@ -7,6 +7,7 @@ import '../services/advertisement_service.dart';
 import '../services/bookmark_service.dart';
 import '../services/notification_service.dart';
 import '../services/teaching_service.dart';
+import '../widgets/whatsapp_fab.dart';
 import 'home/home_screen.dart';
 import 'saved/saved_screen.dart';
 import 'teaching/teaching_screen.dart';
@@ -92,6 +93,11 @@ class _MainShellState extends State<MainShell> {
           ),
         ],
       ),
+      floatingActionButton: const Padding(
+        padding: EdgeInsets.only(bottom: 16),
+        child: WhatsAppFab(),
+      ),
+      floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
     );
   }
 }
