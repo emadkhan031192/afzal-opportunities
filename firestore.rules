@@ -85,5 +85,98 @@ service cloud.firestore {
       allow get: if request.auth != null && request.auth.uid == uid;
       allow write: if false;
     }
+
+    // --- Private Teaching Jobs module ---------------------------------
+    //
+    // Admin authorization reuses the same trusted mechanism as the rest of
+    // the app: presence of /admins/{uid} (see isAdmin() above). No client
+    // can grant itself admin rights; the admins collection is not
+    // client-writable.
+    //
+    // Approval flow: organizations, teachers and vacancies are created
+    // with approvalStatus == 'pending'. Only the administrator can move a
+    // record to 'approved' (or 'rejected'/'suspended'). Owners can never
+    // escalate their own status: every owner write path below requires
+    // the incoming approvalStatus to stay 'pending' (create) or unchanged
+    // (update).
+
+    // True when the caller owns the document being read/written.
+    function isOwner() {
+      return request.auth != null
+        && request.auth.uid == resource.data.ownerUid;
+    }
+
+    // True when a non-admin owner create carries no privilege escalation.
+    function ownerCreateClean() {
+      return request.auth != null
+        && request.resource.data.ownerUid == request.auth.uid
+        && request.resource.data.approvalStatus == 'pending';
+    }
+
+    // True when a non-admin owner update carries no privilege escalation.
+    // Owners may leave approvalStatus untouched, or send a live (approved)
+    // vacancy back to pending for re-approval after a material edit (see
+    // TeachingService.updateVacancy). Every other status transition —
+    // to approved, rejected or suspended, or from any non-approved status —
+    // is admin-only.
+    function ownerUpdateClean() {
+      return request.auth != null
+        && request.auth.uid == resource.data.ownerUid
+        && request.resource.data.ownerUid == resource.data.ownerUid
+        && (
+          request.resource.data.approvalStatus == resource.data.approvalStatus
+          || (
+            resource.data.approvalStatus == 'approved'
+            && request.resource.data.approvalStatus == 'pending'
+          )
+        );
+    }
+
+    match /teachingVacancies/{vacancyId} {
+      // Public: approved vacancies only. Owners: their own submissions in
+      // any status. Admins: everything.
+      allow get: if isAdmin()
+        || resource.data.approvalStatus == 'approved'
+        || isOwner();
+      allow list: if isAdmin()
+        || resource.data.approvalStatus == 'approved'
+        || (request.auth != null
+            && request.auth.uid == resource.data.ownerUid);
+      // Owners submit as pending; material edits to an approved vacancy
+      // go through the client as pending again (see TeachingService).
+      allow create: if isAdmin() || ownerCreateClean();
+      allow update: if isAdmin() || ownerUpdateClean();
+      // Owners may delete their own postings; admins may delete anything.
+      allow delete: if isAdmin()
+        || (request.auth != null
+            && request.auth.uid == resource.data.ownerUid);
+    }
+
+    match /teachingOrganizations/{orgId} {
+      // Private: owner + admin only. Contact details must never be public;
+      // vacancy cards use the denormalized institution name instead.
+      allow get: if isAdmin() || isOwner();
+      allow list: if isAdmin()
+        || (request.auth != null
+            && request.auth.uid == resource.data.ownerUid);
+      allow create: if isAdmin() || ownerCreateClean();
+      allow update: if isAdmin() || ownerUpdateClean();
+      allow delete: if isAdmin();
+    }
+
+    match /teacherProfiles/{profileId} {
+      // Private by default: owner + admin only. A teacher's opt-in to
+      // public visibility takes effect only after admin approval; there
+      // is no public list of teacher profiles in v1.
+      allow get: if isAdmin() || isOwner();
+      allow list: if isAdmin()
+        || (request.auth != null
+            && request.auth.uid == resource.data.ownerUid);
+      allow create: if isAdmin() || ownerCreateClean();
+      allow update: if isAdmin() || ownerUpdateClean();
+      allow delete: if isAdmin()
+        || (request.auth != null
+            && request.auth.uid == resource.data.ownerUid);
+    }
   }
 }

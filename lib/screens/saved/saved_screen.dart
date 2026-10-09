@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../core/l10n/app_localizations.dart';
 import '../../models/advertisement.dart';
 import '../../services/advertisement_service.dart';
 import '../../services/bookmark_service.dart';
@@ -65,8 +66,7 @@ class _SavedScreenState extends State<SavedScreen> {
               }
               if (snapshot.hasError) {
                 return ErrorView(
-                  message:
-                      'Could not load saved advertisements. Check your connection and try again.',
+                  message: AppLocalizations.of(context).loadSavedFailed,
                   onRetry: _refresh,
                 );
               }
@@ -77,11 +77,10 @@ class _SavedScreenState extends State<SavedScreen> {
                 return ListView(
                   children: [
                     const SizedBox(height: 80),
-                    const EmptyView(
+                    EmptyView(
                       icon: Icons.bookmark_border,
-                      title: 'No saved advertisements',
-                      message:
-                          'Tap the bookmark icon on any advertisement to save it here.',
+                      title: AppLocalizations.of(context).noSavedAds,
+                      message: AppLocalizations.of(context).noSavedAdsHint,
                     ),
                     Padding(
                       padding: const EdgeInsets.only(top: 8),
@@ -89,7 +88,7 @@ class _SavedScreenState extends State<SavedScreen> {
                         child: ElevatedButton.icon(
                           onPressed: widget.onBrowse,
                           icon: const Icon(Icons.explore_outlined),
-                          label: const Text('Browse advertisements'),
+                          label: Text(AppLocalizations.of(context).browseAds),
                         ),
                       ),
                     ),
@@ -134,7 +133,6 @@ class _SavedScreenState extends State<SavedScreen> {
                         ),
                         child: JobListCard(
                           ad: ad,
-                          index: index,
                           isSaved: true,
                           onTap: () => _openDetails(ad),
                           onToggleSave: () => widget.bookmarks.toggle(ad.id),

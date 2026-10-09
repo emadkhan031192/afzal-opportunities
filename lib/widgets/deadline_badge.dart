@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../core/constants/app_constants.dart';
+import '../core/l10n/app_localizations.dart';
 import '../core/theme/brand_colors.dart';
 import '../core/utils/deadline.dart';
 
@@ -32,39 +33,45 @@ class DeadlineBadge extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final s = AppLocalizations.of(context);
     final palette = _palette(context, info.tone);
-    final pills = <Widget>[
-      if (info.isNew) ...[
-        _Pill(
-          label: 'NEW',
-          icon: Icons.auto_awesome_outlined,
-          background: BrandColors.mint,
-          foreground: BrandColors.nightBlack,
-          compact: compact,
-          expanded: false,
-        ),
-        SizedBox(width: compact ? 6 : 8),
-      ],
-      _Pill(
-        label: info.label,
-        icon: Icons.schedule_outlined,
-        background: palette.background,
-        foreground: palette.foreground,
-        compact: compact,
-        expanded: expanded,
-      ),
-    ];
+    final deadlinePill = _Pill(
+      label: s.deadlineLabel(info),
+      icon: Icons.schedule_outlined,
+      background: palette.background,
+      foreground: palette.foreground,
+      compact: compact,
+      expanded: expanded,
+    );
     if (expanded) {
       return Column(
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           if (info.isNew) ...[const _NewTag(), const SizedBox(height: 6)],
-          pills.last,
+          deadlinePill,
         ],
       );
     }
-    return Row(mainAxisSize: MainAxisSize.min, children: pills);
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        if (info.isNew) ...[
+          _Pill(
+            label: s.newBadge,
+            icon: Icons.auto_awesome_outlined,
+            background: BrandColors.mint,
+            foreground: BrandColors.nightBlack,
+            compact: compact,
+            expanded: false,
+          ),
+          SizedBox(width: compact ? 6 : 8),
+        ],
+        // The deadline pill shrinks (ellipsizing its label) instead of
+        // overflowing narrow cards.
+        Flexible(child: deadlinePill),
+      ],
+    );
   }
 
   _BadgePalette _palette(BuildContext context, DeadlineTone tone) {
@@ -110,9 +117,9 @@ class _NewTag extends StatelessWidget {
           color: BrandColors.mint,
           borderRadius: BorderRadius.circular(999),
         ),
-        child: const Text(
-          'NEW',
-          style: TextStyle(
+        child: Text(
+          AppLocalizations.of(context).newBadge,
+          style: const TextStyle(
             fontSize: 10,
             fontWeight: FontWeight.w800,
             letterSpacing: 0.8,
@@ -192,6 +199,7 @@ class CategoryPill extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final dark = Theme.of(context).brightness == Brightness.dark;
+    final s = AppLocalizations.of(context);
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
       decoration: BoxDecoration(
@@ -201,7 +209,7 @@ class CategoryPill extends StatelessWidget {
         borderRadius: BorderRadius.circular(999),
       ),
       child: Text(
-        AppConstants.categoryLabel(categoryId),
+        _localizedCategory(categoryId, s),
         style: TextStyle(
           fontSize: 10,
           fontWeight: FontWeight.w700,
@@ -210,5 +218,20 @@ class CategoryPill extends StatelessWidget {
         ),
       ),
     );
+  }
+
+  static String _localizedCategory(String id, AppLocalizations s) {
+    switch (id) {
+      case 'jobs':
+        return s.jobs;
+      case 'scholarships':
+        return s.scholarships;
+      case 'admissions':
+        return s.admissions;
+      case 'other':
+        return s.other;
+      default:
+        return AppConstants.categoryLabel(id);
+    }
   }
 }

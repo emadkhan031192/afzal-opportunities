@@ -1,3 +1,4 @@
+import 'package:afzal_opportunities/core/l10n/app_localizations.dart';
 import 'package:afzal_opportunities/models/advertisement.dart';
 import 'package:afzal_opportunities/widgets/job_grid_card.dart';
 import 'package:afzal_opportunities/widgets/job_list_card.dart';
@@ -21,6 +22,8 @@ Advertisement _ad({DateTime? lastDate}) {
 
 Widget _wrap(Widget child, {double width = 390, double height = 844}) {
   return MaterialApp(
+    localizationsDelegates: const [AppLocalizationsDelegate()],
+    supportedLocales: const [Locale('en'), Locale('ur')],
     home: Scaffold(
       body: SizedBox(width: width, height: height, child: child),
     ),
@@ -37,7 +40,6 @@ void main() {
       _wrap(
         JobListCard(
           ad: _ad(),
-          index: 0,
           isSaved: false,
           onTap: () {},
           onToggleSave: () {},
@@ -45,8 +47,11 @@ void main() {
         height: 200,
       ),
     );
+    // The app localization delegate loads asynchronously; one extra pump
+    // lets it resolve before asserting.
+    await tester.pump();
     expect(find.textContaining('Lecturer'), findsOneWidget);
-    expect(find.textContaining('DAYS LEFT'), findsOneWidget);
+    expect(find.textContaining('days left'), findsOneWidget);
     expect(tester.takeException(), isNull);
   });
 
@@ -58,12 +63,13 @@ void main() {
       _wrap(
         SizedBox(
           width: (390 - 32 - 12) / 2,
-          child: JobGridCard(ad: _ad(), index: 1, onTap: () {}),
+          child: JobGridCard(ad: _ad(), onTap: () {}),
         ),
         height: 320,
       ),
     );
-    expect(find.textContaining('Days left'), findsOneWidget);
+    await tester.pump();
+    expect(find.textContaining('days left'), findsOneWidget);
     expect(find.text('Jobs'), findsOneWidget);
     expect(tester.takeException(), isNull);
   });
@@ -71,8 +77,13 @@ void main() {
   testWidgets('SplashScreen renders and finishes on tap', (tester) async {
     var done = false;
     await tester.pumpWidget(
-      MaterialApp(home: SplashScreen(onDone: () => done = true)),
+      MaterialApp(
+        localizationsDelegates: const [AppLocalizationsDelegate()],
+        supportedLocales: const [Locale('en'), Locale('ur')],
+        home: SplashScreen(onDone: () => done = true),
+      ),
     );
+    await tester.pump();
     expect(find.text('AFZAL'), findsOneWidget);
     expect(find.text('Get Started'), findsOneWidget);
     await tester.tap(find.text('Get Started'));

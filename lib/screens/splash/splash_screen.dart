@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 
+import '../../core/l10n/app_localizations.dart';
 import '../../core/theme/brand_colors.dart';
 
 /// Splash / onboarding screen recreating the user's designed Page 1:
@@ -97,22 +98,29 @@ class _SplashScreenState extends State<SplashScreen> {
                           const SizedBox(height: 14),
                           // Tagline.
                           RichText(
-                            text: const TextSpan(
-                              style: TextStyle(
+                            text: TextSpan(
+                              style: const TextStyle(
                                 fontSize: 21,
                                 height: 1.35,
                                 fontWeight: FontWeight.w600,
                                 color: BrandColors.nightBlue,
                               ),
                               children: [
-                                TextSpan(text: 'Create Your\n'),
                                 TextSpan(
-                                  text: 'Future. ',
-                                  style: TextStyle(
+                                  text:
+                                      '${AppLocalizations.of(context).taglineA1}\n',
+                                ),
+                                TextSpan(
+                                  text:
+                                      '${AppLocalizations.of(context).taglineA2} ',
+                                  style: const TextStyle(
                                     color: BrandColors.splashPurple,
                                   ),
                                 ),
-                                TextSpan(text: 'Shape\nYour Dream.'),
+                                TextSpan(
+                                  text:
+                                      '${AppLocalizations.of(context).taglineB1}\n${AppLocalizations.of(context).taglineB2}',
+                                ),
                               ],
                             ),
                           ),
@@ -204,13 +212,13 @@ class _SplashScreenState extends State<SplashScreen> {
                                         size: 22,
                                       ),
                                     ),
-                                    const Padding(
-                                      padding: EdgeInsets.symmetric(
+                                    Padding(
+                                      padding: const EdgeInsets.symmetric(
                                         horizontal: 14,
                                       ),
                                       child: Text(
-                                        'Get Started',
-                                        style: TextStyle(
+                                        AppLocalizations.of(context).getStarted,
+                                        style: const TextStyle(
                                           fontSize: 16,
                                           fontWeight: FontWeight.w700,
                                           color: BrandColors.nightBlue,

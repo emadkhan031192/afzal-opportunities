@@ -133,7 +133,7 @@ textarea { resize: vertical; }
   display: flex; gap: 0.5rem; flex-wrap: wrap;
   margin-bottom: 1rem;
 }
-.tab {
+.tab, .ttab, .tftab {
   border: 1px solid var(--border);
   background: var(--white);
   color: var(--muted);
@@ -143,12 +143,12 @@ textarea { resize: vertical; }
   cursor: pointer;
   display: inline-flex; align-items: center; gap: 0.5rem;
 }
-.tab.active { background: var(--night-blue); border-color: var(--night-blue); color: var(--white); }
-.tab .count {
+.tab.active, .ttab.active, .tftab.active { background: var(--night-blue); border-color: var(--night-blue); color: var(--white); }
+.tab .count, .ttab .count, .tftab .count {
   background: #EBEDF2; color: var(--night-blue);
   font-size: 0.75rem; padding: 0.1rem 0.55rem; border-radius: 999px;
 }
-.tab.active .count { background: var(--mint); color: var(--night-black); }
+.tab.active .count, .ttab.active .count, .tftab.active .count { background: var(--mint); color: var(--night-black); }
 
 .tab-toolbar { display: flex; align-items: center; gap: 1rem; margin-bottom: 1rem; }
 .tab-toolbar input[type="search"] { max-width: 320px; }
@@ -205,6 +205,22 @@ textarea { resize: vertical; }
 .badge-deadline.fine { background: #E8F6EF; color: #2f7d5c; }
 .badge-new { background: var(--mint); color: var(--night-black); }
 .badge-expired { background: var(--night-blue); color: var(--white); }
+
+/* Approval-status badges (teaching review queues) */
+.badge-pending { background: #FFF4DE; color: var(--warn); }
+.badge-approved { background: #E8F6EF; color: #2f7d5c; }
+.badge-rejected { background: #FDECEF; color: var(--danger); }
+.badge-suspended { background: var(--night-blue); color: var(--white); }
+
+/* Compact key/value rows inside review cards */
+.kv { display: grid; grid-template-columns: 128px 1fr; gap: 0.3rem 0.6rem; margin: 0.5rem 0 0; font-size: 0.85rem; }
+.kv dt { color: var(--muted); font-weight: 600; }
+.kv dd { margin: 0; overflow-wrap: anywhere; }
+
+/* Custom input area inside the confirm dialog (used for reject reasons
+   and the vacancy quick-edit form) */
+#confirm-custom { margin: 0.9rem 0 0.2rem; }
+#confirm-custom .field { margin-bottom: 0.7rem; }
 
 /* ---------- Editor ---------- */
 .editor {

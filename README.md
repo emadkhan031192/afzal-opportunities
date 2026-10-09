@@ -41,14 +41,60 @@ date is easy to see.
   `flutter analyze` and `flutter test` gates; GitHub Actions release-APK
   workflow.
 
+### Implemented in v1.3.0
+
+- **Notifications** — opt-in local notifications for new advertisements and
+  closing-soon reminders on saved ads (1–2 days left). Works without the
+  Blaze plan via periodic background checks (Workmanager, hourly when
+  online). Promotional notifications are always opt-in. Manage everything
+  in Settings.
+- **Urdu language option** — full English/Urdu localization of the app
+  interface with proper right-to-left layout; the choice persists.
+  (Advertisement content itself stays as published by the admin.)
+- **Dark mode** — the theme toggle now lives in Settings; the v1.2.0 pastel
+  cards are category-tinted (Jobs blue, Scholarships mint, Admissions amber,
+  Other rose) with dark-mode variants.
+- **Deadline badges** — urgency-colored badges (mint → amber → red) promoted
+  to the headline position on cards and details.
+- **Share** — share any advertisement or teaching vacancy (title, deadline,
+  short description, link) via the system share sheet.
+- **Settings** — appearance, language, notification preferences, and the
+  Afzal E Services WhatsApp Channel link, reachable from the header.
+
+### Private Teaching Jobs module (v1.3.0)
+
+- **Public browsing** — new "Teaching Jobs" tab; browse approved vacancies
+  without logging in. Search plus District, Subject, Qualification and
+  Experience filters; saved teaching jobs (separate bookmark list).
+- **Vacancy details** — key facts (subjects, qualification, experience,
+  positions, salary when provided, employment type), urgency badge,
+  description, how-to-apply instructions, and share button. Missing data is
+  labelled, never invented.
+- **Organization accounts** — email/password registration with email
+  verification; institution profile (pending admin review); vacancy
+  submission form with validation (submissions start as *pending*, never
+  auto-publish); dashboard with vacancy statuses; material edits to an
+  approved vacancy send it back for re-approval.
+- **Teacher accounts** — email/password registration with email
+  verification; private-by-default profile (pending admin review);
+  CV upload UI is present but disabled until the Blaze storage upgrade —
+  the blocker is explained in-app.
+- **Admin review** — the web admin panel gains Organizations, Teachers and
+  Vacancies queues (approve / reject with reason / suspend / reactivate /
+  unpublish / expire).
+- **Security** — Firestore rules: public reads limited to approved
+  vacancies; organizations/teachers can only touch their own records and
+  can never self-approve; the admin gate reuses the existing
+  `admins/{uid}` registry. **The updated `firestore.rules` must be
+  published in the Firebase console** (see `docs/private-teaching-jobs-prompt.md`
+  §13 and the manual step below).
+
 ### Planned (future releases)
 
-- Web-based admin publishing panel (`admin/` — setup guide added separately)
-- Push notifications for closing-soon advertisements
-- Full-text search across advertisements
-- Share an advertisement
-- Server-managed categories (no app update needed)
-- Urdu localization
+- In-app job applications (direct contact + links are supported today)
+- Server-triggered push notifications (requires Blaze)
+- CV uploads (requires Blaze storage upgrade)
+- Play Store release with a real keystore
 
 ## Screenshots
 
@@ -78,6 +124,23 @@ See [`docs/setup.md`](docs/setup.md) for the complete walkthrough and
 [`docs/firebase-setup.md`](docs/firebase-setup.md) for the Firebase console
 steps (added separately). Until Firebase is configured the app runs in demo
 mode — no fake credentials are ever committed.
+
+### Manual step: publish the teaching-module security rules
+
+The repository's `firestore.rules` now covers the teaching collections
+(`teachingOrganizations`, `teacherProfiles`, `teachingVacancies`), but
+rules only take effect once published in the Firebase console:
+
+1. Sign in to the Firebase console as the project owner
+   (`emadkhan031192@gmail.com`).
+2. Open **Firestore Database → Rules**.
+3. Paste the full contents of the repository's `firestore.rules` and
+   click **Publish**. Confirm the success message.
+
+Until this is done, the teaching tab shows approved vacancies only after
+the rules allow public reads, and organization/teacher writes will fail
+with "Missing or insufficient permissions". The admin panel surfaces
+these errors instead of crashing.
 
 ## Admin panel
 
