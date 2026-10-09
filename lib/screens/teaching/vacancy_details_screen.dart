@@ -36,10 +36,13 @@ class VacancyDetailsScreen extends StatelessWidget {
     final text = StringBuffer()
       ..writeln(v.jobTitle)
       ..writeln(v.institutionName)
-      ..writeln('${v.district}'
-          '${(v.city ?? '').isNotEmpty ? ' · ${v.city}' : ''}')
       ..writeln(
-          '${s.applicationDeadline}: ${v.applicationDeadline != null ? DateFormat('d MMMM yyyy').format(v.applicationDeadline!) : s.notSpecified} (${s.deadlineLabel(info)})')
+        '${v.district}'
+        '${(v.city ?? '').isNotEmpty ? ' · ${v.city}' : ''}',
+      )
+      ..writeln(
+        '${s.applicationDeadline}: ${v.applicationDeadline != null ? DateFormat('d MMMM yyyy').format(v.applicationDeadline!) : s.notSpecified} (${s.deadlineLabel(info)})',
+      )
       ..writeln()
       ..writeln(_short(v.description));
     final link = (v.applicationUrl ?? '').trim();
@@ -106,8 +109,11 @@ class VacancyDetailsScreen extends StatelessWidget {
             const SizedBox(height: 8),
             Row(
               children: [
-                const Icon(Icons.school_outlined,
-                    size: 18, color: BrandColors.mintDark),
+                const Icon(
+                  Icons.school_outlined,
+                  size: 18,
+                  color: BrandColors.mintDark,
+                ),
                 const SizedBox(width: 8),
                 Expanded(
                   child: Text(
@@ -120,8 +126,11 @@ class VacancyDetailsScreen extends StatelessWidget {
             const SizedBox(height: 4),
             Row(
               children: [
-                const Icon(Icons.location_on_outlined,
-                    size: 18, color: BrandColors.mintDark),
+                const Icon(
+                  Icons.location_on_outlined,
+                  size: 18,
+                  color: BrandColors.mintDark,
+                ),
                 const SizedBox(width: 8),
                 Expanded(
                   child: Text(
@@ -165,25 +174,35 @@ class _FactsGrid extends StatelessWidget {
     final s = AppLocalizations.of(context);
     final v = vacancy;
     final facts = <_Fact>[
-      _Fact(s.subjectsRequired,
-          v.subjects.isEmpty ? s.notSpecified : v.subjects.join(', ')),
+      _Fact(
+        s.subjectsRequired,
+        v.subjects.isEmpty ? s.notSpecified : v.subjects.join(', '),
+      ),
       _Fact(s.qualificationRequired, v.qualification),
-      _Fact(s.experienceRequired,
-          (v.experienceRequired ?? '').isEmpty ? s.notSpecified : v.experienceRequired!),
+      _Fact(
+        s.experienceRequired,
+        (v.experienceRequired ?? '').isEmpty
+            ? s.notSpecified
+            : v.experienceRequired!,
+      ),
       _Fact(s.positions, '${v.positionsCount}'),
       _Fact(s.salaryRange, v.salaryDisplay ?? s.notSpecified),
-      _Fact(s.employmentType,
-          (v.employmentType ?? '').isEmpty ? s.notSpecified : v.employmentType!),
       _Fact(
-          s.postedOn,
-          v.publishedAt != null
-              ? DateFormat('d MMM yyyy').format(v.publishedAt!)
-              : s.notSpecified),
+        s.employmentType,
+        (v.employmentType ?? '').isEmpty ? s.notSpecified : v.employmentType!,
+      ),
       _Fact(
-          s.applicationDeadline,
-          v.applicationDeadline != null
-              ? DateFormat('d MMM yyyy').format(v.applicationDeadline!)
-              : s.notSpecified),
+        s.postedOn,
+        v.publishedAt != null
+            ? DateFormat('d MMM yyyy').format(v.publishedAt!)
+            : s.notSpecified,
+      ),
+      _Fact(
+        s.applicationDeadline,
+        v.applicationDeadline != null
+            ? DateFormat('d MMM yyyy').format(v.applicationDeadline!)
+            : s.notSpecified,
+      ),
     ];
     return GridView.builder(
       shrinkWrap: true,
@@ -238,10 +257,9 @@ class _FactCard extends StatelessWidget {
             fact.value,
             maxLines: 2,
             overflow: TextOverflow.ellipsis,
-            style: Theme.of(context)
-                .textTheme
-                .bodyMedium
-                ?.copyWith(fontWeight: FontWeight.w700),
+            style: Theme.of(
+              context,
+            ).textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.w700),
           ),
         ],
       ),
@@ -261,11 +279,14 @@ class _ApplyBox extends StatelessWidget {
     final v = vacancy;
     final lines = <Widget>[];
     if ((v.applicationMethod ?? '').isNotEmpty) {
-      lines.add(_line(context, Icons.how_to_reg_outlined, v.applicationMethod!));
+      lines.add(
+        _line(context, Icons.how_to_reg_outlined, v.applicationMethod!),
+      );
     }
     if ((v.contactInstructions ?? '').isNotEmpty) {
-      lines.add(_line(
-          context, Icons.contact_phone_outlined, v.contactInstructions!));
+      lines.add(
+        _line(context, Icons.contact_phone_outlined, v.contactInstructions!),
+      );
     }
     if ((v.applicationUrl ?? '').trim().isNotEmpty) {
       lines.add(
@@ -275,8 +296,7 @@ class _ApplyBox extends StatelessWidget {
             padding: const EdgeInsets.symmetric(vertical: 6),
             child: Row(
               children: [
-                const Icon(Icons.link,
-                    size: 18, color: BrandColors.mockupBlue),
+                const Icon(Icons.link, size: 18, color: BrandColors.mockupBlue),
                 const SizedBox(width: 8),
                 Expanded(
                   child: Text(
@@ -338,8 +358,10 @@ class _ExpiredNote extends StatelessWidget {
       ),
       child: Row(
         children: [
-          const Icon(Icons.event_busy_outlined,
-              color: BrandColors.dangerStrong),
+          const Icon(
+            Icons.event_busy_outlined,
+            color: BrandColors.dangerStrong,
+          ),
           const SizedBox(width: 8),
           Expanded(
             child: Text(

@@ -11,12 +11,7 @@ import 'firebase_config.dart';
 
 /// Notification categories. Each has its own opt-in preference;
 /// promotions are off by default and everything else is on by default.
-enum NotificationType {
-  newAds,
-  closingSoon,
-  teaching,
-  promotions,
-}
+enum NotificationType { newAds, closingSoon, teaching, promotions }
 
 /// Local-notification system for Afzal E Services.
 ///
@@ -61,8 +56,9 @@ class NotificationService {
   /// Android 13+. Safe to call more than once.
   Future<void> initialize() async {
     if (_initialized) return;
-    const androidSettings =
-        AndroidInitializationSettings('@mipmap/ic_launcher');
+    const androidSettings = AndroidInitializationSettings(
+      '@mipmap/ic_launcher',
+    );
     const settings = InitializationSettings(android: androidSettings);
     await _plugin.initialize(settings);
     const channel = AndroidNotificationChannel(
@@ -73,7 +69,8 @@ class NotificationService {
     );
     await _plugin
         .resolvePlatformSpecificImplementation<
-            AndroidFlutterLocalNotificationsPlugin>()
+          AndroidFlutterLocalNotificationsPlugin
+        >()
         ?.createNotificationChannel(channel);
     _initialized = true;
   }
@@ -82,8 +79,10 @@ class NotificationService {
   /// Returns true when notifications are (or remain) allowed.
   Future<bool> requestPermission() async {
     await initialize();
-    final android = _plugin.resolvePlatformSpecificImplementation<
-        AndroidFlutterLocalNotificationsPlugin>();
+    final android = _plugin
+        .resolvePlatformSpecificImplementation<
+          AndroidFlutterLocalNotificationsPlugin
+        >();
     if (android == null) return true;
     return await android.requestNotificationsPermission() ?? false;
   }
@@ -110,8 +109,9 @@ class NotificationService {
 
     final now = DateTime.now().toUtc();
     final lastCheckRaw = prefs.getString(AppConstants.notifLastCheckKey);
-    final lastCheck =
-        lastCheckRaw == null ? null : DateTime.tryParse(lastCheckRaw);
+    final lastCheck = lastCheckRaw == null
+        ? null
+        : DateTime.tryParse(lastCheckRaw);
     final isFirstRun = lastCheck == null;
 
     final service = adService ?? AdvertisementService();
@@ -175,10 +175,14 @@ class NotificationService {
     }
 
     // Cap the dedup list so it cannot grow without bound.
-    final trimmed =
-        seenIds.length > 300 ? seenIds.sublist(seenIds.length - 300) : seenIds;
+    final trimmed = seenIds.length > 300
+        ? seenIds.sublist(seenIds.length - 300)
+        : seenIds;
     await prefs.setStringList(AppConstants.notifSeenIdsKey, trimmed);
-    await prefs.setString(AppConstants.notifLastCheckKey, now.toIso8601String());
+    await prefs.setString(
+      AppConstants.notifLastCheckKey,
+      now.toIso8601String(),
+    );
   }
 
   /// Fires a teaching-vacancy notification (called by the teaching
@@ -197,8 +201,9 @@ class NotificationService {
     if (seenIds.contains(key)) return;
     await _show(id: key.hashCode, title: title, body: body);
     seenIds.add(key);
-    final trimmed =
-        seenIds.length > 300 ? seenIds.sublist(seenIds.length - 300) : seenIds;
+    final trimmed = seenIds.length > 300
+        ? seenIds.sublist(seenIds.length - 300)
+        : seenIds;
     await prefs.setStringList(AppConstants.notifSeenIdsKey, trimmed);
   }
 

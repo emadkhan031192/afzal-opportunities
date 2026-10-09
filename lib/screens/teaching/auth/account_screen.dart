@@ -89,9 +89,9 @@ class _SignedOutView extends StatelessWidget {
           ),
           const SizedBox(height: 24),
           TextButton(
-            onPressed: () => Navigator.of(context).push(
-              MaterialPageRoute(builder: (_) => const LoginScreen()),
-            ),
+            onPressed: () => Navigator.of(
+              context,
+            ).push(MaterialPageRoute(builder: (_) => const LoginScreen())),
             child: Text(s.haveAccount),
           ),
         ],
@@ -124,9 +124,7 @@ class _ChoiceCard extends StatelessWidget {
             children: [
               Icon(icon, size: 32, color: theme.colorScheme.primary),
               const SizedBox(width: 16),
-              Expanded(
-                child: Text(title, style: theme.textTheme.titleMedium),
-              ),
+              Expanded(child: Text(title, style: theme.textTheme.titleMedium)),
               const Icon(Icons.arrow_forward_ios, size: 18),
             ],
           ),

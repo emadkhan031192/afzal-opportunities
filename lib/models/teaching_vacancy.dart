@@ -9,12 +9,7 @@ class TeachingApproval {
   static const String rejected = 'rejected';
   static const String suspended = 'suspended';
 
-  static const Set<String> values = {
-    pending,
-    approved,
-    rejected,
-    suspended,
-  };
+  static const Set<String> values = {pending, approved, rejected, suspended};
 }
 
 /// A private teaching vacancy submitted by an organization and published
@@ -88,9 +83,9 @@ class TeachingVacancy {
   String? get salaryDisplay {
     if (salaryMin == null && salaryMax == null) return null;
     String fmt(int v) => v.toString().replaceAllMapped(
-          RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'),
-          (m) => '${m[1]},',
-        );
+      RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'),
+      (m) => '${m[1]},',
+    );
     if (salaryMin != null && salaryMax != null) {
       return 'Rs ${fmt(salaryMin!)} – ${fmt(salaryMax!)}';
     }
@@ -109,8 +104,9 @@ class TeachingVacancy {
     final ownerUid = _requiredString(json, 'ownerUid', id);
 
     final rawStatus = json['approvalStatus'];
-    final approvalStatus =
-        rawStatus == null ? TeachingApproval.pending : rawStatus.toString();
+    final approvalStatus = rawStatus == null
+        ? TeachingApproval.pending
+        : rawStatus.toString();
     if (!TeachingApproval.values.contains(approvalStatus)) {
       throw FormatException(
         'TeachingVacancy "$id" has invalid approvalStatus "$approvalStatus".',
@@ -135,8 +131,11 @@ class TeachingVacancy {
       employmentType: _optionalString(json, 'employmentType'),
       genderEligibility: _optionalString(json, 'genderEligibility'),
       description: description,
-      applicationDeadline:
-          _parseDateTime(json['applicationDeadline'], 'applicationDeadline', id),
+      applicationDeadline: _parseDateTime(
+        json['applicationDeadline'],
+        'applicationDeadline',
+        id,
+      ),
       applicationMethod: _optionalString(json, 'applicationMethod'),
       applicationUrl: _optionalString(json, 'applicationUrl'),
       contactInstructions: _optionalString(json, 'contactInstructions'),

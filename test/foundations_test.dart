@@ -73,12 +73,12 @@ void main() {
       final ur = AppLocalizations(const Locale('ur'));
 
       DeadlineInfo info({int? days}) => DeadlineInfo(
-            label: 'x',
-            isExpired: (days ?? 1) < 0,
-            isNew: false,
-            daysLeft: days,
-            tone: DeadlineTone.neutral,
-          );
+        label: 'x',
+        isExpired: (days ?? 1) < 0,
+        isNew: false,
+        daysLeft: days,
+        tone: DeadlineTone.neutral,
+      );
 
       expect(en.deadlineLabel(info(days: null)), 'LAST DATE NOT SPECIFIED');
       expect(ur.deadlineLabel(info(days: null)), 'آخری تاریخ درج نہیں');
@@ -103,10 +103,7 @@ void main() {
       expect(await service.isEnabled(NotificationType.newAds), isTrue);
       expect(await service.isEnabled(NotificationType.closingSoon), isTrue);
       expect(await service.isEnabled(NotificationType.teaching), isTrue);
-      expect(
-        await service.isEnabled(NotificationType.promotions),
-        isFalse,
-      );
+      expect(await service.isEnabled(NotificationType.promotions), isFalse);
     });
 
     test('preferences persist', () async {
@@ -121,10 +118,14 @@ void main() {
     });
 
     test('defaultEnabled matches documented defaults', () {
-      expect(NotificationService.defaultEnabled(NotificationType.newAds),
-          isTrue);
-      expect(NotificationService.defaultEnabled(NotificationType.promotions),
-          isFalse);
+      expect(
+        NotificationService.defaultEnabled(NotificationType.newAds),
+        isTrue,
+      );
+      expect(
+        NotificationService.defaultEnabled(NotificationType.promotions),
+        isFalse,
+      );
     });
   });
 

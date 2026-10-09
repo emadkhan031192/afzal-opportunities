@@ -60,24 +60,25 @@ class _TeacherRegisterScreenState extends State<TeacherRegisterScreen> {
         password: _passwordController.text,
       );
       final uid = credential.user!.uid;
-      await _service.saveProfile(TeacherProfile(
-        id: '',
-        ownerUid: uid,
-        fullName: _nameController.text.trim(),
-        email: _emailController.text.trim(),
-        district: _district,
-        qualification: _qualificationController.text.trim().isEmpty
-            ? null
-            : _qualificationController.text.trim(),
-        subjects: parseCsv(_subjectsController.text),
-        experienceYears:
-            int.tryParse(_experienceController.text.trim()),
-        preferredEmploymentType: _employmentType,
-        professionalSummary: _summaryController.text.trim().isEmpty
-            ? null
-            : _summaryController.text.trim(),
-        approvalStatus: TeachingApproval.pending,
-      ));
+      await _service.saveProfile(
+        TeacherProfile(
+          id: '',
+          ownerUid: uid,
+          fullName: _nameController.text.trim(),
+          email: _emailController.text.trim(),
+          district: _district,
+          qualification: _qualificationController.text.trim().isEmpty
+              ? null
+              : _qualificationController.text.trim(),
+          subjects: parseCsv(_subjectsController.text),
+          experienceYears: int.tryParse(_experienceController.text.trim()),
+          preferredEmploymentType: _employmentType,
+          professionalSummary: _summaryController.text.trim().isEmpty
+              ? null
+              : _summaryController.text.trim(),
+          approvalStatus: TeachingApproval.pending,
+        ),
+      );
       if (mounted) {
         Navigator.of(context).pushReplacement(
           MaterialPageRoute(builder: (_) => const VerifyEmailScreen()),
@@ -144,7 +145,8 @@ class _TeacherRegisterScreenState extends State<TeacherRegisterScreen> {
                     .map((d) => DropdownMenuItem(value: d, child: Text(d)))
                     .toList(),
                 onChanged: (v) => setState(
-                    () => _district = v ?? AppConstants.kpDistricts.first),
+                  () => _district = v ?? AppConstants.kpDistricts.first,
+                ),
               ),
               LabeledTextField(
                 label: s.qualification,

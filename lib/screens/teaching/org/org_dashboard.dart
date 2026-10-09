@@ -13,11 +13,7 @@ import 'vacancy_form_screen.dart';
 /// Organization dashboard: profile status, vacancy submission, and the
 /// organization's own vacancies across all approval statuses.
 class OrgDashboard extends StatefulWidget {
-  const OrgDashboard({
-    super.key,
-    required this.auth,
-    required this.service,
-  });
+  const OrgDashboard({super.key, required this.auth, required this.service});
 
   final TeachingAuth auth;
   final TeachingService service;
@@ -104,11 +100,13 @@ class _DashboardBody extends StatelessWidget {
         padding: const EdgeInsets.fromLTRB(20, 16, 20, 96),
         children: [
           if (!auth.isEmailVerified)
-            _VerifyBanner(onTap: () {
-              Navigator.of(context).push(
-                MaterialPageRoute(builder: (_) => const VerifyEmailScreen()),
-              );
-            }),
+            _VerifyBanner(
+              onTap: () {
+                Navigator.of(context).push(
+                  MaterialPageRoute(builder: (_) => const VerifyEmailScreen()),
+                );
+              },
+            ),
           _StatusCard(org: org),
           const SizedBox(height: 16),
           Text(
@@ -132,19 +130,20 @@ class _DashboardBody extends StatelessWidget {
                   child: EmptyView(
                     icon: Icons.work_outline,
                     title: AppLocalizations.of(context).noVacanciesFound,
-                    message:
-                        AppLocalizations.of(context).vacancySubmittedDesc,
+                    message: AppLocalizations.of(context).vacancySubmittedDesc,
                   ),
                 );
               }
               return Column(
                 children: vacancies
-                    .map((v) => _VacancyRow(
-                          vacancy: v,
-                          service: service,
-                          canPost: auth.isEmailVerified,
-                          onChanged: onChanged,
-                        ))
+                    .map(
+                      (v) => _VacancyRow(
+                        vacancy: v,
+                        service: service,
+                        canPost: auth.isEmailVerified,
+                        onChanged: onChanged,
+                      ),
+                    )
                     .toList(),
               );
             },
@@ -248,8 +247,10 @@ class _StatusCard extends StatelessWidget {
                   ),
                 ),
                 Container(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 10,
+                    vertical: 5,
+                  ),
                   decoration: BoxDecoration(
                     color: color.withValues(alpha: 0.12),
                     borderRadius: BorderRadius.circular(999),
@@ -339,15 +340,15 @@ class _VacancyRow extends StatelessWidget {
     try {
       await service.deleteVacancy(vacancy.id);
       if (context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(s.vacancyDeleted)),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text(s.vacancyDeleted)));
       }
     } catch (_) {
       if (context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(s.unknownError)),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text(s.unknownError)));
       }
     }
     onChanged();

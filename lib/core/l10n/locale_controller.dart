@@ -54,9 +54,5 @@ class LocaleController extends ChangeNotifier {
   static const String _englishValue = 'en';
   static const String _urduValue = 'ur';
 
-  static const List<String> choices = [
-    _systemValue,
-    _englishValue,
-    _urduValue,
-  ];
+  static const List<String> choices = [_systemValue, _englishValue, _urduValue];
 }

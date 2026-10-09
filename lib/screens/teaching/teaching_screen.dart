@@ -64,18 +64,17 @@ class _TeachingScreenState extends State<TeachingScreen> {
   }
 
   Future<void> _openFilters() async {
-    final result = await showTeachingFilterSheet(
-      context,
-      initial: _filter,
-    );
+    final result = await showTeachingFilterSheet(context, initial: _filter);
     if (result != null) {
-      setState(() => _filter = VacancyFilter(
-            query: _filter.query,
-            district: result.district,
-            subject: result.subject,
-            qualification: result.qualification,
-            experience: result.experience,
-          ));
+      setState(
+        () => _filter = VacancyFilter(
+          query: _filter.query,
+          district: result.district,
+          subject: result.subject,
+          qualification: result.qualification,
+          experience: result.experience,
+        ),
+      );
     }
   }
 
@@ -135,12 +134,13 @@ class _TeachingScreenState extends State<TeachingScreen> {
                     ),
                   );
                 }
-                var vacancies =
-                    TeachingService.applyFilter(snapshot.data ?? [], _filter);
+                var vacancies = TeachingService.applyFilter(
+                  snapshot.data ?? [],
+                  _filter,
+                );
                 if (_savedOnly) {
                   vacancies = vacancies
-                      .where((v) =>
-                          widget.teachingBookmarks.isBookmarked(v.id))
+                      .where((v) => widget.teachingBookmarks.isBookmarked(v.id))
                       .toList();
                 }
                 if (vacancies.isEmpty) {
@@ -164,8 +164,9 @@ class _TeachingScreenState extends State<TeachingScreen> {
                       final vacancy = vacancies[index];
                       return TeachingVacancyCard(
                         vacancy: vacancy,
-                        isSaved: widget.teachingBookmarks
-                            .isBookmarked(vacancy.id),
+                        isSaved: widget.teachingBookmarks.isBookmarked(
+                          vacancy.id,
+                        ),
                         onTap: () => _openDetails(vacancy),
                         onToggleSave: () =>
                             widget.teachingBookmarks.toggle(vacancy.id),
@@ -239,9 +240,9 @@ class _TeachingScreenState extends State<TeachingScreen> {
             icon: Icons.person_outline,
             tooltip: s.account,
             active: false,
-            onPressed: () => Navigator.of(context).push(
-              MaterialPageRoute(builder: (_) => const AccountScreen()),
-            ),
+            onPressed: () => Navigator.of(
+              context,
+            ).push(MaterialPageRoute(builder: (_) => const AccountScreen())),
           ),
         ],
       ),
@@ -272,8 +273,8 @@ class _IconButton extends StatelessWidget {
         color: active
             ? BrandColors.mockupBlue
             : (dark
-                ? Colors.white.withValues(alpha: 0.07)
-                : BrandColors.lightBackground),
+                  ? Colors.white.withValues(alpha: 0.07)
+                  : BrandColors.lightBackground),
         borderRadius: BorderRadius.circular(999),
         child: InkWell(
           borderRadius: BorderRadius.circular(999),
@@ -425,8 +426,7 @@ class _TeachingFilterSheetState extends State<_TeachingFilterSheet> {
               segments: [
                 ButtonSegment(value: '', label: Text(s.anyOption)),
                 ButtonSegment(value: 'fresh', label: Text(s.freshEntry)),
-                ButtonSegment(
-                    value: 'experienced', label: Text(s.experienced)),
+                ButtonSegment(value: 'experienced', label: Text(s.experienced)),
               ],
               selected: {_experience},
               showSelectedIcon: false,
@@ -435,12 +435,14 @@ class _TeachingFilterSheetState extends State<_TeachingFilterSheet> {
             ),
             const SizedBox(height: 20),
             ElevatedButton(
-              onPressed: () => Navigator.of(context).pop(VacancyFilter(
-                district: _district,
-                subject: _subjectController.text.trim(),
-                qualification: _qualificationController.text.trim(),
-                experience: _experience,
-              )),
+              onPressed: () => Navigator.of(context).pop(
+                VacancyFilter(
+                  district: _district,
+                  subject: _subjectController.text.trim(),
+                  qualification: _qualificationController.text.trim(),
+                  experience: _experience,
+                ),
+              ),
               child: Text(s.applyFilters),
             ),
           ],

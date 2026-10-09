@@ -114,13 +114,14 @@ class TeachingService {
       }
       if (filter.subject.isNotEmpty &&
           !v.subjects.any(
-              (s) => s.toLowerCase() == filter.subject.toLowerCase())) {
+            (s) => s.toLowerCase() == filter.subject.toLowerCase(),
+          )) {
         return false;
       }
       if (filter.qualification.isNotEmpty &&
-          !v.qualification
-              .toLowerCase()
-              .contains(filter.qualification.toLowerCase())) {
+          !v.qualification.toLowerCase().contains(
+            filter.qualification.toLowerCase(),
+          )) {
         return false;
       }
       if (filter.experience.isNotEmpty) {
@@ -141,12 +142,12 @@ class TeachingService {
   }
 
   /// Whether the vacancy's application deadline has passed (PKT day).
-  static bool isExpired(TeachingVacancy vacancy, {DateTime? now}) {    final deadline = vacancy.applicationDeadline;
+  static bool isExpired(TeachingVacancy vacancy, {DateTime? now}) {
+    final deadline = vacancy.applicationDeadline;
     if (deadline == null) return false;
     final pkt = pktNow(now);
     final today = DateTime(pkt.year, pkt.month, pkt.day);
-    final target =
-        DateTime(deadline.year, deadline.month, deadline.day);
+    final target = DateTime(deadline.year, deadline.month, deadline.day);
     return target.isBefore(today);
   }
 
@@ -156,8 +157,9 @@ class TeachingService {
   static bool _requiresExperience(String? experienceRequired) {
     final text = (experienceRequired ?? '').trim().toLowerCase();
     if (text.isEmpty) return false;
-    if (RegExp(r'fresh|no experience|not required|entry.level')
-        .hasMatch(text)) {
+    if (RegExp(
+      r'fresh|no experience|not required|entry.level',
+    ).hasMatch(text)) {
       return false;
     }
     // Any mention of years (e.g. "2 years") means experience is required.
@@ -260,8 +262,8 @@ class TeachingService {
 
   /// Updates the caller's own vacancy. Material changes to an approved
   /// vacancy send it back to 'pending' for admin re-approval.
-  Future<void> updateVacancy(TeachingVacancy vacancy) async {    final data = vacancy.toJson()
-      ..['updatedAt'] = FieldValue.serverTimestamp();
+  Future<void> updateVacancy(TeachingVacancy vacancy) async {
+    final data = vacancy.toJson()..['updatedAt'] = FieldValue.serverTimestamp();
     if (vacancy.isApproved) {
       // Material change to a live vacancy: re-approval required.
       data['approvalStatus'] = TeachingApproval.pending;
@@ -309,8 +311,7 @@ class TeachingService {
   /// Creates or updates the caller's teacher profile. Approval status
   /// can never be escalated by the client.
   Future<String> saveProfile(TeacherProfile profile) async {
-    final data = profile.toJson()
-      ..['updatedAt'] = FieldValue.serverTimestamp();
+    final data = profile.toJson()..['updatedAt'] = FieldValue.serverTimestamp();
     data.remove('approvalStatus');
     data.remove('rejectionReason');
     if (profile.id.isEmpty) {

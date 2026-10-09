@@ -7,7 +7,11 @@ import '../core/theme/brand_colors.dart';
 /// "AFZAL-E SERVICES" wordmark (mint "-E"), with the active section title
 /// ("Jobs", "Scholarships", …) on the right plus a settings button.
 class MockupHeader extends StatelessWidget {
-  const MockupHeader({super.key, required this.sectionTitle, this.onOpenSettings});
+  const MockupHeader({
+    super.key,
+    required this.sectionTitle,
+    this.onOpenSettings,
+  });
 
   final String sectionTitle;
   final VoidCallback? onOpenSettings;

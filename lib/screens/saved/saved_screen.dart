@@ -88,8 +88,7 @@ class _SavedScreenState extends State<SavedScreen> {
                         child: ElevatedButton.icon(
                           onPressed: widget.onBrowse,
                           icon: const Icon(Icons.explore_outlined),
-                          label:
-                              Text(AppLocalizations.of(context).browseAds),
+                          label: Text(AppLocalizations.of(context).browseAds),
                         ),
                       ),
                     ),

@@ -44,7 +44,7 @@ class DetailsScreen extends StatelessWidget {
     );
     final deadlineLine = ad.lastDate != null
         ? '${s.lastDate}: ${DateFormat('d MMMM yyyy').format(ad.lastDate!)} '
-            '(${s.deadlineLabel(info)})'
+              '(${s.deadlineLabel(info)})'
         : '${s.lastDate}: ${s.notSpecified}';
     final link = (ad.sourceUrl ?? '').trim().isNotEmpty
         ? ad.sourceUrl!.trim()
@@ -135,10 +135,7 @@ class DetailsScreen extends StatelessWidget {
                       style: theme.textTheme.titleLarge,
                     ),
                     const SizedBox(height: 4),
-                    Text(
-                      s.officialInfoBody,
-                      style: theme.textTheme.bodySmall,
-                    ),
+                    Text(s.officialInfoBody, style: theme.textTheme.bodySmall),
                     const SizedBox(height: 8),
                     if (hasApplication)
                       _linkTile(

@@ -40,13 +40,16 @@ class _TeacherProfileFormScreenState extends State<TeacherProfileFormScreen> {
     super.initState();
     final p = widget.existing;
     _nameController = TextEditingController(text: p.fullName);
-    _qualificationController =
-        TextEditingController(text: p.qualification ?? '');
+    _qualificationController = TextEditingController(
+      text: p.qualification ?? '',
+    );
     _subjectsController = TextEditingController(text: p.subjects.join(', '));
     _experienceController = TextEditingController(
-        text: p.experienceYears != null ? '${p.experienceYears}' : '');
-    _summaryController =
-        TextEditingController(text: p.professionalSummary ?? '');
+      text: p.experienceYears != null ? '${p.experienceYears}' : '',
+    );
+    _summaryController = TextEditingController(
+      text: p.professionalSummary ?? '',
+    );
     _district = p.district;
     _employmentType = p.preferredEmploymentType ?? 'Full-time';
     _visibility = p.profileVisibility;
@@ -68,36 +71,38 @@ class _TeacherProfileFormScreenState extends State<TeacherProfileFormScreen> {
     setState(() => _busy = true);
     try {
       final p = widget.existing;
-      await _service.saveProfile(TeacherProfile(
-        id: p.id,
-        ownerUid: p.ownerUid,
-        fullName: _nameController.text.trim(),
-        email: p.email,
-        district: _district,
-        qualification: _qualificationController.text.trim().isEmpty
-            ? null
-            : _qualificationController.text.trim(),
-        subjects: parseCsv(_subjectsController.text),
-        experienceYears: int.tryParse(_experienceController.text.trim()),
-        preferredEmploymentType: _employmentType,
-        professionalSummary: _summaryController.text.trim().isEmpty
-            ? null
-            : _summaryController.text.trim(),
-        cvStoragePath: p.cvStoragePath,
-        profileVisibility: _visibility,
-        approvalStatus: p.approvalStatus,
-      ));
+      await _service.saveProfile(
+        TeacherProfile(
+          id: p.id,
+          ownerUid: p.ownerUid,
+          fullName: _nameController.text.trim(),
+          email: p.email,
+          district: _district,
+          qualification: _qualificationController.text.trim().isEmpty
+              ? null
+              : _qualificationController.text.trim(),
+          subjects: parseCsv(_subjectsController.text),
+          experienceYears: int.tryParse(_experienceController.text.trim()),
+          preferredEmploymentType: _employmentType,
+          professionalSummary: _summaryController.text.trim().isEmpty
+              ? null
+              : _summaryController.text.trim(),
+          cvStoragePath: p.cvStoragePath,
+          profileVisibility: _visibility,
+          approvalStatus: p.approvalStatus,
+        ),
+      );
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(s.profileSaved)),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text(s.profileSaved)));
         Navigator.of(context).pop(true);
       }
     } catch (_) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(s.unknownError)),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text(s.unknownError)));
       }
     } finally {
       if (mounted) setState(() => _busy = false);
@@ -129,7 +134,8 @@ class _TeacherProfileFormScreenState extends State<TeacherProfileFormScreen> {
                     .map((d) => DropdownMenuItem(value: d, child: Text(d)))
                     .toList(),
                 onChanged: (v) => setState(
-                    () => _district = v ?? AppConstants.kpDistricts.first),
+                  () => _district = v ?? AppConstants.kpDistricts.first,
+                ),
               ),
               LabeledTextField(
                 label: s.qualification,
@@ -166,9 +172,13 @@ class _TeacherProfileFormScreenState extends State<TeacherProfileFormScreen> {
                 value: _visibility,
                 items: [
                   DropdownMenuItem(
-                      value: 'private', child: Text(s.visibilityPrivate)),
+                    value: 'private',
+                    child: Text(s.visibilityPrivate),
+                  ),
                   DropdownMenuItem(
-                      value: 'public', child: Text(s.visibilityPublic)),
+                    value: 'public',
+                    child: Text(s.visibilityPublic),
+                  ),
                 ],
                 onChanged: (v) => setState(() => _visibility = v ?? 'private'),
               ),

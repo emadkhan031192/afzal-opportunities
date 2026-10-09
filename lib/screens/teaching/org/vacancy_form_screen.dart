@@ -109,23 +109,23 @@ class _VacancyFormScreenState extends State<VacancyFormScreen> {
     final s = AppLocalizations.of(context);
     if (!_formKey.currentState!.validate()) return;
     if (!_auth.isEmailVerified) {
-      await Navigator.of(context).push(
-        MaterialPageRoute(builder: (_) => const VerifyEmailScreen()),
-      );
+      await Navigator.of(
+        context,
+      ).push(MaterialPageRoute(builder: (_) => const VerifyEmailScreen()));
       return;
     }
     if ((_method == 'url' || _method == 'both') &&
         _appUrlController.text.trim().isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(s.requiredField)),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(s.requiredField)));
       return;
     }
     if ((_method == 'contact' || _method == 'both') &&
         _contactController.text.trim().isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(s.requiredField)),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(s.requiredField)));
       return;
     }
     setState(() => _busy = true);
@@ -151,8 +151,7 @@ class _VacancyFormScreenState extends State<VacancyFormScreen> {
         experienceRequired: _experienceController.text.trim().isEmpty
             ? null
             : _experienceController.text.trim(),
-        positionsCount:
-            int.tryParse(_positionsController.text.trim()) ?? 1,
+        positionsCount: int.tryParse(_positionsController.text.trim()) ?? 1,
         salaryMin: _salaryMinController.text.trim().isEmpty
             ? null
             : int.tryParse(_salaryMinController.text.trim()),
@@ -175,9 +174,9 @@ class _VacancyFormScreenState extends State<VacancyFormScreen> {
       if (_isEdit) {
         await _service.updateVacancy(vacancy);
         if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text(s.vacancyUpdated)),
-          );
+          ScaffoldMessenger.of(
+            context,
+          ).showSnackBar(SnackBar(content: Text(s.vacancyUpdated)));
         }
       } else {
         await _service.submitVacancy(vacancy);
@@ -200,9 +199,9 @@ class _VacancyFormScreenState extends State<VacancyFormScreen> {
       if (mounted) Navigator.of(context).pop(true);
     } catch (_) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(s.unknownError)),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text(s.unknownError)));
       }
     } finally {
       if (mounted) setState(() => _busy = false);
@@ -213,9 +212,7 @@ class _VacancyFormScreenState extends State<VacancyFormScreen> {
   Widget build(BuildContext context) {
     final s = AppLocalizations.of(context);
     return Scaffold(
-      appBar: AppBar(
-        title: Text(_isEdit ? s.editVacancy : s.postVacancy),
-      ),
+      appBar: AppBar(title: Text(_isEdit ? s.editVacancy : s.postVacancy)),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(24),
         child: Form(
@@ -236,7 +233,8 @@ class _VacancyFormScreenState extends State<VacancyFormScreen> {
                     .map((d) => DropdownMenuItem(value: d, child: Text(d)))
                     .toList(),
                 onChanged: (v) => setState(
-                    () => _district = v ?? AppConstants.kpDistricts.first),
+                  () => _district = v ?? AppConstants.kpDistricts.first,
+                ),
               ),
               LabeledTextField(
                 label: s.city,
@@ -247,9 +245,8 @@ class _VacancyFormScreenState extends State<VacancyFormScreen> {
                 label: '${s.subject} *',
                 controller: _subjectsController,
                 hint: 'Mathematics, English',
-                validator: (v) => parseCsv(v ?? '').isEmpty
-                    ? s.requiredField
-                    : null,
+                validator: (v) =>
+                    parseCsv(v ?? '').isEmpty ? s.requiredField : null,
               ),
               LabeledTextField(
                 label: s.gradeLevels,
@@ -280,9 +277,7 @@ class _VacancyFormScreenState extends State<VacancyFormScreen> {
                       label: s.salaryMin,
                       controller: _salaryMinController,
                       keyboardType: TextInputType.number,
-                      inputFormatters: [
-                        FilteringTextInputFormatter.digitsOnly
-                      ],
+                      inputFormatters: [FilteringTextInputFormatter.digitsOnly],
                       hint: s.salaryOptional,
                     ),
                   ),
@@ -292,9 +287,7 @@ class _VacancyFormScreenState extends State<VacancyFormScreen> {
                       label: s.salaryMax,
                       controller: _salaryMaxController,
                       keyboardType: TextInputType.number,
-                      inputFormatters: [
-                        FilteringTextInputFormatter.digitsOnly
-                      ],
+                      inputFormatters: [FilteringTextInputFormatter.digitsOnly],
                       hint: s.salaryOptional,
                     ),
                   ),
@@ -303,12 +296,7 @@ class _VacancyFormScreenState extends State<VacancyFormScreen> {
               LabeledDropdown<String>(
                 label: s.employmentType,
                 value: _employmentType,
-                items: const [
-                  'Full-time',
-                  'Part-time',
-                  'Visiting',
-                  'Contract'
-                ]
+                items: const ['Full-time', 'Part-time', 'Visiting', 'Contract']
                     .map((t) => DropdownMenuItem(value: t, child: Text(t)))
                     .toList(),
                 onChanged: (v) =>
@@ -339,7 +327,9 @@ class _VacancyFormScreenState extends State<VacancyFormScreen> {
                 items: [
                   DropdownMenuItem(value: 'url', child: Text(s.methodUrl)),
                   DropdownMenuItem(
-                      value: 'contact', child: Text(s.methodContact)),
+                    value: 'contact',
+                    child: Text(s.methodContact),
+                  ),
                   DropdownMenuItem(value: 'both', child: Text(s.methodBoth)),
                 ],
                 onChanged: (v) => setState(() => _method = v ?? 'both'),

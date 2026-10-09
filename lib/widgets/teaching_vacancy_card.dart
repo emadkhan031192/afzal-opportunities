@@ -38,8 +38,9 @@ class TeachingVacancyCard extends StatelessWidget {
 
     final bg = dark ? const Color(0xFF1E4D3A) : const Color(0xFFE3F3EA);
     final ink = dark ? Colors.white : BrandColors.nightBlue;
-    final subInk =
-        dark ? const Color(0xFFB9D9C8) : BrandColors.nightBlue.withValues(alpha: 0.62);
+    final subInk = dark
+        ? const Color(0xFFB9D9C8)
+        : BrandColors.nightBlue.withValues(alpha: 0.62);
 
     final location = [
       vacancy.district,
@@ -105,10 +106,7 @@ class TeachingVacancyCard extends StatelessWidget {
                                   location,
                                   maxLines: 1,
                                   overflow: TextOverflow.ellipsis,
-                                  style: TextStyle(
-                                    fontSize: 13,
-                                    color: subInk,
-                                  ),
+                                  style: TextStyle(fontSize: 13, color: subInk),
                                 ),
                               ),
                             ],
@@ -189,8 +187,9 @@ class TeachingVacancyCard extends StatelessWidget {
                     const Spacer(),
                     if (vacancy.applicationDeadline != null)
                       Text(
-                        DateFormat('d MMM yyyy')
-                            .format(vacancy.applicationDeadline!),
+                        DateFormat(
+                          'd MMM yyyy',
+                        ).format(vacancy.applicationDeadline!),
                         style: TextStyle(fontSize: 12.5, color: subInk),
                       )
                     else

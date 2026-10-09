@@ -60,25 +60,27 @@ class _OrgRegisterScreenState extends State<OrgRegisterScreen> {
         password: _passwordController.text,
       );
       final uid = credential.user!.uid;
-      await _service.saveOrganization(TeachingOrganization(
-        id: '',
-        ownerUid: uid,
-        institutionName: _nameController.text.trim(),
-        institutionType: _type,
-        contactPerson: _contactPersonController.text.trim(),
-        email: _emailController.text.trim(),
-        district: _district,
-        city: _cityController.text.trim().isEmpty
-            ? null
-            : _cityController.text.trim(),
-        address: _addressController.text.trim().isEmpty
-            ? null
-            : _addressController.text.trim(),
-        contactNumber: _phoneController.text.trim().isEmpty
-            ? null
-            : _phoneController.text.trim(),
-        approvalStatus: TeachingApproval.pending,
-      ));
+      await _service.saveOrganization(
+        TeachingOrganization(
+          id: '',
+          ownerUid: uid,
+          institutionName: _nameController.text.trim(),
+          institutionType: _type,
+          contactPerson: _contactPersonController.text.trim(),
+          email: _emailController.text.trim(),
+          district: _district,
+          city: _cityController.text.trim().isEmpty
+              ? null
+              : _cityController.text.trim(),
+          address: _addressController.text.trim().isEmpty
+              ? null
+              : _addressController.text.trim(),
+          contactNumber: _phoneController.text.trim().isEmpty
+              ? null
+              : _phoneController.text.trim(),
+          approvalStatus: TeachingApproval.pending,
+        ),
+      );
       if (mounted) {
         Navigator.of(context).pushReplacement(
           MaterialPageRoute(builder: (_) => const VerifyEmailScreen()),
@@ -130,8 +132,12 @@ class _OrgRegisterScreenState extends State<OrgRegisterScreen> {
                 label: s.institutionType,
                 value: _type,
                 items: const ['School', 'Academy', 'College', 'Other']
-                    .map((t) =>
-                        DropdownMenuItem(value: t, child: Text(_typeLabelStatic(t, s))))
+                    .map(
+                      (t) => DropdownMenuItem(
+                        value: t,
+                        child: Text(_typeLabelStatic(t, s)),
+                      ),
+                    )
                     .toList(),
                 onChanged: (v) => setState(() => _type = v ?? 'School'),
               ),
@@ -159,8 +165,9 @@ class _OrgRegisterScreenState extends State<OrgRegisterScreen> {
                 items: AppConstants.kpDistricts
                     .map((d) => DropdownMenuItem(value: d, child: Text(d)))
                     .toList(),
-                onChanged: (v) =>
-                    setState(() => _district = v ?? AppConstants.kpDistricts.first),
+                onChanged: (v) => setState(
+                  () => _district = v ?? AppConstants.kpDistricts.first,
+                ),
               ),
               LabeledTextField(
                 label: s.city,
@@ -180,8 +187,7 @@ class _OrgRegisterScreenState extends State<OrgRegisterScreen> {
               if (_errorKey != null) ...[
                 Text(
                   _errorText(s),
-                  style:
-                      TextStyle(color: Theme.of(context).colorScheme.error),
+                  style: TextStyle(color: Theme.of(context).colorScheme.error),
                 ),
                 const SizedBox(height: 12),
               ],

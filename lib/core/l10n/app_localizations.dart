@@ -16,8 +16,10 @@ class AppLocalizations {
   bool get isUrdu => locale.languageCode == 'ur';
 
   static AppLocalizations of(BuildContext context) {
-    final instance =
-        Localizations.of<AppLocalizations>(context, AppLocalizations);
+    final instance = Localizations.of<AppLocalizations>(
+      context,
+      AppLocalizations,
+    );
     assert(instance != null, 'AppLocalizationsDelegate is not registered');
     return instance!;
   }
@@ -85,7 +87,8 @@ class AppLocalizations {
   String get officialWebsite => _t('officialWebsite');
 
   // Deadline labels (localized equivalents of DeadlineInfo.label)
-  String get lastDateNotSpecified => _t('lastDateNotSpecified');  String get lastDateToday => _t('lastDateToday');
+  String get lastDateNotSpecified => _t('lastDateNotSpecified');
+  String get lastDateToday => _t('lastDateToday');
   String get closingTomorrow => _t('closingTomorrow');
   String get closingSoonLabel => _t('closingSoonLabel');
   String get newBadge => _t('newBadge');
@@ -95,7 +98,8 @@ class AppLocalizations {
 
   String daysLeft(int n) =>
       isUrdu ? '$n ${_t('daysLeftUnit')}' : '$n ${_t('daysLeftUnit')}';
-  String dayLeft() => isUrdu ? '1 ${_t('dayLeftUnit')}' : '1 ${_t('dayLeftUnit')}';
+  String dayLeft() =>
+      isUrdu ? '1 ${_t('dayLeftUnit')}' : '1 ${_t('dayLeftUnit')}';
 
   /// Localized equivalent of [DeadlineInfo.label], derived from the
   /// structured fields so widgets never hard-code English deadline copy.
@@ -280,7 +284,8 @@ class AppLocalizations {
     'noAdsFound': 'No advertisements found',
     'noAdsFoundHint': 'Try a different search or clear the filters.',
     'noSavedAds': 'No saved advertisements',
-    'noSavedAdsHint': 'Tap the bookmark icon on any advertisement to save it here.',
+    'noSavedAdsHint':
+        'Tap the bookmark icon on any advertisement to save it here.',
     'loadSavedFailed':
         'Could not load saved advertisements. Check your connection and try again.',
     'browseAds': 'Browse advertisements',
@@ -550,7 +555,8 @@ class AppLocalizations {
     'notifNewAds': 'نئے اشتہارات',
     'notifNewAdsDesc': 'نئے اشتہارات شائع ہونے پر مطلع کریں',
     'notifClosingSoon': 'آخری تاریخ کی یاد دہانی',
-    'notifClosingSoonDesc': '1–2 دن میں ختم ہونے والے محفوظ شدہ اشتہارات کی یاد دلائیں',
+    'notifClosingSoonDesc':
+        '1–2 دن میں ختم ہونے والے محفوظ شدہ اشتہارات کی یاد دلائیں',
     'notifTeaching': 'تدریسی آسامیاں',
     'notifTeachingDesc': 'نئی تدریسی آسامیوں پر مطلع کریں',
     'notifPromotions': 'تشہیری پیغامات',
@@ -699,8 +705,7 @@ class AppLocalizations {
 /// Registers [AppLocalizations] with the widget tree. Material's own
 /// localizations (for RTL + Material strings) come from
 /// flutter_localizations delegates registered alongside this one.
-class AppLocalizationsDelegate
-    extends LocalizationsDelegate<AppLocalizations> {
+class AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {
   const AppLocalizationsDelegate();
 
   @override

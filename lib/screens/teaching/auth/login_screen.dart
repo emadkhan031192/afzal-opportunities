@@ -56,9 +56,9 @@ class _LoginScreenState extends State<LoginScreen> {
     try {
       await _auth.sendPasswordReset(email);
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(s.resetLinkSent)),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text(s.resetLinkSent)));
       }
     } catch (e) {
       setState(() => _errorKey = TeachingAuth.errorKey(e));
@@ -107,9 +107,7 @@ class _LoginScreenState extends State<LoginScreen> {
               if (_errorKey != null) ...[
                 Text(
                   _errorText(s),
-                  style: TextStyle(
-                    color: Theme.of(context).colorScheme.error,
-                  ),
+                  style: TextStyle(color: Theme.of(context).colorScheme.error),
                 ),
                 const SizedBox(height: 12),
               ],

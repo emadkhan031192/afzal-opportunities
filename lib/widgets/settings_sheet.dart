@@ -132,7 +132,8 @@ class _SettingsSheetState extends State<SettingsSheet> {
             _SectionTitle(s.notifications),
             ...NotificationType.values.map(
               (type) => SwitchListTile(
-                value: _notifState[type] ??
+                value:
+                    _notifState[type] ??
                     NotificationService.defaultEnabled(type),
                 onChanged: (v) => _setNotif(type, v),
                 title: Text(_notifTitle(type, s)),
@@ -144,8 +145,10 @@ class _SettingsSheetState extends State<SettingsSheet> {
             const SizedBox(height: 8),
             _SectionTitle(s.about),
             ListTile(
-              leading: const Icon(Icons.campaign_outlined,
-                  color: BrandColors.mintDark),
+              leading: const Icon(
+                Icons.campaign_outlined,
+                color: BrandColors.mintDark,
+              ),
               title: Text(s.followWhatsappChannel),
               trailing: const Icon(Icons.open_in_new, size: 18),
               contentPadding: EdgeInsets.zero,
@@ -216,9 +219,9 @@ class _SectionTitle extends StatelessWidget {
       child: Text(
         text,
         style: Theme.of(context).textTheme.titleMedium?.copyWith(
-              fontWeight: FontWeight.w800,
-              color: BrandColors.mintDark,
-            ),
+          fontWeight: FontWeight.w800,
+          color: BrandColors.mintDark,
+        ),
       ),
     );
   }
@@ -253,8 +256,9 @@ class _ThemeRow extends StatelessWidget {
           ),
         ],
         selected: {controller.isDark},
-        onSelectionChanged: (selected) =>
-            controller.setMode(selected.first ? ThemeMode.dark : ThemeMode.light),
+        onSelectionChanged: (selected) => controller.setMode(
+          selected.first ? ThemeMode.dark : ThemeMode.light,
+        ),
       ),
     );
   }

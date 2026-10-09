@@ -30,8 +30,9 @@ class TeacherDashboard extends StatefulWidget {
 }
 
 class _TeacherDashboardState extends State<TeacherDashboard> {
-  late final BookmarkService _savedJobs =
-      BookmarkService(storageKey: AppConstants.teachingBookmarksKey);
+  late final BookmarkService _savedJobs = BookmarkService(
+    storageKey: AppConstants.teachingBookmarksKey,
+  );
 
   @override
   void initState() {
@@ -109,11 +110,13 @@ class _Body extends StatelessWidget {
         padding: const EdgeInsets.fromLTRB(20, 16, 20, 32),
         children: [
           if (!auth.isEmailVerified)
-            _VerifyBanner(onTap: () {
-              Navigator.of(context).push(
-                MaterialPageRoute(builder: (_) => const VerifyEmailScreen()),
-              );
-            }),
+            _VerifyBanner(
+              onTap: () {
+                Navigator.of(context).push(
+                  MaterialPageRoute(builder: (_) => const VerifyEmailScreen()),
+                );
+              },
+            ),
           _StatusCard(profile: profile),
           const SizedBox(height: 12),
           _ProfileCard(profile: profile),
@@ -126,8 +129,7 @@ class _Body extends StatelessWidget {
               onPressed: () async {
                 final changed = await Navigator.of(context).push<bool>(
                   MaterialPageRoute(
-                    builder: (_) =>
-                        TeacherProfileFormScreen(existing: profile),
+                    builder: (_) => TeacherProfileFormScreen(existing: profile),
                   ),
                 );
                 if (changed == true) onChanged();
@@ -240,7 +242,9 @@ class _StatusCard extends StatelessWidget {
                 ),
                 Container(
                   padding: const EdgeInsets.symmetric(
-                      horizontal: 10, vertical: 5),
+                    horizontal: 10,
+                    vertical: 5,
+                  ),
                   decoration: BoxDecoration(
                     color: color.withValues(alpha: 0.12),
                     borderRadius: BorderRadius.circular(999),
@@ -281,8 +285,7 @@ class _ProfileCard extends StatelessWidget {
       s.district: profile.district,
       if ((profile.qualification ?? '').isNotEmpty)
         s.qualification: profile.qualification!,
-      if (profile.subjects.isNotEmpty)
-        s.subject: profile.subjects.join(', '),
+      if (profile.subjects.isNotEmpty) s.subject: profile.subjects.join(', '),
       if (profile.experienceYears != null)
         s.experience: '${profile.experienceYears}',
       if ((profile.preferredEmploymentType ?? '').isNotEmpty)
@@ -302,10 +305,7 @@ class _ProfileCard extends StatelessWidget {
                   children: [
                     SizedBox(
                       width: 150,
-                      child: Text(
-                        entry.key,
-                        style: theme.textTheme.bodySmall,
-                      ),
+                      child: Text(entry.key, style: theme.textTheme.bodySmall),
                     ),
                     Expanded(
                       child: Text(
@@ -320,10 +320,7 @@ class _ProfileCard extends StatelessWidget {
               ),
             if ((profile.professionalSummary ?? '').isNotEmpty) ...[
               const SizedBox(height: 4),
-              Text(
-                s.professionalSummary,
-                style: theme.textTheme.bodySmall,
-              ),
+              Text(s.professionalSummary, style: theme.textTheme.bodySmall),
               Text(
                 profile.professionalSummary!,
                 style: theme.textTheme.bodyMedium,

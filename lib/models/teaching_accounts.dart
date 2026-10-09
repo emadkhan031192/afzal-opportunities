@@ -53,8 +53,9 @@ class TeachingOrganization {
     final district = _requiredString(json, 'district', id);
 
     final rawStatus = json['approvalStatus'];
-    final approvalStatus =
-        rawStatus == null ? TeachingApproval.pending : rawStatus.toString();
+    final approvalStatus = rawStatus == null
+        ? TeachingApproval.pending
+        : rawStatus.toString();
     if (!TeachingApproval.values.contains(approvalStatus)) {
       throw FormatException(
         'TeachingOrganization "$id" has invalid approvalStatus.',
@@ -153,12 +154,11 @@ class TeacherProfile {
     final district = _requiredString(json, 'district', id);
 
     final rawStatus = json['approvalStatus'];
-    final approvalStatus =
-        rawStatus == null ? TeachingApproval.pending : rawStatus.toString();
+    final approvalStatus = rawStatus == null
+        ? TeachingApproval.pending
+        : rawStatus.toString();
     if (!TeachingApproval.values.contains(approvalStatus)) {
-      throw FormatException(
-        'TeacherProfile "$id" has invalid approvalStatus.',
-      );
+      throw FormatException('TeacherProfile "$id" has invalid approvalStatus.');
     }
 
     final visibility = _optionalString(json, 'profileVisibility') ?? 'private';
@@ -177,8 +177,7 @@ class TeacherProfile {
       qualification: _optionalString(json, 'qualification'),
       subjects: _stringList(json['subjects']),
       experienceYears: _optionalInt(json['experienceYears']),
-      preferredEmploymentType:
-          _optionalString(json, 'preferredEmploymentType'),
+      preferredEmploymentType: _optionalString(json, 'preferredEmploymentType'),
       professionalSummary: _optionalString(json, 'professionalSummary'),
       cvStoragePath: _optionalString(json, 'cvStoragePath'),
       profileVisibility: visibility,

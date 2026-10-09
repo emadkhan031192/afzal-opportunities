@@ -391,10 +391,7 @@ class _HomeScreenState extends State<HomeScreen> {
       sliver: SliverGrid(
         delegate: SliverChildBuilderDelegate((context, index) {
           final ad = ads[index];
-          return JobGridCard(
-            ad: ad,
-            onTap: () => _openDetails(ad),
-          );
+          return JobGridCard(ad: ad, onTap: () => _openDetails(ad));
         }, childCount: ads.length),
         gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
           crossAxisCount: 2,

@@ -107,8 +107,9 @@ class _SplashScreenState extends State<SplashScreen> {
                               ),
                               children: [
                                 TextSpan(
-                                    text:
-                                        '${AppLocalizations.of(context).taglineA1}\n'),
+                                  text:
+                                      '${AppLocalizations.of(context).taglineA1}\n',
+                                ),
                                 TextSpan(
                                   text:
                                       '${AppLocalizations.of(context).taglineA2} ',

@@ -18,11 +18,7 @@ import 'deadline_badge.dart';
 /// Admissions amber, Other rose) with dark-mode variants. Only real ad
 /// data is shown — no invented logos, salaries or applicant counts.
 class JobGridCard extends StatelessWidget {
-  const JobGridCard({
-    super.key,
-    required this.ad,
-    required this.onTap,
-  });
+  const JobGridCard({super.key, required this.ad, required this.onTap});
 
   final Advertisement ad;
   final VoidCallback onTap;

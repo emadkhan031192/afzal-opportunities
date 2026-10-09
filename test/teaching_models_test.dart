@@ -93,8 +93,7 @@ void main() {
         contactNumber: '03001234567',
         approvalStatus: TeachingApproval.pending,
       );
-      final restored =
-          TeachingOrganization.fromJson('o1', org.toJson());
+      final restored = TeachingOrganization.fromJson('o1', org.toJson());
       expect(restored.institutionName, 'City Grammar School');
       expect(restored.contactNumber, '03001234567');
       expect(restored.isPending, isTrue);
@@ -135,13 +134,15 @@ void main() {
     final vacancies = [
       _vacancy(district: 'Mardan', subjects: ['Mathematics']),
       _vacancy(
-          district: 'Peshawar',
-          subjects: ['English'],
-          qualification: 'MA English'),
+        district: 'Peshawar',
+        subjects: ['English'],
+        qualification: 'MA English',
+      ),
       _vacancy(
-          district: 'Mardan',
-          subjects: ['Physics'],
-          experience: '2 years teaching experience'),
+        district: 'Mardan',
+        subjects: ['Physics'],
+        experience: '2 years teaching experience',
+      ),
     ];
 
     test('filters by district', () {
@@ -198,9 +199,11 @@ void main() {
 
     test('isExpired uses PKT day boundaries', () {
       final past = _vacancy(
-          deadline: DateTime.now().subtract(const Duration(days: 1)));
+        deadline: DateTime.now().subtract(const Duration(days: 1)),
+      );
       final future = _vacancy(
-          deadline: DateTime.now().add(const Duration(days: 1)));
+        deadline: DateTime.now().add(const Duration(days: 1)),
+      );
       expect(TeachingService.isExpired(past), isTrue);
       expect(TeachingService.isExpired(future), isFalse);
       expect(TeachingService.isExpired(_vacancy()), isFalse);

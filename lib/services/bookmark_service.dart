@@ -10,7 +10,7 @@ import '../core/constants/app_constants.dart';
 /// (e.g. saved teaching vacancies).
 class BookmarkService extends ChangeNotifier {
   BookmarkService({String? storageKey})
-      : _storageKey = storageKey ?? AppConstants.bookmarksKey;
+    : _storageKey = storageKey ?? AppConstants.bookmarksKey;
 
   final String _storageKey;
   List<String> _ids = [];
