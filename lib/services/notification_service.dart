@@ -8,6 +8,7 @@ import '../models/advertisement.dart';
 import 'advertisement_service.dart';
 import 'bookmark_service.dart';
 import 'firebase_config.dart';
+import 'teaching_service.dart';
 
 /// Notification categories. Each has its own opt-in preference;
 /// promotions are off by default and everything else is on by default.
@@ -98,10 +99,12 @@ class NotificationService {
   }
 
   /// One background-check pass: new published ads + closing-soon
-  /// reminders for saved ads. Updates the watermark afterwards.
+  /// reminders for saved ads + new teaching vacancies.
+  /// Updates the watermark afterwards.
   Future<void> checkForUpdates({
     AdvertisementService? adService,
     BookmarkService? bookmarks,
+    TeachingService? teachingService,
   }) async {
     if (!FirebaseConfig.isConfigured) return;
     await initialize();
@@ -174,6 +177,28 @@ class NotificationService {
               : '$days days left · ${ad.organization}',
         );
         seenIds.add(key);
+      }
+    }
+
+    // New teaching vacancies since the last check.
+    final teaching = teachingService ?? TeachingService();
+    if (await isEnabled(NotificationType.teaching) &&
+        !isFirstRun &&
+        lastCheckTime != null) {
+      try {
+        final vacancies = await teaching.fetchApprovedVacancies();
+        for (final v in vacancies) {
+          final publishedAt = v.publishedAt ?? v.createdAt;
+          if (publishedAt == null) continue;
+          if (!publishedAt.toUtc().isAfter(lastCheckTime)) continue;
+          await notifyTeaching(
+            id: v.id,
+            title: 'New teaching job: ${v.jobTitle}',
+            body: '${v.institutionName} · ${v.district}',
+          );
+        }
+      } catch (e) {
+        debugPrint('Notification check: failed to fetch vacancies: $e');
       }
     }
 

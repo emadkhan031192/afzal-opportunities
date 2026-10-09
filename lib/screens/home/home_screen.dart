@@ -11,13 +11,13 @@ import '../../models/advertisement.dart';
 import '../../services/advertisement_service.dart';
 import '../../services/bookmark_service.dart';
 import '../../services/notification_service.dart';
+import '../../widgets/app_header.dart';
 import '../../widgets/category_chips.dart';
 import '../../widgets/filter_sheet.dart';
-import '../../widgets/job_grid_card.dart';
-import '../../widgets/job_list_card.dart';
-import '../../widgets/mockup_header.dart';
 import '../../widgets/settings_sheet.dart';
 import '../../widgets/state_views.dart';
+import '../../widgets/vibrant_ad_card.dart';
+import '../../widgets/welcome_carousel.dart';
 import '../details/details_screen.dart';
 
 /// Discovery feed rebuilt from the user's designed Pages 2–4:
@@ -115,20 +115,6 @@ class _HomeScreenState extends State<HomeScreen> {
       _closingSoonOnly ||
       _query.trim().isNotEmpty;
 
-  String _sectionTitle(AppLocalizations s) {
-    if (_category == AppConstants.allCategoriesId) return s.jobs;
-    switch (_category) {
-      case 'scholarships':
-        return s.scholarships;
-      case 'admissions':
-        return s.admissions;
-      case 'other':
-        return s.other;
-      default:
-        return AppConstants.categoryLabel(_category);
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
     return RefreshIndicator(
@@ -182,20 +168,23 @@ class _HomeScreenState extends State<HomeScreen> {
       physics: const AlwaysScrollableScrollPhysics(),
       slivers: [
         SliverToBoxAdapter(
-          child: Padding(
-            padding: const EdgeInsets.fromLTRB(16, 16, 16, 0),
-            child: MockupHeader(
-              sectionTitle: _sectionTitle(AppLocalizations.of(context)),
-              onOpenSettings: () => SettingsSheet.show(
-                context,
-                themeController: widget.themeController,
-                localeController: widget.localeController,
-                notificationService: widget.notificationService,
-              ),
+          child: AppHeader(
+            onOpenSettings: () => SettingsSheet.show(
+              context,
+              themeController: widget.themeController,
+              localeController: widget.localeController,
+              notificationService: widget.notificationService,
             ),
+            onOpenNotifications: () => SettingsSheet.show(
+              context,
+              themeController: widget.themeController,
+              localeController: widget.localeController,
+              notificationService: widget.notificationService,
+            ),
+            hasUnreadNotifications: true,
           ),
         ),
-        SliverToBoxAdapter(child: _pillsRow()),
+        const SliverToBoxAdapter(child: WelcomeCarousel()),
         SliverToBoxAdapter(child: _searchRow()),
         SliverToBoxAdapter(
           child: CategoryChips(
@@ -235,27 +224,8 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  /// Blue pills row: static "Latest advertisements" label + tappable
-  /// list/grid view toggle, as in the mockups.
-  Widget _pillsRow() {
-    final s = AppLocalizations.of(context);
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(16, 18, 16, 0),
-      child: Row(
-        children: [
-          _Pill(label: s.latestAdvertisements, onTap: null),
-          const SizedBox(width: 10),
-          _Pill(
-            label: _gridView ? s.gridView : s.listView,
-            onTap: () => setState(() => _gridView = !_gridView),
-          ),
-        ],
-      ),
-    );
-  }
-
-  /// Compact search + filter row kept under the pills so discovery tools
-  /// stay one tap away without disturbing the mockup layout.
+  /// Compact search + filter row kept under the carousel so discovery tools
+  /// stay one tap away without disturbing the layout.
   Widget _searchRow() {
     final theme = Theme.of(context);
     final dark = theme.brightness == Brightness.dark;
@@ -316,8 +286,8 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  /// Section header: "Closing soon" with a "See all" toggle (the mockup's
-  /// "Popular Agency" slot repurposed for the real closing-soon filter).
+  /// Section header: "Latest Advertisements" with the List/Grid toggle
+  /// from the user's final UI.
   Widget _sectionHeader() {
     final theme = Theme.of(context);
     final dark = theme.brightness == Brightness.dark;
@@ -329,33 +299,32 @@ class _HomeScreenState extends State<HomeScreen> {
           Text(
             _closingSoonOnly ? s.closingSoon : s.latestAdvertisements,
             style: TextStyle(
-              fontSize: 20,
+              fontSize: 16,
               fontWeight: FontWeight.w800,
-              color: dark ? Colors.white : BrandColors.nightBlue,
+              color: dark ? Colors.white : const Color(0xFF0F172A),
             ),
           ),
           const Spacer(),
-          GestureDetector(
-            onTap: () => setState(() => _closingSoonOnly = !_closingSoonOnly),
+          Container(
+            decoration: BoxDecoration(
+              color: dark
+                  ? Colors.white.withValues(alpha: 0.08)
+                  : const Color(0xFFF1F5F9),
+              borderRadius: BorderRadius.circular(10),
+            ),
+            padding: const EdgeInsets.all(3),
             child: Row(
               mainAxisSize: MainAxisSize.min,
               children: [
-                if (_closingSoonOnly)
-                  const Padding(
-                    padding: EdgeInsets.only(right: 4),
-                    child: Icon(
-                      Icons.close,
-                      size: 16,
-                      color: BrandColors.mutedOnLight,
-                    ),
-                  ),
-                Text(
-                  s.seeAll,
-                  style: const TextStyle(
-                    fontSize: 14,
-                    fontWeight: FontWeight.w600,
-                    color: BrandColors.mutedOnLight,
-                  ),
+                _ToggleButton(
+                  label: '☰ ${s.listView}',
+                  active: !_gridView,
+                  onTap: () => setState(() => _gridView = false),
+                ),
+                _ToggleButton(
+                  label: '⊞ ${s.gridView}',
+                  active: _gridView,
+                  onTap: () => setState(() => _gridView = true),
                 ),
               ],
             ),
@@ -367,14 +336,15 @@ class _HomeScreenState extends State<HomeScreen> {
 
   Widget _listSliver(List<Advertisement> ads) {
     return SliverPadding(
-      padding: const EdgeInsets.fromLTRB(16, 0, 16, 24),
+      padding: const EdgeInsets.fromLTRB(20, 0, 20, 24),
       sliver: SliverList(
         delegate: SliverChildBuilderDelegate((context, index) {
           final ad = ads[index];
           return AnimatedBuilder(
             animation: widget.bookmarks,
-            builder: (context, _) => JobListCard(
+            builder: (context, _) => VibrantAdCard(
               ad: ad,
+              index: index,
               isSaved: widget.bookmarks.isBookmarked(ad.id),
               onTap: () => _openDetails(ad),
               onToggleSave: () => widget.bookmarks.toggle(ad.id),
@@ -387,49 +357,77 @@ class _HomeScreenState extends State<HomeScreen> {
 
   Widget _gridSliver(List<Advertisement> ads) {
     return SliverPadding(
-      padding: const EdgeInsets.fromLTRB(16, 0, 16, 24),
+      padding: const EdgeInsets.fromLTRB(20, 0, 20, 24),
       sliver: SliverGrid(
         delegate: SliverChildBuilderDelegate((context, index) {
           final ad = ads[index];
-          return JobGridCard(ad: ad, onTap: () => _openDetails(ad));
+          return AnimatedBuilder(
+            animation: widget.bookmarks,
+            builder: (context, _) => VibrantAdCard(
+              ad: ad,
+              index: index,
+              isSaved: widget.bookmarks.isBookmarked(ad.id),
+              onTap: () => _openDetails(ad),
+              onToggleSave: () => widget.bookmarks.toggle(ad.id),
+            ),
+          );
         }, childCount: ads.length),
         gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
           crossAxisCount: 2,
           mainAxisSpacing: 12,
           crossAxisSpacing: 12,
-          childAspectRatio: 0.62,
+          childAspectRatio: 0.58,
         ),
       ),
     );
   }
 }
 
-/// Rounded blue pill used for the "Latest advertisements" label and the
-/// list/grid view toggle.
-class _Pill extends StatelessWidget {
-  const _Pill({required this.label, this.onTap});
+/// Toggle button for the List/Grid view switch.
+class _ToggleButton extends StatelessWidget {
+  const _ToggleButton({
+    required this.label,
+    required this.active,
+    required this.onTap,
+  });
 
   final String label;
-  final VoidCallback? onTap;
+  final bool active;
+  final VoidCallback onTap;
 
   @override
   Widget build(BuildContext context) {
-    final pill = Container(
-      padding: const EdgeInsets.symmetric(horizontal: 22, vertical: 13),
-      decoration: BoxDecoration(
-        color: BrandColors.mockupBlue,
-        borderRadius: BorderRadius.circular(999),
-      ),
-      child: Text(
-        label,
-        style: const TextStyle(
-          fontSize: 16.5,
-          fontWeight: FontWeight.w700,
-          color: Colors.white,
+    final dark = Theme.of(context).brightness == Brightness.dark;
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+        decoration: BoxDecoration(
+          color: active
+              ? (dark ? Colors.white.withValues(alpha: 0.12) : Colors.white)
+              : Colors.transparent,
+          borderRadius: BorderRadius.circular(8),
+          boxShadow: active
+              ? [
+                  BoxShadow(
+                    color: Colors.black.withValues(alpha: 0.05),
+                    blurRadius: 4,
+                    offset: const Offset(0, 2),
+                  ),
+                ]
+              : null,
+        ),
+        child: Text(
+          label,
+          style: TextStyle(
+            fontSize: 12,
+            fontWeight: FontWeight.w700,
+            color: active
+                ? (dark ? Colors.white : const Color(0xFF0F172A))
+                : const Color(0xFF64748B),
+          ),
         ),
       ),
     );
-    if (onTap == null) return pill;
-    return GestureDetector(onTap: onTap, child: pill);
   }
 }

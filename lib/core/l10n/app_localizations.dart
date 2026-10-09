@@ -53,6 +53,15 @@ class AppLocalizations {
   String get browseAds => _t('browseAds');
   String get somethingWentWrong => _t('somethingWentWrong');
   String get retry => _t('retry');
+  String get teachingLoadFailed => _t('teachingLoadFailed');
+  String get teachingPermissionDenied => _t('teachingPermissionDenied');
+  String get carouselHomeBadge => _t('carouselHomeBadge');
+  String get carouselHomeTitle => _t('carouselHomeTitle');
+  String get carouselHomeDesc => _t('carouselHomeDesc');
+  String get carouselTeachingBadge => _t('carouselTeachingBadge');
+  String get carouselTeachingTitle => _t('carouselTeachingTitle');
+  String get carouselTeachingDesc => _t('carouselTeachingDesc');
+  String get joinWhatsAppChannel => _t('joinWhatsAppChannel');
 
   // Filters
   String get filter => _t('filter');
@@ -291,6 +300,19 @@ class AppLocalizations {
     'browseAds': 'Browse advertisements',
     'somethingWentWrong': 'Something went wrong',
     'retry': 'Retry',
+    'teachingLoadFailed':
+        'Could not load teaching vacancies. Check your connection and try again.',
+    'teachingPermissionDenied':
+        'Teaching jobs are not set up yet. The database access rules need to be published — please contact support.',
+    'carouselHomeBadge': 'Welcome',
+    'carouselHomeTitle': 'Welcome to Afzal-E Services',
+    'carouselHomeDesc':
+        'Your trusted hub for verified job alerts, scholarships, and career opportunities across Pakistan.',
+    'carouselTeachingBadge': 'Private Education',
+    'carouselTeachingTitle': 'Private School & Academy Vacancies',
+    'carouselTeachingDesc':
+        'Exclusive portal for private schools and academies to post teaching vacancies, and for qualified teachers to find jobs.',
+    'joinWhatsAppChannel': 'Join our WhatsApp Channel ↗',
     'filter': 'Filter',
     'applyFilters': 'Apply filters',
     'resetFilters': 'Reset filters',
@@ -506,6 +528,19 @@ class AppLocalizations {
     'browseAds': 'اشتہارات دیکھیں',
     'somethingWentWrong': 'کچھ غلط ہو گیا',
     'retry': 'دوبارہ کوشش کریں',
+    'teachingLoadFailed':
+        'ٹیچنگ کی نوکریاں لوڈ نہیں ہو سکیں۔ کنکشن چیک کر کے دوبارہ کوشش کریں۔',
+    'teachingPermissionDenied':
+        'ٹیچنگ جابز ابھی سیٹ اپ نہیں ہوئیں۔ ڈیٹا بیس کے اصول شائع کرنے کی ضرورت ہے — سپورٹ سے رابطہ کریں۔',
+    'carouselHomeBadge': 'خوش آمدید',
+    'carouselHomeTitle': 'افضل ای سروسز میں خوش آمدید',
+    'carouselHomeDesc':
+        'پاکستان بھر میں تصدیق شدہ نوکریوں، اسکالرشپ اور کیریئر کے مواقع حاصل کرنے کا معتبر ذریعہ۔',
+    'carouselTeachingBadge': 'پرائیویٹ تعلیم',
+    'carouselTeachingTitle': 'پرائیویٹ اسکولز اور اکیڈمیز کی نوکریاں',
+    'carouselTeachingDesc':
+        'یہ شعبہ خاص طور پر پرائیویٹ اسکولوں اور اکیڈمیوں کے لیے ہے تاکہ وہ نوکریاں پوسٹ کر سکیں اور اساتذہ نوکری حاصل کر سکیں۔',
+    'joinWhatsAppChannel': 'ہمارا واٹس ایپ چینل جوائن کریں ↗',
     'filter': 'فلٹر',
     'applyFilters': 'فلٹر لگائیں',
     'resetFilters': 'فلٹر صاف کریں',
