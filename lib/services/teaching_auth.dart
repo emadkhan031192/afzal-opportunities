@@ -62,6 +62,15 @@ class TeachingAuth extends ChangeNotifier {
     await _auth.sendPasswordResetEmail(email: email.trim());
   }
 
+  /// Permanently deletes the signed-in Firebase Auth user. Call
+  /// [TeachingService.deleteMyAccountData] first to remove the user's
+  /// Firestore documents. May throw `requires-recent-login`, in which
+  /// case the user must sign in again before retrying.
+  Future<void> deleteAccount() async {
+    await _auth.currentUser?.delete();
+    notifyListeners();
+  }
+
   /// Firebase Auth error codes mapped to short, localizable keys.
   static String errorKey(Object error) {
     if (error is FirebaseAuthException) {
