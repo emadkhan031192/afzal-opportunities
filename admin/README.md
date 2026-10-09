@@ -96,6 +96,27 @@ upload the contents of the `admin/` folder as-is.
 > itself enforces nothing — the Firestore/Storage rules do — but keeping the
 > login page unlisted reduces nuisance sign-in attempts.
 
+## Teaching review queues (Private Teaching Jobs module)
+
+The dashboard topbar has a **Teaching review** button opening a separate
+moderation view with three queues:
+
+- **Organizations** (`teachingOrganizations`) — filters: pending / approved /
+  suspended / rejected. Actions: Approve, Reject (optional reason), Suspend,
+  Reactivate.
+- **Teachers** (`teacherProfiles`) — same filters and actions. A CV is only
+  ever shown as "attached / not attached" — the private `cvStoragePath` is
+  never rendered as a link.
+- **Vacancies** (`teachingVacancies`) — filters: pending / approved /
+  rejected / expired (expired = flagged `expired`, or approved with a past
+  application deadline). Actions: Approve & publish (sets `publishedAt`),
+  Reject (optional reason), Unpublish (back to pending), Expire, and Edit
+  (title / description / deadline correction only).
+
+The queue-tab badges show pending counts (the review workload). All writes
+use server timestamps and are enforced by Firestore rules; permission
+failures appear as error toasts.
+
 ## Daily workflow
 
 1. **+ New advertisement** → fill in the fields → watch the **live preview**.

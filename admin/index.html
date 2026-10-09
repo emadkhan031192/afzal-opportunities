@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <meta name="description" content="Afzal Opportunities — administration panel for publishing advertisements." />
   <title>Afzal Opportunities — Admin</title>
-  <link rel="stylesheet" href="styles.css?v=20261008" />
+  <link rel="stylesheet" href="styles.css?v=20261009" />
 
   <!-- Firebase JS compat SDKs (v10, via CDN). No build step required. -->
   <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-app-compat.js"></script>
@@ -57,6 +57,7 @@
       <div class="topbar-actions">
         <span id="admin-email" class="muted small"></span>
         <button id="btn-new" class="btn primary">+ New advertisement</button>
+        <button id="btn-teaching" class="btn">Teaching review</button>
         <button id="btn-logout" class="btn ghost">Sign out</button>
       </div>
     </header>
@@ -97,6 +98,53 @@
       </div>
 
       <div id="ad-list" class="ad-grid" aria-live="polite"></div>
+    </main>
+  </section>
+
+  <!-- ============ VIEW: Teaching review ============ -->
+  <section id="view-teaching" class="view" hidden>
+    <header class="topbar">
+      <button id="btn-teaching-back" class="btn ghost">&larr; Advertisements</button>
+      <h2>Teaching review</h2>
+      <span class="muted small">Private Teaching Jobs moderation</span>
+    </header>
+
+    <main class="dashboard">
+      <nav class="tabs" role="tablist" aria-label="Teaching review queues">
+        <button class="ttab active" data-ttab="organizations" role="tab" aria-selected="true">
+          Organizations <span class="count" id="count-t-organizations">0</span>
+        </button>
+        <button class="ttab" data-ttab="teachers" role="tab" aria-selected="false">
+          Teachers <span class="count" id="count-t-teachers">0</span>
+        </button>
+        <button class="ttab" data-ttab="vacancies" role="tab" aria-selected="false">
+          Vacancies <span class="count" id="count-t-vacancies">0</span>
+        </button>
+      </nav>
+
+      <nav class="tabs" id="teaching-filters" role="tablist" aria-label="Status filter"></nav>
+
+      <div class="tab-toolbar">
+        <input type="search" id="teaching-search-input" placeholder="Search organizations..." aria-label="Search teaching review queue" />
+        <span id="teaching-status" class="muted small" role="status"></span>
+      </div>
+
+      <div id="teaching-list-loading" class="state-block" hidden>
+        <div class="spinner" aria-hidden="true"></div>
+        <p>Loading review queue...</p>
+      </div>
+      <div id="teaching-list-error" class="state-block error-block" hidden>
+        <p><strong>Could not load this queue.</strong></p>
+        <p class="muted small" id="teaching-list-error-detail"></p>
+        <p class="muted small">Reads are enforced by Firestore rules — if the teaching-collection rules are not deployed yet, access is denied.</p>
+        <button class="btn" id="btn-teaching-retry">Retry</button>
+      </div>
+      <div id="teaching-list-empty" class="state-block" hidden>
+        <p class="big">Nothing here</p>
+        <p class="muted small">No records match this filter.</p>
+      </div>
+
+      <div id="teaching-list" class="ad-grid" aria-live="polite"></div>
     </main>
   </section>
 
@@ -219,6 +267,7 @@
     <div class="dialog" role="dialog" aria-modal="true" aria-labelledby="confirm-title">
       <h3 id="confirm-title">Are you sure?</h3>
       <p class="muted" id="confirm-message"></p>
+      <div id="confirm-custom" hidden></div>
       <div class="dialog-actions">
         <button class="btn ghost" id="confirm-cancel">Cancel</button>
         <button class="btn primary" id="confirm-ok">Confirm</button>
@@ -229,6 +278,6 @@
   <!-- Toast notifications -->
   <div id="toast-wrap" aria-live="polite"></div>
 
-  <script src="app.js?v=20261008"></script>
+  <script src="app.js?v=20261009"></script>
 </body>
 </html>

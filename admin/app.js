@@ -154,11 +154,15 @@ function confirmDialog(title, message, okLabel = "Confirm") {
 }
 $("confirm-cancel").addEventListener("click", () => {
   $("confirm-overlay").hidden = true;
+  $("confirm-custom").innerHTML = "";
+  $("confirm-custom").hidden = true;
   confirmResolve && confirmResolve(false);
   confirmResolve = null;
 });
 $("confirm-ok").addEventListener("click", () => {
   $("confirm-overlay").hidden = true;
+  $("confirm-custom").innerHTML = "";
+  $("confirm-custom").hidden = true;
   confirmResolve && confirmResolve(true);
   confirmResolve = null;
 });
@@ -182,7 +186,7 @@ function initFirebase() {
 /* =================================================================
    View routing (simple JS view switching)
    ================================================================= */
-const VIEWS = ["view-login", "view-dashboard", "view-editor"];
+const VIEWS = ["view-login", "view-dashboard", "view-editor", "view-teaching"];
 function showView(id) {
   VIEWS.forEach((v) => {
     $(v).hidden = v !== id;
@@ -874,6 +878,686 @@ async function submitForm(targetStatus) {
     $("btn-save-draft").disabled = false;
     $("btn-publish").disabled = false;
   }
+}
+
+/* =================================================================
+   Teaching review — Private Teaching Jobs moderation queues
+   -----------------------------------------------------------------
+   Review queues for the teachingOrganizations, teacherProfiles and
+   teachingVacancies collections. Same security model as the
+   advertisements dashboard: this UI enforces nothing — Firestore
+   rules decide which reads/writes succeed, and permission errors are
+   surfaced as toasts instead of crashing the panel.
+   ================================================================= */
+
+const TEACH_QUEUES = ["organizations", "teachers", "vacancies"];
+const TEACH_COLLECTIONS = {
+  organizations: "teachingOrganizations",
+  teachers: "teacherProfiles",
+  vacancies: "teachingVacancies",
+};
+const TEACH_STATUS_FILTERS = {
+  organizations: ["pending", "approved", "suspended", "rejected"],
+  teachers: ["pending", "approved", "suspended", "rejected"],
+  vacancies: ["pending", "approved", "rejected", "expired"],
+};
+const TEACH_SEARCH_PLACEHOLDERS = {
+  organizations: "Search organizations...",
+  teachers: "Search teachers...",
+  vacancies: "Search vacancies...",
+};
+const TEACH_STATUS_LABELS = {
+  pending: "Pending",
+  approved: "Approved",
+  rejected: "Rejected",
+  suspended: "Suspended",
+  expired: "Expired",
+};
+
+let teachQueue = "organizations";
+let teachFilter = "pending";
+let teachSearch = "";
+let teachData = { organizations: [], teachers: [], vacancies: [] };
+let teachErrors = {}; // queue -> error message when that collection read failed
+let orgNameCache = {}; // teachingOrganizations doc id -> institutionName
+
+/* ---------- small formatting helpers ---------- */
+const MONTHS_SHORT = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+
+function fmtTs(ts) {
+  if (!ts) return "—";
+  const d = ts.toDate ? ts.toDate() : new Date(ts);
+  if (Object.prototype.toString.call(d) !== "[object Date]" || isNaN(d.getTime())) return "—";
+  const hh = String(d.getHours()).padStart(2, "0");
+  const mm = String(d.getMinutes()).padStart(2, "0");
+  return `${d.getDate()} ${MONTHS_SHORT[d.getMonth()]} ${d.getFullYear()}, ${hh}:${mm}`;
+}
+
+function arrJoin(v) {
+  if (Array.isArray(v)) return v.filter(Boolean).join(", ") || "—";
+  return v ? String(v) : "—";
+}
+
+function trunc(s, n) {
+  s = String(s || "");
+  return s.length > n ? s.slice(0, n - 1) + "…" : s;
+}
+
+function salaryLabel(v) {
+  const hasMin = v.salaryMin != null && v.salaryMin !== "";
+  const hasMax = v.salaryMax != null && v.salaryMax !== "";
+  if (hasMin && hasMax) return `Rs ${v.salaryMin} – ${v.salaryMax}`;
+  if (hasMin) return `Rs ${v.salaryMin}+`;
+  if (hasMax) return `Up to Rs ${v.salaryMax}`;
+  return "Not specified";
+}
+
+/** Normalize applicationDeadline (YYYY-MM-DD string or Timestamp/Date)
+    to a PKT YYYY-MM-DD string, then reuse the ad deadline logic. */
+function teachDeadlineInfo(v) {
+  const dl = v.applicationDeadline;
+  let str = null;
+  if (typeof dl === "string" && DATE_RE.test(dl)) {
+    str = dl;
+  } else if (dl) {
+    const d = dl.toDate ? dl.toDate() : new Date(dl);
+    if (!isNaN(d.getTime())) {
+      const pkt = new Date(d.getTime() + 5 * 60 * 60 * 1000);
+      str =
+        `${pkt.getUTCFullYear()}-${String(pkt.getUTCMonth() + 1).padStart(2, "0")}-` +
+        String(pkt.getUTCDate()).padStart(2, "0");
+    }
+  }
+  return { str, label: deadlineLabel({ lastDate: str }) };
+}
+
+/** Value suitable for an <input type="date"> from an applicationDeadline. */
+function dateInputValue(dl) {
+  if (typeof dl === "string" && DATE_RE.test(dl)) return dl;
+  if (dl) {
+    const d = dl.toDate ? dl.toDate() : new Date(dl);
+    if (!isNaN(d.getTime())) {
+      const pkt = new Date(d.getTime() + 5 * 60 * 60 * 1000);
+      return (
+        `${pkt.getUTCFullYear()}-${String(pkt.getUTCMonth() + 1).padStart(2, "0")}-` +
+        String(pkt.getUTCDate()).padStart(2, "0")
+      );
+    }
+  }
+  return "";
+}
+
+function teachStatusBadge(status) {
+  const s = status || "pending";
+  const cls =
+    {
+      pending: "badge-pending",
+      approved: "badge-approved",
+      rejected: "badge-rejected",
+      suspended: "badge-suspended",
+      expired: "badge-expired",
+    }[s] || "badge-deadline";
+  return `<span class="badge ${cls}">${esc(TEACH_STATUS_LABELS[s] || s)}</span>`;
+}
+
+function teachDisplayName(queue, doc) {
+  if (queue === "organizations") return doc.institutionName || "Unnamed institution";
+  if (queue === "teachers") return doc.fullName || "Unnamed teacher";
+  return doc.jobTitle || "Untitled vacancy";
+}
+
+/* ---------- dialog with input fields (reject reasons, quick edits) ----------
+   Reuses the existing confirm overlay. Resolves to { id: value } when
+   confirmed and valid, or null when cancelled. Validation failures keep
+   the dialog open with inline errors. */
+function promptFields(title, message, fields, okLabel = "Save") {
+  $("confirm-title").textContent = title;
+  $("confirm-message").textContent = message || "";
+  $("confirm-ok").textContent = okLabel;
+  const initial = {};
+  fields.forEach((f) => {
+    initial[f.id] = f.value || "";
+  });
+
+  function renderForm(values, errors) {
+    const custom = $("confirm-custom");
+    custom.innerHTML = "";
+    custom.hidden = false;
+    const inputs = {};
+    fields.forEach((f) => {
+      const label = document.createElement("label");
+      label.className = "field";
+      const span = document.createElement("span");
+      span.textContent = f.label + (f.required ? " *" : "");
+      label.appendChild(span);
+      let input;
+      if (f.type === "textarea") {
+        input = document.createElement("textarea");
+        input.rows = 4;
+      } else {
+        input = document.createElement("input");
+        input.type = f.type === "date" ? "date" : "text";
+      }
+      input.value = values[f.id] || "";
+      if (f.placeholder) input.placeholder = f.placeholder;
+      label.appendChild(input);
+      const err = document.createElement("small");
+      err.className = "field-error";
+      if (errors[f.id]) {
+        err.textContent = errors[f.id];
+      } else {
+        err.hidden = true;
+      }
+      label.appendChild(err);
+      custom.appendChild(label);
+      inputs[f.id] = input;
+    });
+    return inputs;
+  }
+
+  let inputs = renderForm(initial, {});
+  $("confirm-overlay").hidden = false;
+
+  return new Promise((resolve) => {
+    const attempt = (ok) => {
+      if (!ok) {
+        resolve(null);
+        return;
+      }
+      const values = {};
+      const errors = {};
+      fields.forEach((f) => {
+        const v = inputs[f.id].value.trim();
+        values[f.id] = v;
+        if (f.required && !v) {
+          errors[f.id] = "This field is required.";
+        } else if (v && f.type === "date" && !DATE_RE.test(v)) {
+          errors[f.id] = "Enter a valid date (YYYY-MM-DD).";
+        }
+      });
+      if (Object.keys(errors).length > 0) {
+        // The shared dialog handler already hid the overlay, cleared the
+        // form and nulled confirmResolve; rebuild the form with the entered
+        // values plus errors, re-show it, and re-arm (deferred so the
+        // re-arm runs after the handler's synchronous `confirmResolve = null`).
+        inputs = renderForm(values, errors);
+        $("confirm-overlay").hidden = false;
+        setTimeout(() => {
+          confirmResolve = attempt;
+        }, 0);
+        return;
+      }
+      resolve(values);
+    };
+    confirmResolve = attempt;
+  });
+}
+
+/* ---------- navigation wiring ---------- */
+$("btn-teaching").addEventListener("click", () => {
+  showView("view-teaching");
+  loadTeaching();
+});
+$("btn-teaching-back").addEventListener("click", () => showView("view-dashboard"));
+$("btn-teaching-retry").addEventListener("click", loadTeaching);
+$("teaching-search-input").addEventListener("input", (e) => {
+  teachSearch = e.target.value.trim().toLowerCase();
+  renderTeaching();
+});
+
+document.querySelectorAll(".ttab").forEach((tab) => {
+  tab.addEventListener("click", () => {
+    teachQueue = tab.dataset.ttab;
+    teachFilter = "pending";
+    teachSearch = "";
+    $("teaching-search-input").value = "";
+    document.querySelectorAll(".ttab").forEach((t) => {
+      const on = t === tab;
+      t.classList.toggle("active", on);
+      t.setAttribute("aria-selected", on ? "true" : "false");
+    });
+    renderTeaching();
+  });
+});
+
+/* ---------- loading ---------- */
+async function loadTeaching() {
+  $("teaching-list-loading").hidden = false;
+  $("teaching-list-error").hidden = true;
+  $("teaching-list-empty").hidden = true;
+  $("teaching-list").innerHTML = "";
+  $("teaching-status").textContent = "";
+  teachErrors = {};
+  try {
+    const results = await Promise.all(
+      TEACH_QUEUES.map((q) =>
+        db
+          .collection(TEACH_COLLECTIONS[q])
+          .orderBy("updatedAt", "desc")
+          .limit(500)
+          .get()
+          .then((snap) => ({
+            queue: q,
+            docs: snap.docs.map((d) => ({ id: d.id, ...d.data() })),
+          }))
+          .catch((err) => ({ queue: q, error: err }))
+      )
+    );
+    results.forEach((r) => {
+      if (r.error) {
+        teachData[r.queue] = [];
+        teachErrors[r.queue] = (r.error && r.error.message) || "Unknown error.";
+      } else {
+        teachData[r.queue] = r.docs;
+      }
+    });
+    await ensureOrgNames();
+  } catch (err) {
+    console.error("loadTeaching failed:", err);
+  } finally {
+    $("teaching-list-loading").hidden = true;
+    renderTeaching();
+  }
+}
+
+/** Resolve organizationId -> institutionName for vacancy cards (cached). */
+async function ensureOrgNames() {
+  const ids = new Set();
+  teachData.vacancies.forEach((v) => {
+    if (v.organizationId && !orgNameCache[v.organizationId]) ids.add(v.organizationId);
+  });
+  await Promise.all(
+    [...ids].map(async (id) => {
+      try {
+        const snap = await db.collection(TEACH_COLLECTIONS.organizations).doc(id).get();
+        orgNameCache[id] = snap.exists
+          ? snap.data().institutionName || "Unnamed institution"
+          : "Unknown institution";
+      } catch (e) {
+        orgNameCache[id] = "Unknown institution";
+      }
+    })
+  );
+}
+
+/* ---------- filtering / rendering ---------- */
+function teachMatchesFilter(queue, doc, filter) {
+  const status = doc.approvalStatus || "pending";
+  if (queue === "vacancies" && filter === "expired") {
+    if (status === "expired") return true;
+    if (status !== "approved") return false;
+    return teachDeadlineInfo(doc).label.tone === "expired";
+  }
+  if (queue === "vacancies" && filter === "approved") {
+    // Mirror the advertisements dashboard: past-deadline items live under "expired".
+    return status === "approved" && teachDeadlineInfo(doc).label.tone !== "expired";
+  }
+  return status === filter;
+}
+
+function teachSearchText(queue, doc) {
+  const parts = [];
+  if (queue === "organizations") {
+    parts.push(doc.institutionName, doc.contactPerson, doc.email, doc.district, doc.city, doc.institutionType);
+  } else if (queue === "teachers") {
+    parts.push(doc.fullName, doc.email, doc.district, doc.qualification, arrJoin(doc.subjects));
+  } else {
+    parts.push(doc.jobTitle, doc.district, doc.city, doc.qualification, arrJoin(doc.subjects));
+  }
+  return parts.filter(Boolean).join(" ").toLowerCase();
+}
+
+function filteredTeaching() {
+  let list = teachData[teachQueue].filter((d) => teachMatchesFilter(teachQueue, d, teachFilter));
+  if (teachSearch) {
+    list = list.filter((d) => teachSearchText(teachQueue, d).includes(teachSearch));
+  }
+  return list;
+}
+
+function renderTeaching() {
+  // Queue tab counts show pending items (the actual review workload).
+  TEACH_QUEUES.forEach((q) => {
+    const n = teachData[q].filter((d) => (d.approvalStatus || "pending") === "pending").length;
+    $("count-t-" + q).textContent = n;
+  });
+
+  // Status filter tabs for the active queue.
+  const nav = $("teaching-filters");
+  nav.innerHTML = "";
+  TEACH_STATUS_FILTERS[teachQueue].forEach((f) => {
+    const n = teachData[teachQueue].filter((d) => teachMatchesFilter(teachQueue, d, f)).length;
+    const b = document.createElement("button");
+    b.className = "tftab" + (f === teachFilter ? " active" : "");
+    b.setAttribute("role", "tab");
+    b.setAttribute("aria-selected", f === teachFilter ? "true" : "false");
+    b.innerHTML = `${esc(TEACH_STATUS_LABELS[f])} <span class="count">${n}</span>`;
+    b.addEventListener("click", () => {
+      teachFilter = f;
+      renderTeaching();
+    });
+    nav.appendChild(b);
+  });
+
+  $("teaching-search-input").placeholder = TEACH_SEARCH_PLACEHOLDERS[teachQueue];
+
+  const err = teachErrors[teachQueue];
+  const list = err ? [] : filteredTeaching();
+  $("teaching-list-error").hidden = !err;
+  if (err) $("teaching-list-error-detail").textContent = err;
+  $("teaching-list-empty").hidden = err || list.length !== 0;
+  $("teaching-status").textContent =
+    err || list.length === 0 ? "" : `${list.length} record${list.length === 1 ? "" : "s"}`;
+
+  const wrap = $("teaching-list");
+  wrap.innerHTML = "";
+  list.forEach((d) => wrap.appendChild(teachCard(d)));
+}
+
+/* ---------- card builders ---------- */
+function teachAddBtn(actionsEl, label, cls, handler) {
+  const b = document.createElement("button");
+  b.className = `btn ${cls || ""}`.trim();
+  b.textContent = label;
+  b.addEventListener("click", handler);
+  actionsEl.appendChild(b);
+}
+
+/** Shared card shell: status badges, title, subtitle, key/value rows. */
+function teachCardShell(statusHtml, title, subtitle, kvRows, extraHtml) {
+  const card = document.createElement("article");
+  card.className = "ad-card";
+  const kv = (kvRows || [])
+    .map(([k, v]) => `<dt>${esc(k)}</dt><dd>${esc(v)}</dd>`)
+    .join("");
+  card.innerHTML = `
+    <div class="ad-card-body">
+      <div class="preview-badges">${statusHtml}</div>
+      <h4>${esc(title)}</h4>
+      ${subtitle ? `<p class="muted small" style="margin:0">${esc(subtitle)}</p>` : ""}
+      ${kv ? `<dl class="kv">${kv}</dl>` : ""}
+      ${extraHtml || ""}
+      <div class="ad-card-actions"></div>
+    </div>`;
+  return card;
+}
+
+function teachCard(doc) {
+  if (teachQueue === "organizations") return orgCard(doc);
+  if (teachQueue === "teachers") return teacherCard(doc);
+  return vacancyCard(doc);
+}
+
+function orgCard(org) {
+  const loc = [org.district, org.city].filter(Boolean).join(", ");
+  const rows = [
+    ["Contact person", org.contactPerson || "—"],
+    ["Email", org.email || "—"],
+    ["Phone", org.contactNumber || "—"],
+    ["Address", org.address || "—"],
+    ["Submitted", fmtTs(org.createdAt)],
+  ];
+  if (org.rejectionReason) rows.push(["Rejection reason", org.rejectionReason]);
+  const card = teachCardShell(
+    teachStatusBadge(org.approvalStatus),
+    org.institutionName || "Unnamed institution",
+    [org.institutionType, loc].filter(Boolean).join(" · "),
+    rows,
+    ""
+  );
+  const actions = card.querySelector(".ad-card-actions");
+  const st = org.approvalStatus || "pending";
+  if (st === "pending" || st === "rejected") {
+    teachAddBtn(actions, "Approve", "primary", () => teachApprove("organizations", org));
+  }
+  if (st === "pending") {
+    teachAddBtn(actions, "Reject", "", () => teachReject("organizations", org));
+  }
+  if (st === "approved") {
+    teachAddBtn(actions, "Suspend", "danger", () => teachSuspend("organizations", org));
+  }
+  if (st === "suspended") {
+    teachAddBtn(actions, "Reactivate", "primary", () => teachReactivate("organizations", org));
+  }
+  return card;
+}
+
+function teacherCard(t) {
+  const exp =
+    t.experienceYears == null || t.experienceYears === ""
+      ? "—"
+      : `${t.experienceYears} yr${Number(t.experienceYears) === 1 ? "" : "s"}`;
+  const rows = [
+    ["Subjects", arrJoin(t.subjects)],
+    ["Experience", exp],
+    ["Preferred type", t.preferredEmploymentType || "—"],
+    ["Email", t.email || "—"],
+    // Never render cvStoragePath as a clickable public link: it is a
+    // private Storage path and must stay that way.
+    ["CV", t.cvStoragePath ? "Attached (private — not publicly linked)" : "No CV attached"],
+    ["Public profile", t.profileVisibility || "—"],
+    ["Submitted", fmtTs(t.createdAt)],
+  ];
+  if (t.rejectionReason) rows.push(["Rejection reason", t.rejectionReason]);
+  const card = teachCardShell(
+    teachStatusBadge(t.approvalStatus),
+    t.fullName || "Unnamed teacher",
+    [t.qualification, t.district].filter(Boolean).join(" · "),
+    rows,
+    t.professionalSummary
+      ? `<p class="small muted" style="margin:0.5rem 0 0">${esc(trunc(t.professionalSummary, 220))}</p>`
+      : ""
+  );
+  const actions = card.querySelector(".ad-card-actions");
+  const st = t.approvalStatus || "pending";
+  if (st === "pending" || st === "rejected") {
+    teachAddBtn(actions, "Approve", "primary", () => teachApprove("teachers", t));
+  }
+  if (st === "pending") {
+    teachAddBtn(actions, "Reject", "", () => teachReject("teachers", t));
+  }
+  if (st === "approved") {
+    teachAddBtn(actions, "Suspend", "danger", () => teachSuspend("teachers", t));
+  }
+  if (st === "suspended") {
+    teachAddBtn(actions, "Reactivate", "primary", () => teachReactivate("teachers", t));
+  }
+  return card;
+}
+
+function vacancyCard(v) {
+  const info = teachDeadlineInfo(v);
+  const dl = info.label;
+  const dlTone = dl.tone === "expired" ? "badge-expired" : `badge-deadline${dl.tone === "neutral" ? "" : " " + dl.tone}`;
+  const orgName = v.organizationId
+    ? orgNameCache[v.organizationId] || "…"
+    : v.institutionName || "—";
+  const rows = [
+    ["Subjects", arrJoin(v.subjects)],
+    ["Grades", arrJoin(v.gradeLevels)],
+    ["Qualification", v.qualification || "—"],
+    ["Experience", v.experienceRequired || "—"],
+    ["Positions", v.positionsCount != null && v.positionsCount !== "" ? String(v.positionsCount) : "—"],
+    ["Salary", salaryLabel(v)],
+    ["Employment type", v.employmentType || "—"],
+    ["Gender eligibility", v.genderEligibility || "—"],
+    ["Apply via", v.applicationMethod || "—"],
+    ["Application URL", v.applicationUrl ? trunc(v.applicationUrl, 60) : "—"],
+    ["Contact", v.contactInstructions ? trunc(v.contactInstructions, 90) : "—"],
+    ["Submitted", fmtTs(v.createdAt)],
+    ["Published", fmtTs(v.publishedAt)],
+  ];
+  if (v.rejectionReason) rows.push(["Rejection reason", v.rejectionReason]);
+  const card = teachCardShell(
+    `${teachStatusBadge(v.approvalStatus)}<span class="badge ${dlTone}">${esc(dl.text)}${
+      info.str ? ` · ${esc(formatPKTDate(info.str))}` : ""
+    }</span>`,
+    v.jobTitle || "Untitled vacancy",
+    [orgName, [v.district, v.city].filter(Boolean).join(", ")].filter(Boolean).join(" · "),
+    rows,
+    v.description
+      ? `<p class="small muted" style="margin:0.5rem 0 0">${esc(trunc(v.description, 220))}</p>`
+      : ""
+  );
+  const actions = card.querySelector(".ad-card-actions");
+  const st = v.approvalStatus || "pending";
+  if (st === "pending" || st === "rejected") {
+    teachAddBtn(actions, "Approve & publish", "primary", () => vacancyApprovePublish(v));
+  }
+  if (st === "pending" || st === "rejected") {
+    teachAddBtn(actions, "Reject", "", () => vacancyReject(v));
+  }
+  if (st === "approved") {
+    teachAddBtn(actions, "Unpublish", "", () => vacancyUnpublish(v));
+    teachAddBtn(actions, "Expire", "ghost", () => vacancyExpire(v));
+  }
+  teachAddBtn(actions, "Edit", "", () => vacancyEdit(v));
+  return card;
+}
+
+/* ---------- review actions ---------- */
+async function teachUpdate(queue, doc, patch, successMsg) {
+  try {
+    await db
+      .collection(TEACH_COLLECTIONS[queue])
+      .doc(doc.id)
+      .update({
+        ...patch,
+        updatedAt: firebase.firestore.FieldValue.serverTimestamp(),
+      });
+    toast(successMsg);
+    loadTeaching();
+  } catch (err) {
+    console.error("teachUpdate failed:", err);
+    toast(`Could not update: ${err.message || err}`, "error");
+  }
+}
+
+async function teachApprove(queue, doc) {
+  const kind = queue === "vacancies" ? "vacancy" : queue.slice(0, -1);
+  const ok = await confirmDialog(
+    `Approve this ${kind}?`,
+    `"${teachDisplayName(queue, doc)}" will be marked as approved.`,
+    "Approve"
+  );
+  if (!ok) return;
+  teachUpdate(queue, doc, { approvalStatus: "approved" }, "Approved.");
+}
+
+async function teachReject(queue, doc) {
+  const kind = queue === "vacancies" ? "vacancy" : queue.slice(0, -1);
+  const vals = await promptFields(
+    `Reject this ${kind}?`,
+    `"${teachDisplayName(queue, doc)}" will be marked as rejected. A reason is optional and is stored with the record.`,
+    [
+      {
+        id: "reason",
+        label: "Rejection reason (optional)",
+        type: "textarea",
+        placeholder: "e.g. Institution documents could not be verified.",
+      },
+    ],
+    "Reject"
+  );
+  if (!vals) return;
+  const patch = { approvalStatus: "rejected" };
+  if (vals.reason) patch.rejectionReason = vals.reason;
+  teachUpdate(queue, doc, patch, "Rejected.");
+}
+
+async function teachSuspend(queue, doc) {
+  const kind = queue.slice(0, -1);
+  const ok = await confirmDialog(
+    `Suspend this ${kind}?`,
+    `"${teachDisplayName(queue, doc)}" will be suspended and hidden from public listings.`,
+    "Suspend"
+  );
+  if (!ok) return;
+  teachUpdate(queue, doc, { approvalStatus: "suspended" }, "Suspended.");
+}
+
+async function teachReactivate(queue, doc) {
+  const kind = queue.slice(0, -1);
+  const ok = await confirmDialog(
+    `Reactivate this ${kind}?`,
+    `"${teachDisplayName(queue, doc)}" will be approved again.`,
+    "Reactivate"
+  );
+  if (!ok) return;
+  teachUpdate(queue, doc, { approvalStatus: "approved" }, "Reactivated.");
+}
+
+async function vacancyApprovePublish(doc) {
+  const ok = await confirmDialog(
+    "Approve and publish this vacancy?",
+    `"${teachDisplayName("vacancies", doc)}" will become visible in the app.`,
+    "Approve & publish"
+  );
+  if (!ok) return;
+  teachUpdate(
+    "vacancies",
+    doc,
+    {
+      approvalStatus: "approved",
+      publishedAt: firebase.firestore.FieldValue.serverTimestamp(),
+    },
+    "Vacancy approved and published."
+  );
+}
+
+async function vacancyReject(doc) {
+  return teachReject("vacancies", doc);
+}
+
+async function vacancyUnpublish(doc) {
+  const ok = await confirmDialog(
+    "Unpublish this vacancy?",
+    `"${teachDisplayName("vacancies", doc)}" will return to pending and disappear from the app.`,
+    "Unpublish"
+  );
+  if (!ok) return;
+  teachUpdate(
+    "vacancies",
+    doc,
+    {
+      approvalStatus: "pending",
+      publishedAt: firebase.firestore.FieldValue.delete(),
+    },
+    "Vacancy unpublished (back to pending)."
+  );
+}
+
+async function vacancyExpire(doc) {
+  const ok = await confirmDialog(
+    "Mark this vacancy as expired?",
+    `"${teachDisplayName("vacancies", doc)}" will be treated as expired and hidden from the active feed.`,
+    "Expire"
+  );
+  if (!ok) return;
+  teachUpdate("vacancies", doc, { approvalStatus: "expired" }, "Vacancy marked as expired.");
+}
+
+/** Minimal correction editor: title / description / deadline only. */
+async function vacancyEdit(doc) {
+  const vals = await promptFields(
+    "Correct vacancy",
+    "Fix the title, description or deadline. All other fields stay unchanged.",
+    [
+      { id: "jobTitle", label: "Job title", type: "text", value: doc.jobTitle || "", required: true },
+      { id: "description", label: "Description", type: "textarea", value: doc.description || "", required: true },
+      {
+        id: "applicationDeadline",
+        label: "Application deadline (optional)",
+        type: "date",
+        value: dateInputValue(doc.applicationDeadline),
+      },
+    ],
+    "Save changes"
+  );
+  if (!vals) return;
+  const patch = { jobTitle: vals.jobTitle, description: vals.description };
+  patch.applicationDeadline = vals.applicationDeadline || firebase.firestore.FieldValue.delete();
+  teachUpdate("vacancies", doc, patch, "Vacancy updated.");
 }
 
 /* =================================================================
