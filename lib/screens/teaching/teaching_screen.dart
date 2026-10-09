@@ -10,6 +10,7 @@ import '../../services/bookmark_service.dart';
 import '../../services/notification_service.dart';
 import '../../services/teaching_service.dart';
 import '../../widgets/app_header.dart';
+import '../../widgets/notification_inbox_sheet.dart';
 import '../../widgets/settings_sheet.dart';
 import '../../widgets/state_views.dart';
 import '../../widgets/vibrant_teaching_card.dart';
@@ -47,11 +48,23 @@ class _TeachingScreenState extends State<TeachingScreen> {
   VacancyFilter _filter = const VacancyFilter();
   bool _savedOnly = false;
   late final Stream<List<TeachingVacancy>> _vacanciesStream;
+  int _unreadCount = 0;
 
   @override
   void initState() {
     super.initState();
     _vacanciesStream = widget.service.watchApprovedVacancies();
+    _loadUnread();
+  }
+
+  Future<void> _loadUnread() async {
+    final count = await widget.notificationService.getUnreadCount();
+    if (mounted) setState(() => _unreadCount = count);
+  }
+
+  Future<void> _openInbox() async {
+    await NotificationInboxSheet.show(context, widget.notificationService);
+    await _loadUnread();
   }
 
   @override
@@ -105,16 +118,11 @@ class _TeachingScreenState extends State<TeachingScreen> {
                 localeController: widget.localeController,
                 notificationService: widget.notificationService,
               ),
-              onOpenNotifications: () => SettingsSheet.show(
-                context,
-                themeController: widget.themeController,
-                localeController: widget.localeController,
-                notificationService: widget.notificationService,
-              ),
+              onOpenNotifications: _openInbox,
               onOpenProfile: () => Navigator.of(context).push(
                 MaterialPageRoute<void>(builder: (_) => const AccountScreen()),
               ),
-              hasUnreadNotifications: true,
+              hasUnreadNotifications: _unreadCount > 0,
             ),
           ),
           const SliverToBoxAdapter(child: WelcomeCarousel(teaching: true)),

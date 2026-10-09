@@ -32,7 +32,8 @@ class AppHeader extends StatelessWidget {
         children: [
           SvgPicture.asset(
             'assets/logo/a_mark.svg',
-            height: 32,
+            height: 28,
+            width: 28,
             colorFilter: dark
                 ? const ColorFilter.mode(Colors.white, BlendMode.srcIn)
                 : null,
@@ -45,7 +46,7 @@ class AppHeader extends StatelessWidget {
               Text(
                 'AFZAL-E',
                 style: TextStyle(
-                  fontSize: 15,
+                  fontSize: 14,
                   fontWeight: FontWeight.w900,
                   color: ink,
                   height: 1.1,

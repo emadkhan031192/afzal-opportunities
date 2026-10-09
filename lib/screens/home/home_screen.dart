@@ -14,6 +14,7 @@ import '../../services/notification_service.dart';
 import '../../widgets/app_header.dart';
 import '../../widgets/category_chips.dart';
 import '../../widgets/filter_sheet.dart';
+import '../../widgets/notification_inbox_sheet.dart';
 import '../../widgets/settings_sheet.dart';
 import '../../widgets/state_views.dart';
 import '../../widgets/vibrant_ad_card.dart';
@@ -53,11 +54,23 @@ class _HomeScreenState extends State<HomeScreen> {
   bool _gridView = false;
   String _query = '';
   late Future<List<Advertisement>> _future;
+  int _unreadCount = 0;
 
   @override
   void initState() {
     super.initState();
     _future = widget.service.fetchPublished();
+    _loadUnread();
+  }
+
+  Future<void> _loadUnread() async {
+    final count = await widget.notificationService.getUnreadCount();
+    if (mounted) setState(() => _unreadCount = count);
+  }
+
+  Future<void> _openInbox() async {
+    await NotificationInboxSheet.show(context, widget.notificationService);
+    await _loadUnread();
   }
 
   @override
@@ -175,13 +188,8 @@ class _HomeScreenState extends State<HomeScreen> {
               localeController: widget.localeController,
               notificationService: widget.notificationService,
             ),
-            onOpenNotifications: () => SettingsSheet.show(
-              context,
-              themeController: widget.themeController,
-              localeController: widget.localeController,
-              notificationService: widget.notificationService,
-            ),
-            hasUnreadNotifications: true,
+            onOpenNotifications: _openInbox,
+            hasUnreadNotifications: _unreadCount > 0,
           ),
         ),
         const SliverToBoxAdapter(child: WelcomeCarousel()),

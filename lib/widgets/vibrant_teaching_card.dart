@@ -5,6 +5,7 @@ import '../core/utils/deadline.dart';
 import '../core/utils/url_utils.dart';
 import '../models/teaching_vacancy.dart';
 import '../services/teaching_service.dart';
+import '../widgets/whatsapp_icon.dart';
 
 /// Vibrant teaching vacancy card from the user's final UI: alternating
 /// yellow/blue backgrounds matching the advertisement cards, with the
@@ -92,7 +93,7 @@ class VibrantTeachingCard extends StatelessWidget {
                     _CardIconButton(
                       background: _chipBg,
                       onTap: () => _shareWhatsApp(context),
-                      child: Icon(Icons.chat_outlined, size: 16, color: _ink),
+                      child: WhatsAppIcon(size: 16, color: _ink),
                     ),
                     const SizedBox(width: 6),
                     _CardIconButton(
@@ -150,55 +151,52 @@ class VibrantTeachingCard extends StatelessWidget {
                   ),
                 ],
                 const SizedBox(height: 12),
-                Row(
-                  children: [
-                    Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 8,
-                        vertical: 5,
-                      ),
+                Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 8,
+                    vertical: 5,
+                  ),
+                  decoration: BoxDecoration(
+                    color: _chipBg,
+                    borderRadius: BorderRadius.circular(6),
+                  ),
+                  child: Text(
+                    expired
+                        ? '⌛ ${s.expired}'.toUpperCase()
+                        : '⏳ ${s.deadlineLabel(info)}'.toUpperCase(),
+                    style: TextStyle(
+                      fontSize: 10,
+                      fontWeight: FontWeight.w800,
+                      color: _ink,
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 10),
+                SizedBox(
+                  width: double.infinity,
+                  child: GestureDetector(
+                    onTap: onTap,
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(vertical: 10),
                       decoration: BoxDecoration(
-                        color: _chipBg,
-                        borderRadius: BorderRadius.circular(6),
+                        color: _isYellow
+                            ? const Color(0xFF0F172A)
+                            : Colors.white,
+                        borderRadius: BorderRadius.circular(20),
                       ),
+                      alignment: Alignment.center,
                       child: Text(
-                        expired
-                            ? '⌛ ${s.expired}'.toUpperCase()
-                            : '⏳ ${s.deadlineLabel(info)}'.toUpperCase(),
+                        '${s.applyNow} ↗',
                         style: TextStyle(
-                          fontSize: 10,
+                          fontSize: 12,
                           fontWeight: FontWeight.w800,
-                          color: _ink,
-                        ),
-                      ),
-                    ),
-                    const Spacer(),
-                    GestureDetector(
-                      onTap: onTap,
-                      child: Container(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 14,
-                          vertical: 8,
-                        ),
-                        decoration: BoxDecoration(
                           color: _isYellow
-                              ? const Color(0xFF0F172A)
-                              : Colors.white,
-                          borderRadius: BorderRadius.circular(20),
-                        ),
-                        child: Text(
-                          '${s.applyNow} ↗',
-                          style: TextStyle(
-                            fontSize: 11,
-                            fontWeight: FontWeight.w800,
-                            color: _isYellow
-                                ? Colors.white
-                                : const Color(0xFF1E40AF),
-                          ),
+                              ? Colors.white
+                              : const Color(0xFF1E40AF),
                         ),
                       ),
                     ),
-                  ],
+                  ),
                 ),
               ],
             ),

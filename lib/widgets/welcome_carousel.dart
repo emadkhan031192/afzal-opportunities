@@ -45,9 +45,9 @@ class _WelcomeCarouselState extends State<WelcomeCarousel> {
 
   @override
   Widget build(BuildContext context) {
-    final s = AppLocalizations.of(context);
-    // Always show both EN and UR slides regardless of current locale,
-    // matching the HTML design.
+    // One slide is always English, one is always Urdu — independent of
+    // the app's current locale, as the user requested.
+    final ur = AppLocalizations(const Locale('ur'));
     final displaySlides = <_SlideData>[
       _SlideData(
         badge: widget.teaching ? 'Private Education' : 'Welcome',
@@ -60,11 +60,13 @@ class _WelcomeCarouselState extends State<WelcomeCarousel> {
         rtl: false,
       ),
       _SlideData(
-        badge: s.carouselTeachingBadge.isNotEmpty && widget.teaching
-            ? s.carouselTeachingBadge
-            : s.carouselHomeBadge,
-        title: widget.teaching ? s.carouselTeachingTitle : s.carouselHomeTitle,
-        desc: widget.teaching ? s.carouselTeachingDesc : s.carouselHomeDesc,
+        badge: widget.teaching
+            ? ur.carouselTeachingBadge
+            : ur.carouselHomeBadge,
+        title: widget.teaching
+            ? ur.carouselTeachingTitle
+            : ur.carouselHomeTitle,
+        desc: widget.teaching ? ur.carouselTeachingDesc : ur.carouselHomeDesc,
         rtl: true,
       ),
     ];

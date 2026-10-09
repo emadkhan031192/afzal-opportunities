@@ -62,6 +62,10 @@ class AppLocalizations {
   String get carouselTeachingTitle => _t('carouselTeachingTitle');
   String get carouselTeachingDesc => _t('carouselTeachingDesc');
   String get joinWhatsAppChannel => _t('joinWhatsAppChannel');
+  String get noNotificationsYet => _t('noNotificationsYet');
+  String get checkForUpdatesNow => _t('checkForUpdatesNow');
+  String get checkForUpdatesHint => _t('checkForUpdatesHint');
+  String get checkCompleted => _t('checkCompleted');
 
   // Filters
   String get filter => _t('filter');
@@ -313,6 +317,11 @@ class AppLocalizations {
     'carouselTeachingDesc':
         'Exclusive portal for private schools and academies to post teaching vacancies, and for qualified teachers to find jobs.',
     'joinWhatsAppChannel': 'Join our WhatsApp Channel ↗',
+    'noNotificationsYet':
+        'No notifications yet. New job alerts and deadline reminders will appear here.',
+    'checkForUpdatesNow': 'Check for updates now',
+    'checkForUpdatesHint': 'Manually run the new-ads check',
+    'checkCompleted': 'Check completed',
     'filter': 'Filter',
     'applyFilters': 'Apply filters',
     'resetFilters': 'Reset filters',
@@ -541,6 +550,11 @@ class AppLocalizations {
     'carouselTeachingDesc':
         'یہ شعبہ خاص طور پر پرائیویٹ اسکولوں اور اکیڈمیوں کے لیے ہے تاکہ وہ نوکریاں پوسٹ کر سکیں اور اساتذہ نوکری حاصل کر سکیں۔',
     'joinWhatsAppChannel': 'ہمارا واٹس ایپ چینل جوائن کریں ↗',
+    'noNotificationsYet':
+        'ابھی کوئی اطلاع نہیں۔ نئی نوکریوں کے الرٹس اور ڈیڈ لائن یاد دہانیاں یہاں نظر آئیں گی۔',
+    'checkForUpdatesNow': 'ابھی اپ ڈیٹس چیک کریں',
+    'checkForUpdatesHint': 'نئے اشتہارات کی جانچ دستی طور پر چلائیں',
+    'checkCompleted': 'جانچ مکمل',
     'filter': 'فلٹر',
     'applyFilters': 'فلٹر لگائیں',
     'resetFilters': 'فلٹر صاف کریں',

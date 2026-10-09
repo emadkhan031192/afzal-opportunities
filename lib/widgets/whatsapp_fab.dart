@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../core/constants/app_constants.dart';
 import '../core/l10n/app_localizations.dart';
 import '../core/utils/url_utils.dart';
+import 'whatsapp_icon.dart';
 
 /// Floating WhatsApp button from the user's final UI: a green circular
 /// button that expands a "Join our WhatsApp Channel" label on tap before
@@ -79,7 +80,7 @@ class _WhatsAppFabState extends State<WhatsAppFab> {
               ],
             ),
             alignment: Alignment.center,
-            child: const Icon(Icons.chat, size: 26, color: Colors.white),
+            child: const WhatsAppIcon(size: 28),
           ),
         ),
       ],
