@@ -6,8 +6,13 @@ import '../core/constants/app_constants.dart';
 /// Local bookmarks, persisted across app restarts.
 ///
 /// Bookmarks are keyed by stable advertisement id. No account is required
-/// in v1.0.
+/// in v1.0. Pass a custom [storageKey] to keep a separate bookmark list
+/// (e.g. saved teaching vacancies).
 class BookmarkService extends ChangeNotifier {
+  BookmarkService({String? storageKey})
+      : _storageKey = storageKey ?? AppConstants.bookmarksKey;
+
+  final String _storageKey;
   List<String> _ids = [];
   bool _loaded = false;
 
@@ -19,7 +24,7 @@ class BookmarkService extends ChangeNotifier {
   /// Loads persisted bookmarks. Safe to call once at startup.
   Future<void> load() async {
     final prefs = await SharedPreferences.getInstance();
-    _ids = prefs.getStringList(AppConstants.bookmarksKey) ?? <String>[];
+    _ids = prefs.getStringList(_storageKey) ?? <String>[];
     _loaded = true;
     notifyListeners();
   }
@@ -35,6 +40,6 @@ class BookmarkService extends ChangeNotifier {
     }
     notifyListeners();
     final prefs = await SharedPreferences.getInstance();
-    await prefs.setStringList(AppConstants.bookmarksKey, _ids);
+    await prefs.setStringList(_storageKey, _ids);
   }
 }

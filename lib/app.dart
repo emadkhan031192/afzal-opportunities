@@ -18,12 +18,14 @@ class AfzalApp extends StatefulWidget {
     required this.themeController,
     required this.localeController,
     required this.bookmarkService,
+    required this.teachingBookmarks,
     required this.notificationService,
   });
 
   final ThemeController themeController;
   final LocaleController localeController;
   final BookmarkService bookmarkService;
+  final BookmarkService teachingBookmarks;
   final NotificationService notificationService;
 
   @override
@@ -67,6 +69,7 @@ class _AfzalAppState extends State<AfzalApp> {
         themeController: widget.themeController,
         localeController: widget.localeController,
         bookmarkService: widget.bookmarkService,
+        teachingBookmarks: widget.teachingBookmarks,
         notificationService: widget.notificationService,
       ),
     );
@@ -79,12 +82,14 @@ class _LaunchFlow extends StatefulWidget {
     required this.themeController,
     required this.localeController,
     required this.bookmarkService,
+    required this.teachingBookmarks,
     required this.notificationService,
   });
 
   final ThemeController themeController;
   final LocaleController localeController;
   final BookmarkService bookmarkService;
+  final BookmarkService teachingBookmarks;
   final NotificationService notificationService;
 
   @override
@@ -103,6 +108,7 @@ class _LaunchFlowState extends State<_LaunchFlow> {
       themeController: widget.themeController,
       localeController: widget.localeController,
       bookmarkService: widget.bookmarkService,
+      teachingBookmarks: widget.teachingBookmarks,
       notificationService: widget.notificationService,
     );
   }

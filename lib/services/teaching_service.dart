@@ -10,6 +10,11 @@ import 'teaching_vacancy.dart';
 /// Filters for the public teaching-vacancy feed. All optional; filtering
 /// beyond the approval status happens client-side so no composite
 /// Firestore indexes are required.
+///
+/// Experience bands: '' (any), 'fresh' (entry level — no experience
+/// required or unspecified), 'experienced' (explicitly requires
+/// experience). Vacancies that do not specify experience are never
+/// hidden by the experience filter.
 class VacancyFilter {
   const VacancyFilter({
     this.query = '',
@@ -119,8 +124,11 @@ class TeachingService {
         return false;
       }
       if (filter.experience.isNotEmpty) {
-        final required = (v.experienceRequired ?? '').toLowerCase();
-        if (!required.contains(filter.experience.toLowerCase())) return false;
+        final requiresExperience = _requiresExperience(v.experienceRequired);
+        if (filter.experience == 'fresh' && requiresExperience) return false;
+        if (filter.experience == 'experienced' && !requiresExperience) {
+          return false;
+        }
       }
       if (query.isNotEmpty) {
         final haystack =
@@ -133,14 +141,27 @@ class TeachingService {
   }
 
   /// Whether the vacancy's application deadline has passed (PKT day).
-  static bool isExpired(TeachingVacancy vacancy, {DateTime? now}) {
-    final deadline = vacancy.applicationDeadline;
+  static bool isExpired(TeachingVacancy vacancy, {DateTime? now}) {    final deadline = vacancy.applicationDeadline;
     if (deadline == null) return false;
     final pkt = pktNow(now);
     final today = DateTime(pkt.year, pkt.month, pkt.day);
     final target =
         DateTime(deadline.year, deadline.month, deadline.day);
     return target.isBefore(today);
+  }
+
+  /// Whether the vacancy explicitly requires teaching experience.
+  /// Empty/unspecified (or explicit "fresh"/"no experience") counts as
+  /// entry-level — never treated as requiring experience.
+  static bool _requiresExperience(String? experienceRequired) {
+    final text = (experienceRequired ?? '').trim().toLowerCase();
+    if (text.isEmpty) return false;
+    if (RegExp(r'fresh|no experience|not required|entry.level')
+        .hasMatch(text)) {
+      return false;
+    }
+    // Any mention of years (e.g. "2 years") means experience is required.
+    return RegExp(r'\d+\s*(year|yr)').hasMatch(text);
   }
 
   List<TeachingVacancy> _parseVacancies(

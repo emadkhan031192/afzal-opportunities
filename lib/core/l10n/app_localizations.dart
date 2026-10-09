@@ -140,6 +140,9 @@ class AppLocalizations {
   String get subject => _t('subject');
   String get qualification => _t('qualification');
   String get experience => _t('experience');
+  String get anyOption => _t('anyOption');
+  String get freshEntry => _t('freshEntry');
+  String get experienced => _t('experienced');
   String get noVacanciesFound => _t('noVacanciesFound');
   String get noVacanciesHint => _t('noVacanciesHint');
   String get subjectsRequired => _t('subjectsRequired');
@@ -279,6 +282,9 @@ class AppLocalizations {
     'subject': 'Subject',
     'qualification': 'Qualification',
     'experience': 'Experience',
+    'anyOption': 'Any',
+    'freshEntry': 'Fresh / entry level',
+    'experienced': 'Experienced',
     'noVacanciesFound': 'No vacancies found',
     'noVacanciesHint': 'Try a different search or clear the filters.',
     'subjectsRequired': 'Subjects required',
@@ -417,6 +423,9 @@ class AppLocalizations {
     'subject': 'مضمون',
     'qualification': 'تعلیمی قابلیت',
     'experience': 'تجربہ',
+    'anyOption': 'کوئی بھی',
+    'freshEntry': 'فریش / ابتدائی',
+    'experienced': 'تجربہ کار',
     'noVacanciesFound': 'کوئی آسامی نہیں ملی',
     'noVacanciesHint': 'کوئی اور تلاش آزمائیں یا فلٹر صاف کریں۔',
     'subjectsRequired': 'مطلوبہ مضامین',

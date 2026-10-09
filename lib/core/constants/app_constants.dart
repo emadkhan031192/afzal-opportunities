@@ -74,6 +74,7 @@ class AppConstants {
   static const String notifLastCheckKey = 'afzal_notif_last_check';
   static const String notifSeenIdsKey = 'afzal_notif_seen_ids';
   static const String notifChannelId = 'afzal_opportunities';
+  static const String teachingBookmarksKey = 'afzal_teaching_bookmarks';
 
   // Background task name for periodic vacancy/advertisement checks.
   static const String bgCheckTaskName = 'afzal-periodic-check';

@@ -6,24 +6,28 @@ import '../core/theme/theme_controller.dart';
 import '../services/advertisement_service.dart';
 import '../services/bookmark_service.dart';
 import '../services/notification_service.dart';
+import '../services/teaching_service.dart';
 import 'home/home_screen.dart';
 import 'saved/saved_screen.dart';
+import 'teaching/teaching_screen.dart';
 
-/// Root scaffold: bottom navigation between the discovery feed and saved
-/// advertisements. The branded header (logo, greeting, theme toggle) lives
-/// inside the home feed itself.
+/// Root scaffold: bottom navigation between the discovery feed, teaching
+/// jobs and saved advertisements. The branded header lives inside each
+/// feed.
 class MainShell extends StatefulWidget {
   const MainShell({
     super.key,
     required this.themeController,
     required this.localeController,
     required this.bookmarkService,
+    required this.teachingBookmarks,
     required this.notificationService,
   });
 
   final ThemeController themeController;
   final LocaleController localeController;
   final BookmarkService bookmarkService;
+  final BookmarkService teachingBookmarks;
   final NotificationService notificationService;
 
   @override
@@ -33,6 +37,7 @@ class MainShell extends StatefulWidget {
 class _MainShellState extends State<MainShell> {
   int _index = 0;
   final AdvertisementService _service = AdvertisementService();
+  final TeachingService _teachingService = TeachingService();
 
   @override
   Widget build(BuildContext context) {
@@ -48,7 +53,15 @@ class _MainShellState extends State<MainShell> {
               themeController: widget.themeController,
               localeController: widget.localeController,
               notificationService: widget.notificationService,
-              onOpenSaved: () => setState(() => _index = 1),
+              onOpenSaved: () => setState(() => _index = 2),
+            ),
+            TeachingScreen(
+              service: _teachingService,
+              bookmarks: widget.bookmarkService,
+              teachingBookmarks: widget.teachingBookmarks,
+              themeController: widget.themeController,
+              localeController: widget.localeController,
+              notificationService: widget.notificationService,
             ),
             SavedScreen(
               service: _service,
@@ -66,6 +79,11 @@ class _MainShellState extends State<MainShell> {
             icon: const Icon(Icons.home_outlined),
             activeIcon: const Icon(Icons.home),
             label: s.home,
+          ),
+          BottomNavigationBarItem(
+            icon: const Icon(Icons.school_outlined),
+            activeIcon: const Icon(Icons.school),
+            label: s.teaching,
           ),
           BottomNavigationBarItem(
             icon: const Icon(Icons.bookmark_border),

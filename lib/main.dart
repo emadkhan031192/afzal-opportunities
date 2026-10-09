@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import 'app.dart';
+import 'core/constants/app_constants.dart';
 import 'core/l10n/locale_controller.dart';
 import 'core/theme/theme_controller.dart';
 import 'services/background_tasks.dart';
@@ -25,6 +26,11 @@ Future<void> main() async {
   final bookmarkService = BookmarkService();
   await bookmarkService.load();
 
+  final teachingBookmarks = BookmarkService(
+    storageKey: AppConstants.teachingBookmarksKey,
+  );
+  await teachingBookmarks.load();
+
   // Local notifications: channel setup + runtime permission (Android 13+).
   // The periodic background check runs even without permission; it just
   // cannot display anything until the user grants it.
@@ -37,6 +43,7 @@ Future<void> main() async {
       themeController: themeController,
       localeController: localeController,
       bookmarkService: bookmarkService,
+      teachingBookmarks: teachingBookmarks,
       notificationService: notifications,
     ),
   );
