@@ -113,12 +113,23 @@ service cloud.firestore {
         && request.resource.data.approvalStatus == 'pending';
     }
 
-    // True when a non-admin owner update leaves approvalStatus untouched.
+    // True when a non-admin owner update carries no privilege escalation.
+    // Owners may leave approvalStatus untouched, or send a live (approved)
+    // vacancy back to pending for re-approval after a material edit (see
+    // TeachingService.updateVacancy). Every other status transition —
+    // to approved, rejected or suspended, or from any non-approved status —
+    // is admin-only.
     function ownerUpdateClean() {
       return request.auth != null
         && request.auth.uid == resource.data.ownerUid
         && request.resource.data.ownerUid == resource.data.ownerUid
-        && request.resource.data.approvalStatus == resource.data.approvalStatus;
+        && (
+          request.resource.data.approvalStatus == resource.data.approvalStatus
+          || (
+            resource.data.approvalStatus == 'approved'
+            && request.resource.data.approvalStatus == 'pending'
+          )
+        );
     }
 
     match /teachingVacancies/{vacancyId} {
