@@ -140,7 +140,6 @@ class _DashboardBody extends StatelessWidget {
                       (v) => _VacancyRow(
                         vacancy: v,
                         service: service,
-                        canPost: auth.isEmailVerified,
                         onChanged: onChanged,
                       ),
                     )
@@ -281,13 +280,11 @@ class _VacancyRow extends StatelessWidget {
   const _VacancyRow({
     required this.vacancy,
     required this.service,
-    required this.canPost,
     required this.onChanged,
   });
 
   final TeachingVacancy vacancy;
   final TeachingService service;
-  final bool canPost;
   final VoidCallback onChanged;
 
   Color _statusColor(BuildContext context, String status) {

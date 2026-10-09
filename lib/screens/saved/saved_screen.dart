@@ -133,7 +133,6 @@ class _SavedScreenState extends State<SavedScreen> {
                         ),
                         child: JobListCard(
                           ad: ad,
-                          index: index,
                           isSaved: true,
                           onTap: () => _openDetails(ad),
                           onToggleSave: () => widget.bookmarks.toggle(ad.id),

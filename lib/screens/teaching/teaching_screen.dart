@@ -45,6 +45,13 @@ class _TeachingScreenState extends State<TeachingScreen> {
   final TextEditingController _searchController = TextEditingController();
   VacancyFilter _filter = const VacancyFilter();
   bool _savedOnly = false;
+  late final Stream<List<TeachingVacancy>> _vacanciesStream;
+
+  @override
+  void initState() {
+    super.initState();
+    _vacanciesStream = widget.service.watchApprovedVacancies();
+  }
 
   @override
   void dispose() {
@@ -117,7 +124,7 @@ class _TeachingScreenState extends State<TeachingScreen> {
           SliverToBoxAdapter(child: _searchRow(s, dark)),
           SliverToBoxAdapter(
             child: StreamBuilder<List<TeachingVacancy>>(
-              stream: widget.service.watchApprovedVacancies(),
+              stream: _vacanciesStream,
               builder: (context, snapshot) {
                 if (snapshot.connectionState == ConnectionState.waiting) {
                   return const Padding(
