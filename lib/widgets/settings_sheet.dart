@@ -148,6 +148,22 @@ class _SettingsSheetState extends State<SettingsSheet> {
                 dense: true,
               ),
             ),
+            ListTile(
+              leading: const Icon(Icons.refresh, color: BrandColors.mintDark),
+              title: Text(s.checkForUpdatesNow),
+              subtitle: Text(s.checkForUpdatesHint),
+              contentPadding: EdgeInsets.zero,
+              dense: true,
+              onTap: () async {
+                Navigator.of(context).pop();
+                await widget.notificationService.checkForUpdates();
+                if (context.mounted) {
+                  ScaffoldMessenger.of(
+                    context,
+                  ).showSnackBar(SnackBar(content: Text(s.checkCompleted)));
+                }
+              },
+            ),
             const SizedBox(height: 8),
             _SectionTitle(s.about),
             ListTile(

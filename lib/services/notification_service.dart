@@ -258,5 +258,58 @@ class NotificationService {
     } catch (e) {
       debugPrint('Failed to show notification: $e');
     }
+    // Log to the in-app inbox so the bell has something to show even
+    // if the system notification was missed or permission was denied.
+    await _logToInbox(title: title, body: body);
+  }
+
+  static const _inboxKey = 'notif_inbox';
+  static const _inboxReadKey = 'notif_inbox_read_count';
+
+  /// Records a fired notification in the in-app inbox (newest first,
+  /// capped at 50).
+  Future<void> _logToInbox({
+    required String title,
+    required String body,
+  }) async {
+    final prefs = await _store;
+    final raw = prefs.getStringList(_inboxKey) ?? [];
+    final entry =
+        '${DateTime.now().toUtc().toIso8601String()}|${_esc(title)}|${_esc(body)}';
+    raw.insert(0, entry);
+    final trimmed = raw.length > 50 ? raw.sublist(0, 50) : raw;
+    await prefs.setStringList(_inboxKey, trimmed);
+  }
+
+  static String _esc(String s) => s.replaceAll('|', ' ').replaceAll('\n', ' ');
+
+  /// Inbox entries as (timestamp, title, body), newest first.
+  Future<List<({DateTime at, String title, String body})>> getInbox() async {
+    final prefs = await _store;
+    final raw = prefs.getStringList(_inboxKey) ?? [];
+    final out = <({DateTime at, String title, String body})>[];
+    for (final line in raw) {
+      final parts = line.split('|');
+      if (parts.length < 3) continue;
+      final at = DateTime.tryParse(parts[0]) ?? DateTime.now().toUtc();
+      out.add((at: at, title: parts[1], body: parts.sublist(2).join('|')));
+    }
+    return out;
+  }
+
+  /// Number of inbox entries the user has not viewed yet.
+  Future<int> getUnreadCount() async {
+    final prefs = await _store;
+    final total = (prefs.getStringList(_inboxKey) ?? []).length;
+    final read = prefs.getInt(_inboxReadKey) ?? 0;
+    final unread = total - read;
+    return unread < 0 ? 0 : unread;
+  }
+
+  /// Marks all inbox entries as read (clears the bell dot).
+  Future<void> markInboxRead() async {
+    final prefs = await _store;
+    final total = (prefs.getStringList(_inboxKey) ?? []).length;
+    await prefs.setInt(_inboxReadKey, total);
   }
 }
