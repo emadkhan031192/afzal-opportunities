@@ -5,7 +5,6 @@ import '../core/l10n/app_localizations.dart';
 import '../core/theme/brand_colors.dart';
 import '../core/utils/deadline.dart';
 import '../models/teaching_vacancy.dart';
-import '../services/teaching_service.dart';
 import 'deadline_badge.dart';
 
 /// Public vacancy card for the Private Teaching Jobs feed.

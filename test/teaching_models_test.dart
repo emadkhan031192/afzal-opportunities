@@ -9,6 +9,8 @@ TeachingVacancy _vacancy({
   String qualification = 'BS Mathematics',
   String? experience,
   DateTime? deadline,
+  int? salaryMin,
+  int? salaryMax,
 }) {
   return TeachingVacancy(
     id: 'v1',
@@ -23,6 +25,8 @@ TeachingVacancy _vacancy({
     subjects: subjects,
     experienceRequired: experience,
     applicationDeadline: deadline,
+    salaryMin: salaryMin,
+    salaryMax: salaryMax,
   );
 }
 
