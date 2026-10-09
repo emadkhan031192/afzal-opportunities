@@ -135,7 +135,10 @@ service cloud.firestore {
       // go through the client as pending again (see TeachingService).
       allow create: if isAdmin() || ownerCreateClean();
       allow update: if isAdmin() || ownerUpdateClean();
-      allow delete: if isAdmin();
+      // Owners may delete their own postings; admins may delete anything.
+      allow delete: if isAdmin()
+        || (request.auth != null
+            && request.auth.uid == resource.data.ownerUid);
     }
 
     match /teachingOrganizations/{orgId} {

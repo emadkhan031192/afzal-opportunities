@@ -13,6 +13,7 @@ import '../../widgets/mockup_header.dart';
 import '../../widgets/settings_sheet.dart';
 import '../../widgets/state_views.dart';
 import '../../widgets/teaching_vacancy_card.dart';
+import 'auth/account_screen.dart';
 import 'vacancy_details_screen.dart';
 
 /// Public Private Teaching Jobs tab: browse approved vacancies without
@@ -231,6 +232,15 @@ class _TeachingScreenState extends State<TeachingScreen> {
               tooltip: s.savedJobs,
               active: _savedOnly,
               onPressed: () => setState(() => _savedOnly = !_savedOnly),
+            ),
+          ),
+          const SizedBox(width: 8),
+          _IconButton(
+            icon: Icons.person_outline,
+            tooltip: s.account,
+            active: false,
+            onPressed: () => Navigator.of(context).push(
+              MaterialPageRoute(builder: (_) => const AccountScreen()),
             ),
           ),
         ],

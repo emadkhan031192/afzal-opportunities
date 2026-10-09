@@ -136,6 +136,11 @@ class AppLocalizations {
   String get teachingTitle => _t('teachingTitle');
   String get teachingSubtitle => _t('teachingSubtitle');
   String get searchTeachingHint => _t('searchTeachingHint');
+  String get genderEligibility => _t('genderEligibility');
+  String get profileVisibilityLabel => _t('profileVisibilityLabel');
+  String get visibilityPrivate => _t('visibilityPrivate');
+  String get visibilityPublic => _t('visibilityPublic');
+  String get visibilityPublicNote => _t('visibilityPublicNote');
   String get district => _t('district');
   String get subject => _t('subject');
   String get qualification => _t('qualification');
@@ -176,8 +181,72 @@ class AppLocalizations {
   String get verifyEmailTitle => _t('verifyEmailTitle');
   String get verifyEmailBody => _t('verifyEmailBody');
   String get resendEmail => _t('resendEmail');
+  String get verificationResent => _t('verificationResent');
   String get forgotPassword => _t('forgotPassword');
   String get resetLinkSent => _t('resetLinkSent');
+  String get loginFailed => _t('loginFailed');
+  String get emailInUse => _t('emailInUse');
+  String get tooManyRequests => _t('tooManyRequests');
+  String get networkError => _t('networkError');
+  String get unknownError => _t('unknownError');
+
+  // Teaching auth & dashboards
+  String get createAccount => _t('createAccount');
+  String get iAmInstitution => _t('iAmInstitution');
+  String get iAmTeacher => _t('iAmTeacher');
+  String get haveAccount => _t('haveAccount');
+  String get needAccount => _t('needAccount');
+  String get institutionName => _t('institutionName');
+  String get institutionType => _t('institutionType');
+  String get contactPerson => _t('contactPerson');
+  String get contactNumber => _t('contactNumber');
+  String get typeSchool => _t('typeSchool');
+  String get typeAcademy => _t('typeAcademy');
+  String get typeCollege => _t('typeCollege');
+  String get typeOther => _t('typeOther');
+  String get professionalSummary => _t('professionalSummary');
+  String get experienceYears => _t('experienceYears');
+  String get preferredEmploymentType => _t('preferredEmploymentType');
+  String get cvUpload => _t('cvUpload');
+  String get cvUploadBlocked => _t('cvUploadBlocked');
+  String get cvUploadBlockedDesc => _t('cvUploadBlockedDesc');
+  String get myVacancies => _t('myVacancies');
+  String get postVacancy => _t('postVacancy');
+  String get editVacancy => _t('editVacancy');
+  String get myProfile => _t('myProfile');
+  String get accountStatus => _t('accountStatus');
+  String get statusPending => _t('statusPending');
+  String get statusApproved => _t('statusApproved');
+  String get statusRejected => _t('statusRejected');
+  String get statusSuspended => _t('statusSuspended');
+  String get pendingReviewDesc => _t('pendingReviewDesc');
+  String get rejectedDesc => _t('rejectedDesc');
+  String get suspendedDesc => _t('suspendedDesc');
+  String get jobTitleLabel => _t('jobTitleLabel');
+  String get gradeLevels => _t('gradeLevels');
+  String get positionsCount => _t('positionsCount');
+  String get salaryMin => _t('salaryMin');
+  String get salaryMax => _t('salaryMax');
+  String get salaryOptional => _t('salaryOptional');
+  String get applicationMethod => _t('applicationMethod');
+  String get methodUrl => _t('methodUrl');
+  String get methodContact => _t('methodContact');
+  String get methodBoth => _t('methodBoth');
+  String get applicationUrl => _t('applicationUrl');
+  String get selectDate => _t('selectDate');
+  String get clearDate => _t('clearDate');
+  String get saveProfile => _t('saveProfile');
+  String get profileSaved => _t('profileSaved');
+  String get vacancySubmitted => _t('vacancySubmitted');
+  String get vacancySubmittedDesc => _t('vacancySubmittedDesc');
+  String get vacancyUpdated => _t('vacancyUpdated');
+  String get verificationRequired => _t('verificationRequired');
+  String get verificationRequiredDesc => _t('verificationRequiredDesc');
+  String get checkVerification => _t('checkVerification');
+  String get browseAsGuest => _t('browseAsGuest');
+  String get deleteVacancy => _t('deleteVacancy');
+  String get deleteVacancyConfirm => _t('deleteVacancyConfirm');
+  String get vacancyDeleted => _t('vacancyDeleted');
 
   // Generic actions
   String get ok => _t('ok');
@@ -279,6 +348,12 @@ class AppLocalizations {
     'teachingSubtitle': 'Verified vacancies from private schools & academies',
     'searchTeachingHint': 'Search teaching jobs…',
     'district': 'District',
+    'genderEligibility': 'Gender eligibility',
+    'profileVisibilityLabel': 'Profile visibility',
+    'visibilityPrivate': 'Private — only you and the admin',
+    'visibilityPublic': 'Public — visible to approved institutions',
+    'visibilityPublicNote':
+        'Public visibility takes effect only after admin approval of your profile.',
     'subject': 'Subject',
     'qualification': 'Qualification',
     'experience': 'Experience',
@@ -317,8 +392,76 @@ class AppLocalizations {
     'verifyEmailBody':
         'We sent a verification link to your email. Verify it before continuing.',
     'resendEmail': 'Resend email',
+    'verificationResent': 'Verification email sent. Check your inbox.',
     'forgotPassword': 'Forgot password?',
     'resetLinkSent': 'Password reset link sent. Check your inbox.',
+    'loginFailed': 'Incorrect email or password.',
+    'emailInUse': 'This email is already registered. Try logging in.',
+    'tooManyRequests': 'Too many attempts. Please try again later.',
+    'networkError': 'Network error. Check your connection and try again.',
+    'unknownError': 'Something went wrong. Please try again.',
+    'createAccount': 'Create account',
+    'iAmInstitution': "I'm an institution",
+    'iAmTeacher': "I'm a teacher",
+    'haveAccount': 'Already have an account? Log in',
+    'needAccount': "Don't have an account? Register",
+    'institutionName': 'Institution name',
+    'institutionType': 'Institution type',
+    'contactPerson': 'Contact person',
+    'contactNumber': 'Contact number',
+    'typeSchool': 'School',
+    'typeAcademy': 'Academy / tuition centre',
+    'typeCollege': 'College',
+    'typeOther': 'Other',
+    'professionalSummary': 'Professional summary',
+    'experienceYears': 'Years of experience',
+    'preferredEmploymentType': 'Preferred employment type',
+    'cvUpload': 'CV upload',
+    'cvUploadBlocked': 'CV upload coming soon',
+    'cvUploadBlockedDesc':
+        'CV uploads need a storage upgrade that is not enabled yet. You can complete your profile now and add your CV later.',
+    'myVacancies': 'My vacancies',
+    'postVacancy': 'Post a vacancy',
+    'editVacancy': 'Edit vacancy',
+    'myProfile': 'My profile',
+    'accountStatus': 'Account status',
+    'statusPending': 'Pending review',
+    'statusApproved': 'Approved',
+    'statusRejected': 'Rejected',
+    'statusSuspended': 'Suspended',
+    'pendingReviewDesc':
+        'Your submission is waiting for admin review. You will be able to use it once approved.',
+    'rejectedDesc': 'This submission was not approved. Reason:',
+    'suspendedDesc':
+        'This account is suspended. Contact Afzal E Services for help.',
+    'jobTitleLabel': 'Job title',
+    'gradeLevels': 'Grade levels (e.g. 9–10)',
+    'positionsCount': 'Number of positions',
+    'salaryMin': 'Minimum salary (Rs)',
+    'salaryMax': 'Maximum salary (Rs)',
+    'salaryOptional': 'Optional — leave empty if not disclosed',
+    'applicationMethod': 'Application method',
+    'methodUrl': 'Online link',
+    'methodContact': 'Contact instructions',
+    'methodBoth': 'Both',
+    'applicationUrl': 'Application link',
+    'selectDate': 'Select date',
+    'clearDate': 'Clear',
+    'saveProfile': 'Save profile',
+    'profileSaved': 'Profile saved.',
+    'vacancySubmitted': 'Vacancy submitted',
+    'vacancySubmittedDesc':
+        'Your vacancy is pending admin review and will appear publicly once approved.',
+    'vacancyUpdated': 'Vacancy updated.',
+    'verificationRequired': 'Email verification required',
+    'verificationRequiredDesc':
+        'Verify your email address before posting vacancies or publishing your profile.',
+    'checkVerification': "I've verified — check again",
+    'browseAsGuest': 'Browse as guest',
+    'deleteVacancy': 'Delete vacancy',
+    'deleteVacancyConfirm':
+        'Are you sure you want to delete this vacancy? This cannot be undone.',
+    'vacancyDeleted': 'Vacancy deleted.',
     'ok': 'OK',
     'cancel': 'Cancel',
     'getStarted': 'Get Started',
@@ -420,6 +563,12 @@ class AppLocalizations {
     'teachingSubtitle': 'پرائیویٹ اسکولوں اور اکیڈمیز کی تصدیق شدہ آسامیاں',
     'searchTeachingHint': 'تدریسی نوکریاں تلاش کریں…',
     'district': 'ضلع',
+    'genderEligibility': 'صنفی اہلیت',
+    'profileVisibilityLabel': 'پروفائل کی نمائش',
+    'visibilityPrivate': 'پرائیویٹ — صرف آپ اور ایڈمن',
+    'visibilityPublic': 'پبلک — منظور شدہ اداروں کو نظر آئے گا',
+    'visibilityPublicNote':
+        'پبلک نمائش آپ کے پروفائل کی ایڈمن منظوری کے بعد ہی فعال ہوگی۔',
     'subject': 'مضمون',
     'qualification': 'تعلیمی قابلیت',
     'experience': 'تجربہ',
@@ -458,8 +607,76 @@ class AppLocalizations {
     'verifyEmailBody':
         'آپ کے ای میل پر تصدیقی لنک بھیجا گیا ہے۔ جاری رکھنے سے پہلے تصدیق کریں۔',
     'resendEmail': 'ای میل دوبارہ بھیجیں',
+    'verificationResent': 'تصدیقی ای میل بھیج دی گئی۔ ان باکس چیک کریں۔',
     'forgotPassword': 'پاس ورڈ بھول گئے؟',
     'resetLinkSent': 'پاس ورڈ ری سیٹ لنک بھیج دیا گیا۔ ان باکس چیک کریں۔',
+    'loginFailed': 'ای میل یا پاس ورڈ غلط ہے۔',
+    'emailInUse': 'یہ ای میل پہلے سے رجسٹرڈ ہے۔ لاگ اِن کرنے کی کوشش کریں۔',
+    'tooManyRequests': 'بہت زیادہ کوششیں۔ کچھ دیر بعد دوبارہ کوشش کریں۔',
+    'networkError': 'نیٹ ورک میں مسئلہ۔ کنکشن چیک کر کے دوبارہ کوشش کریں۔',
+    'unknownError': 'کچھ غلط ہو گیا۔ دوبارہ کوشش کریں۔',
+    'createAccount': 'اکاؤنٹ بنائیں',
+    'iAmInstitution': 'میں ایک ادارہ ہوں',
+    'iAmTeacher': 'میں ایک استاد ہوں',
+    'haveAccount': 'پہلے سے اکاؤنٹ ہے؟ لاگ اِن کریں',
+    'needAccount': 'اکاؤنٹ نہیں ہے؟ رجسٹر کریں',
+    'institutionName': 'ادارے کا نام',
+    'institutionType': 'ادارے کی قسم',
+    'contactPerson': 'رابطہ شخص',
+    'contactNumber': 'رابطہ نمبر',
+    'typeSchool': 'اسکول',
+    'typeAcademy': 'اکیڈمی / ٹیوشن سینٹر',
+    'typeCollege': 'کالج',
+    'typeOther': 'دیگر',
+    'professionalSummary': 'پیشہ ورانہ خلاصہ',
+    'experienceYears': 'تجربے کے سال',
+    'preferredEmploymentType': 'پسندیدہ ملازمت کی نوعیت',
+    'cvUpload': 'سی وی اپ لوڈ',
+    'cvUploadBlocked': 'سی وی اپ لوڈ جلد آ رہا ہے',
+    'cvUploadBlockedDesc':
+        'سی وی اپ لوڈ کے لیے اسٹوریج اپ گریڈ درکار ہے جو ابھی فعال نہیں۔ آپ ابھی اپنا پروفائل مکمل کر سکتے ہیں اور سی وی بعد میں شامل کر سکتے ہیں۔',
+    'myVacancies': 'میری آسامیاں',
+    'postVacancy': 'آسامی شائع کریں',
+    'editVacancy': 'آسامی میں ترمیم',
+    'myProfile': 'میرا پروفائل',
+    'accountStatus': 'اکاؤنٹ کی حیثیت',
+    'statusPending': 'جائزہ زیر التواء',
+    'statusApproved': 'منظور شدہ',
+    'statusRejected': 'مسترد شدہ',
+    'statusSuspended': 'معطل شدہ',
+    'pendingReviewDesc':
+        'آپ کی درخواست ایڈمن کے جائزے کی منتظر ہے۔ منظوری کے بعد آپ اسے استعمال کر سکیں گے۔',
+    'rejectedDesc': 'یہ درخواست منظور نہیں ہوئی۔ وجہ:',
+    'suspendedDesc':
+        'یہ اکاؤنٹ معطل ہے۔ مدد کے لیے افضل ای سروسز سے رابطہ کریں۔',
+    'jobTitleLabel': 'آسامی کا عنوان',
+    'gradeLevels': 'جماعتیں (مثلاً 9–10)',
+    'positionsCount': 'آسامیوں کی تعداد',
+    'salaryMin': 'کم از کم تنخواہ (روپے)',
+    'salaryMax': 'زیادہ سے زیادہ تنخواہ (روپے)',
+    'salaryOptional': 'اختیاری — ظاہر نہ کرنا ہو تو خالی چھوڑیں',
+    'applicationMethod': 'اپلائی کا طریقہ',
+    'methodUrl': 'آن لائن لنک',
+    'methodContact': 'رابطے کی ہدایات',
+    'methodBoth': 'دونوں',
+    'applicationUrl': 'اپلائی کا لنک',
+    'selectDate': 'تاریخ منتخب کریں',
+    'clearDate': 'صاف کریں',
+    'saveProfile': 'پروفائل محفوظ کریں',
+    'profileSaved': 'پروفائل محفوظ ہو گیا۔',
+    'vacancySubmitted': 'آسامی جمع ہو گئی',
+    'vacancySubmittedDesc':
+        'آپ کی آسامی ایڈمن کے جائزے کی منتظر ہے اور منظوری کے بعد عوامی طور پر نظر آئے گی۔',
+    'vacancyUpdated': 'آسامی اپ ڈیٹ ہو گئی۔',
+    'verificationRequired': 'ای میل کی تصدیق ضروری ہے',
+    'verificationRequiredDesc':
+        'آسامیاں پوسٹ کرنے یا پروفائل شائع کرنے سے پہلے اپنے ای میل کی تصدیق کریں۔',
+    'checkVerification': 'تصدیق ہو گئی — دوبارہ چیک کریں',
+    'browseAsGuest': 'مہمان کے طور پر دیکھیں',
+    'deleteVacancy': 'آسامی حذف کریں',
+    'deleteVacancyConfirm':
+        'کیا آپ واقعی یہ آسامی حذف کرنا چاہتے ہیں؟ یہ واپس نہیں ہو سکے گا۔',
+    'vacancyDeleted': 'آسامی حذف ہو گئی۔',
     'ok': 'ٹھیک ہے',
     'cancel': 'منسوخ کریں',
     'getStarted': 'شروع کریں',

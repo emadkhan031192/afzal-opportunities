@@ -260,8 +260,7 @@ class TeachingService {
 
   /// Updates the caller's own vacancy. Material changes to an approved
   /// vacancy send it back to 'pending' for admin re-approval.
-  Future<void> updateVacancy(TeachingVacancy vacancy) async {
-    final data = vacancy.toJson()
+  Future<void> updateVacancy(TeachingVacancy vacancy) async {    final data = vacancy.toJson()
       ..['updatedAt'] = FieldValue.serverTimestamp();
     if (vacancy.isApproved) {
       // Material change to a live vacancy: re-approval required.
@@ -276,6 +275,14 @@ class TeachingService {
         .collection(AppConstants.teachingVacanciesCollection)
         .doc(vacancy.id)
         .update(data);
+  }
+
+  /// Deletes the caller's own vacancy (rules enforce ownership).
+  Future<void> deleteVacancy(String id) async {
+    await _db
+        .collection(AppConstants.teachingVacanciesCollection)
+        .doc(id)
+        .delete();
   }
 
   // ------------------------------------------------------------------
