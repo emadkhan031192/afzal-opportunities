@@ -82,6 +82,8 @@ class AppConstants {
   // External links.
   static const String whatsappChannelUrl =
       'https://whatsapp.com/channel/0029Va8EBlpLI8YRkHbALM1b';
+  static const String whatsappJobsGroupUrl =
+      'https://chat.whatsapp.com/J6AwEs4kl1P5aVEYHCTfPq';
 
   // Teaching module Firestore collections.
   static const String teachingOrganizationsCollection = 'teachingOrganizations';

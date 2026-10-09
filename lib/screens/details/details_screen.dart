@@ -6,6 +6,7 @@ import '../../core/constants/app_constants.dart';
 import '../../core/l10n/app_localizations.dart';
 import '../../core/theme/brand_colors.dart';
 import '../../core/utils/deadline.dart';
+import '../../core/utils/share_text.dart';
 import '../../core/utils/url_utils.dart';
 import '../../models/advertisement.dart';
 import '../../services/bookmark_service.dart';
@@ -38,34 +39,8 @@ class DetailsScreen extends StatelessWidget {
   /// link back (official source URL when available).
   Future<void> _shareAd(BuildContext context) async {
     final s = AppLocalizations.of(context);
-    final info = getDeadlineInfo(
-      lastDate: ad.lastDate,
-      publishedAt: ad.publishedAt,
-    );
-    final deadlineLine = ad.lastDate != null
-        ? '${s.lastDate}: ${DateFormat('d MMMM yyyy').format(ad.lastDate!)} '
-              '(${s.deadlineLabel(info)})'
-        : '${s.lastDate}: ${s.notSpecified}';
-    final link = (ad.sourceUrl ?? '').trim().isNotEmpty
-        ? ad.sourceUrl!.trim()
-        : (ad.applicationUrl ?? '').trim();
-    final text = StringBuffer()
-      ..writeln(ad.title)
-      ..writeln(ad.organization)
-      ..writeln(deadlineLine)
-      ..writeln()
-      ..writeln(_shortDescription(ad.description));
-    if (link.isNotEmpty) {
-      text.writeln(link);
-    }
-    await SharePlus.instance.share(
-      ShareParams(text: text.toString(), subject: ad.title),
-    );
-  }
-
-  static String _shortDescription(String description) {
-    final trimmed = description.trim().replaceAll(RegExp(r'\s+'), ' ');
-    return trimmed.length > 220 ? '${trimmed.substring(0, 220)}…' : trimmed;
+    final text = buildAdShareText(ad, s, forWhatsApp: false);
+    await SharePlus.instance.share(ShareParams(text: text, subject: ad.title));
   }
 
   @override
