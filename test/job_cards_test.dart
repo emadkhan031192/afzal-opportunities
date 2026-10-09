@@ -47,6 +47,9 @@ void main() {
         height: 200,
       ),
     );
+    // The app localization delegate loads asynchronously; one extra pump
+    // lets it resolve before asserting.
+    await tester.pump();
     expect(find.textContaining('Lecturer'), findsOneWidget);
     expect(find.textContaining('days left'), findsOneWidget);
     expect(tester.takeException(), isNull);
@@ -65,6 +68,7 @@ void main() {
         height: 320,
       ),
     );
+    await tester.pump();
     expect(find.textContaining('days left'), findsOneWidget);
     expect(find.text('Jobs'), findsOneWidget);
     expect(tester.takeException(), isNull);
@@ -79,6 +83,7 @@ void main() {
         home: SplashScreen(onDone: () => done = true),
       ),
     );
+    await tester.pump();
     expect(find.text('AFZAL'), findsOneWidget);
     expect(find.text('Get Started'), findsOneWidget);
     await tester.tap(find.text('Get Started'));

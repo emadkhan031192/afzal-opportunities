@@ -35,38 +35,43 @@ class DeadlineBadge extends StatelessWidget {
   Widget build(BuildContext context) {
     final s = AppLocalizations.of(context);
     final palette = _palette(context, info.tone);
-    final pills = <Widget>[
-      if (info.isNew) ...[
-        _Pill(
-          label: s.newBadge,
-          icon: Icons.auto_awesome_outlined,
-          background: BrandColors.mint,
-          foreground: BrandColors.nightBlack,
-          compact: compact,
-          expanded: false,
-        ),
-        SizedBox(width: compact ? 6 : 8),
-      ],
-      _Pill(
-        label: s.deadlineLabel(info),
-        icon: Icons.schedule_outlined,
-        background: palette.background,
-        foreground: palette.foreground,
-        compact: compact,
-        expanded: expanded,
-      ),
-    ];
+    final deadlinePill = _Pill(
+      label: s.deadlineLabel(info),
+      icon: Icons.schedule_outlined,
+      background: palette.background,
+      foreground: palette.foreground,
+      compact: compact,
+      expanded: expanded,
+    );
     if (expanded) {
       return Column(
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           if (info.isNew) ...[const _NewTag(), const SizedBox(height: 6)],
-          pills.last,
+          deadlinePill,
         ],
       );
     }
-    return Row(mainAxisSize: MainAxisSize.min, children: pills);
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        if (info.isNew) ...[
+          _Pill(
+            label: s.newBadge,
+            icon: Icons.auto_awesome_outlined,
+            background: BrandColors.mint,
+            foreground: BrandColors.nightBlack,
+            compact: compact,
+            expanded: false,
+          ),
+          SizedBox(width: compact ? 6 : 8),
+        ],
+        // The deadline pill shrinks (ellipsizing its label) instead of
+        // overflowing narrow cards.
+        Flexible(child: deadlinePill),
+      ],
+    );
   }
 
   _BadgePalette _palette(BuildContext context, DeadlineTone tone) {

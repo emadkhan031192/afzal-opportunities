@@ -2,6 +2,7 @@ import 'package:afzal_opportunities/core/l10n/app_localizations.dart';
 import 'package:afzal_opportunities/models/teaching_vacancy.dart';
 import 'package:afzal_opportunities/widgets/teaching_vacancy_card.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:intl/date_symbol_data_local.dart';
 
@@ -80,7 +81,12 @@ void main() {
   testWidgets('TeachingVacancyCard renders in Urdu', (tester) async {
     await tester.pumpWidget(
       const MaterialApp(
-        localizationsDelegates: [AppLocalizationsDelegate()],
+        localizationsDelegates: [
+          AppLocalizationsDelegate(),
+          GlobalMaterialLocalizations.delegate,
+          GlobalWidgetsLocalizations.delegate,
+          GlobalCupertinoLocalizations.delegate,
+        ],
         supportedLocales: [Locale('en'), Locale('ur')],
         locale: Locale('ur'),
         home: _UrduCardHost(),
