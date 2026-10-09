@@ -1,6 +1,9 @@
 import 'package:afzal_opportunities/app.dart';
+import 'package:afzal_opportunities/core/constants/app_constants.dart';
+import 'package:afzal_opportunities/core/l10n/locale_controller.dart';
 import 'package:afzal_opportunities/core/theme/theme_controller.dart';
 import 'package:afzal_opportunities/services/bookmark_service.dart';
+import 'package:afzal_opportunities/services/notification_service.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:integration_test/integration_test.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -15,11 +18,23 @@ void main() {
 
       final themeController = ThemeController();
       await themeController.load();
+      final localeController = LocaleController();
+      await localeController.load();
       final bookmarks = BookmarkService();
       await bookmarks.load();
+      final teachingBookmarks = BookmarkService(
+        storageKey: AppConstants.teachingBookmarksKey,
+      );
+      await teachingBookmarks.load();
 
       await tester.pumpWidget(
-        AfzalApp(themeController: themeController, bookmarkService: bookmarks),
+        AfzalApp(
+          themeController: themeController,
+          localeController: localeController,
+          bookmarkService: bookmarks,
+          teachingBookmarks: teachingBookmarks,
+          notificationService: NotificationService(),
+        ),
       );
       await tester.pumpAndSettle();
 

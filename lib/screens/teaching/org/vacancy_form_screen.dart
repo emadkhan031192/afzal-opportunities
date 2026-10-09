@@ -8,7 +8,7 @@ import '../../../models/teaching_vacancy.dart';
 import '../../../services/teaching_auth.dart';
 import '../../../services/teaching_service.dart';
 import '../../../widgets/teaching_form_fields.dart';
-import '../../auth/verify_email_screen.dart';
+import '../auth/verify_email_screen.dart';
 
 /// Vacancy submission / edit form for organizations.
 ///

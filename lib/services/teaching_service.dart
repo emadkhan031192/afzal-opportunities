@@ -3,9 +3,9 @@ import 'package:flutter/foundation.dart';
 
 import '../core/constants/app_constants.dart';
 import '../core/utils/deadline.dart' show pktNow;
+import '../models/teaching_accounts.dart';
+import '../models/teaching_vacancy.dart';
 import 'firebase_config.dart';
-import 'teaching_accounts.dart';
-import 'teaching_vacancy.dart';
 
 /// Filters for the public teaching-vacancy feed. All optional; filtering
 /// beyond the approval status happens client-side so no composite

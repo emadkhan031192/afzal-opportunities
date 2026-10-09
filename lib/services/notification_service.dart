@@ -126,11 +126,14 @@ class NotificationService {
     final seenIds = prefs.getStringList(AppConstants.notifSeenIdsKey) ?? [];
 
     // New published advertisements since the last check.
-    if (await isEnabled(NotificationType.newAds) && !isFirstRun) {
+    final lastCheckTime = lastCheck;
+    if (await isEnabled(NotificationType.newAds) &&
+        !isFirstRun &&
+        lastCheckTime != null) {
       for (final ad in ads) {
         final publishedAt = ad.publishedAt ?? ad.createdAt;
         if (publishedAt == null) continue;
-        if (!publishedAt.toUtc().isAfter(lastCheck!)) continue;
+        if (!publishedAt.toUtc().isAfter(lastCheckTime)) continue;
         if (seenIds.contains(_seenKey(ad.id))) continue;
         await _show(
           id: ad.id.hashCode,

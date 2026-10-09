@@ -113,7 +113,8 @@ class LabeledDropdown<T> extends StatelessWidget {
           Text(label, style: Theme.of(context).textTheme.labelLarge),
           const SizedBox(height: 6),
           DropdownButtonFormField<T>(
-            value: value,
+            key: ValueKey(value),
+            initialValue: value,
             items: items,
             onChanged: onChanged,
             validator: validator,

@@ -47,7 +47,9 @@ class VacancyDetailsScreen extends StatelessWidget {
       ..writeln(_short(v.description));
     final link = (v.applicationUrl ?? '').trim();
     if (link.isNotEmpty) text.writeln(link);
-    await Share.share(text.toString(), subject: v.jobTitle);
+    await SharePlus.instance.share(
+      ShareParams(text: text.toString(), subject: v.jobTitle),
+    );
   }
 
   static String _short(String text) {
@@ -55,21 +57,11 @@ class VacancyDetailsScreen extends StatelessWidget {
     return trimmed.length > 220 ? '${trimmed.substring(0, 220)}…' : trimmed;
   }
 
-  Future<void> _openUrl(BuildContext context, String? url) async {
-    final opened = await openUrl(url);
-    if (!opened && context.mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(AppLocalizations.of(context).linkOpenFailed)),
-      );
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final s = AppLocalizations.of(context);
     final v = vacancy;
-    final dark = theme.brightness == Brightness.dark;
     final info = getDeadlineInfo(
       lastDate: v.applicationDeadline,
       publishedAt: v.publishedAt,
@@ -395,9 +387,11 @@ class _ApplyBar extends StatelessWidget {
           children: [
             Expanded(
               child: OutlinedButton.icon(
-                onPressed: () => Share.share(
-                  '${vacancy.jobTitle}\n${vacancy.institutionName}',
-                  subject: vacancy.jobTitle,
+                onPressed: () => SharePlus.instance.share(
+                  ShareParams(
+                    text: '${vacancy.jobTitle}\n${vacancy.institutionName}',
+                    subject: vacancy.jobTitle,
+                  ),
                 ),
                 icon: const Icon(Icons.share_outlined),
                 label: Text(s.share),

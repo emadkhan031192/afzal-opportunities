@@ -70,7 +70,9 @@ class _TeacherDashboardState extends State<TeacherDashboard> {
           if (profile == null) {
             return ErrorView(
               message: s.somethingWentWrong,
-              onRetry: () => setState(() {}),
+              onRetry: () async {
+                setState(() {});
+              },
             );
           }
           return _Body(

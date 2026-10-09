@@ -137,19 +137,23 @@ class _TeachingScreenState extends State<TeachingScreen> {
                     padding: const EdgeInsets.only(top: 60),
                     child: ErrorView(
                       message: s.somethingWentWrong,
-                      onRetry: () => setState(() {}),
+                      onRetry: () async {
+                        setState(() {});
+                      },
                     ),
                   );
                 }
-                var vacancies = TeachingService.applyFilter(
+                final allVacancies = TeachingService.applyFilter(
                   snapshot.data ?? [],
                   _filter,
                 );
-                if (_savedOnly) {
-                  vacancies = vacancies
-                      .where((v) => widget.teachingBookmarks.isBookmarked(v.id))
-                      .toList();
-                }
+                final vacancies = _savedOnly
+                    ? allVacancies
+                          .where(
+                            (v) => widget.teachingBookmarks.isBookmarked(v.id),
+                          )
+                          .toList()
+                    : allVacancies;
                 if (vacancies.isEmpty) {
                   return Padding(
                     padding: const EdgeInsets.only(top: 40),
@@ -397,7 +401,8 @@ class _TeachingFilterSheetState extends State<_TeachingFilterSheet> {
             Text(s.district, style: theme.textTheme.labelLarge),
             const SizedBox(height: 8),
             DropdownButtonFormField<String>(
-              value: _district.isEmpty ? null : _district,
+              key: ValueKey(_district),
+              initialValue: _district.isEmpty ? null : _district,
               hint: Text(s.anyOption),
               items: [
                 DropdownMenuItem(value: '', child: Text(s.anyOption)),

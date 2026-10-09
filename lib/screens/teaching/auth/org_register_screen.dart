@@ -48,7 +48,6 @@ class _OrgRegisterScreenState extends State<OrgRegisterScreen> {
   }
 
   Future<void> _register() async {
-    final s = AppLocalizations.of(context);
     if (!_formKey.currentState!.validate()) return;
     setState(() {
       _busy = true;

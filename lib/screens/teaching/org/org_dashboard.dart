@@ -53,7 +53,9 @@ class _OrgDashboardState extends State<OrgDashboard> {
           if (org == null) {
             return ErrorView(
               message: s.somethingWentWrong,
-              onRetry: () => setState(() {}),
+              onRetry: () async {
+                setState(() {});
+              },
             );
           }
           return _DashboardBody(
@@ -78,7 +80,7 @@ class _OrgDashboardState extends State<OrgDashboard> {
   }
 }
 
-class _DashboardBody extends StatelessWidget {
+class _DashboardBody extends StatefulWidget {
   const _DashboardBody({
     required this.auth,
     required this.service,
@@ -92,8 +94,26 @@ class _DashboardBody extends StatelessWidget {
   final VoidCallback onChanged;
 
   @override
+  State<_DashboardBody> createState() => _DashboardBodyState();
+}
+
+class _DashboardBodyState extends State<_DashboardBody> {
+  late final Stream<List<TeachingVacancy>> _vacanciesStream;
+
+  @override
+  void initState() {
+    super.initState();
+    _vacanciesStream = widget.service.watchMyVacancies(
+      widget.auth.currentUser!.uid,
+    );
+  }
+
+  @override
   Widget build(BuildContext context) {
-    final uid = auth.currentUser!.uid;
+    final auth = widget.auth;
+    final service = widget.service;
+    final org = widget.org;
+    final onChanged = widget.onChanged;
     return RefreshIndicator(
       onRefresh: () async => onChanged(),
       child: ListView(
@@ -115,7 +135,7 @@ class _DashboardBody extends StatelessWidget {
           ),
           const SizedBox(height: 8),
           StreamBuilder<List<TeachingVacancy>>(
-            stream: service.watchMyVacancies(uid),
+            stream: _vacanciesStream,
             builder: (context, snapshot) {
               if (snapshot.connectionState == ConnectionState.waiting) {
                 return const Padding(

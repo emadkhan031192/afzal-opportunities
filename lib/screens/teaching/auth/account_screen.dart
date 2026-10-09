@@ -155,7 +155,7 @@ class _SignedInView extends StatelessWidget {
         if (snapshot.hasError) {
           return ErrorView(
             message: AppLocalizations.of(context).somethingWentWrong,
-            onRetry: () {},
+            onRetry: () async {},
           );
         }
         final results = snapshot.data ?? [];

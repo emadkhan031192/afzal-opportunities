@@ -58,7 +58,9 @@ class DetailsScreen extends StatelessWidget {
     if (link.isNotEmpty) {
       text.writeln(link);
     }
-    await Share.share(text.toString(), subject: ad.title);
+    await SharePlus.instance.share(
+      ShareParams(text: text.toString(), subject: ad.title),
+    );
   }
 
   static String _shortDescription(String description) {

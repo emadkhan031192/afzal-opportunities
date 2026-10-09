@@ -4,8 +4,6 @@ import 'package:flutter/services.dart';
 import '../../core/constants/app_constants.dart';
 import '../../core/l10n/app_localizations.dart';
 import '../../models/teaching_accounts.dart';
-import '../../models/teaching_vacancy.dart';
-import '../../services/teaching_auth.dart';
 import '../../services/teaching_service.dart';
 import '../../widgets/teaching_form_fields.dart';
 
