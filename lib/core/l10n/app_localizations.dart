@@ -179,6 +179,11 @@ class AppLocalizations {
   // Generic actions
   String get ok => _t('ok');
   String get cancel => _t('cancel');
+  String get getStarted => _t('getStarted');
+  String get taglineA1 => _t('taglineA1');
+  String get taglineA2 => _t('taglineA2');
+  String get taglineB1 => _t('taglineB1');
+  String get taglineB2 => _t('taglineB2');
   String get save => _t('save');
   String get delete => _t('delete');
   String get edit => _t('edit');
@@ -310,6 +315,11 @@ class AppLocalizations {
     'resetLinkSent': 'Password reset link sent. Check your inbox.',
     'ok': 'OK',
     'cancel': 'Cancel',
+    'getStarted': 'Get Started',
+    'taglineA1': 'Create Your',
+    'taglineA2': 'Future.',
+    'taglineB1': 'Shape',
+    'taglineB2': 'Your Dream.',
     'save': 'Save',
     'delete': 'Delete',
     'edit': 'Edit',
@@ -443,6 +453,11 @@ class AppLocalizations {
     'resetLinkSent': 'پاس ورڈ ری سیٹ لنک بھیج دیا گیا۔ ان باکس چیک کریں۔',
     'ok': 'ٹھیک ہے',
     'cancel': 'منسوخ کریں',
+    'getStarted': 'شروع کریں',
+    'taglineA1': 'اپنا',
+    'taglineA2': 'مستقبل بنائیں۔',
+    'taglineB1': 'اپنے خواب',
+    'taglineB2': 'سجائیں۔',
     'save': 'محفوظ کریں',
     'delete': 'حذف کریں',
     'edit': 'ترمیم کریں',
