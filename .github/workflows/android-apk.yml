@@ -52,8 +52,8 @@ jobs:
   build-aab:
     name: Build signed AAB (Play Store)
     runs-on: ubuntu-latest
-    # Only on main pushes: PRs must not consume the signing secrets.
-    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    # Only on main: PRs must not consume the signing secrets.
+    if: github.ref == 'refs/heads/main' && (github.event_name == 'push' || github.event_name == 'workflow_dispatch')
     steps:
       - name: Check out repository
         uses: actions/checkout@v4
