@@ -5,11 +5,12 @@ import '../core/theme/brand_colors.dart';
 
 /// App header from the user's mockups: the "A" mark SVG beside the
 /// "AFZAL-E SERVICES" wordmark (mint "-E"), with the active section title
-/// ("Jobs", "Scholarships", …) on the right.
+/// ("Jobs", "Scholarships", …) on the right plus a settings button.
 class MockupHeader extends StatelessWidget {
-  const MockupHeader({super.key, required this.sectionTitle});
+  const MockupHeader({super.key, required this.sectionTitle, this.onOpenSettings});
 
   final String sectionTitle;
+  final VoidCallback? onOpenSettings;
 
   @override
   Widget build(BuildContext context) {
@@ -55,6 +56,14 @@ class MockupHeader extends StatelessWidget {
             color: ink,
           ),
         ),
+        if (onOpenSettings != null) ...[
+          const SizedBox(width: 4),
+          IconButton(
+            onPressed: onOpenSettings,
+            icon: Icon(Icons.settings_outlined, color: ink),
+            tooltip: 'Settings',
+          ),
+        ],
       ],
     );
   }

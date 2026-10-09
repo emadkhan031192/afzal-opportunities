@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../core/constants/app_constants.dart';
+import '../../core/l10n/locale_controller.dart';
 import '../../core/theme/brand_colors.dart';
 import '../../core/theme/theme_controller.dart';
 import '../../core/utils/deadline.dart';
@@ -8,11 +9,13 @@ import '../../core/utils/feed_sort.dart';
 import '../../models/advertisement.dart';
 import '../../services/advertisement_service.dart';
 import '../../services/bookmark_service.dart';
+import '../../services/notification_service.dart';
 import '../../widgets/category_chips.dart';
 import '../../widgets/filter_sheet.dart';
 import '../../widgets/job_grid_card.dart';
 import '../../widgets/job_list_card.dart';
 import '../../widgets/mockup_header.dart';
+import '../../widgets/settings_sheet.dart';
 import '../../widgets/state_views.dart';
 import '../details/details_screen.dart';
 
@@ -25,12 +28,16 @@ class HomeScreen extends StatefulWidget {
     required this.service,
     required this.bookmarks,
     required this.themeController,
+    required this.localeController,
+    required this.notificationService,
     this.onOpenSaved,
   });
 
   final AdvertisementService service;
   final BookmarkService bookmarks;
   final ThemeController themeController;
+  final LocaleController localeController;
+  final NotificationService notificationService;
   final VoidCallback? onOpenSaved;
 
   @override
@@ -167,7 +174,15 @@ class _HomeScreenState extends State<HomeScreen> {
         SliverToBoxAdapter(
           child: Padding(
             padding: const EdgeInsets.fromLTRB(16, 16, 16, 0),
-            child: MockupHeader(sectionTitle: _sectionTitle),
+            child: MockupHeader(
+              sectionTitle: _sectionTitle,
+              onOpenSettings: () => SettingsSheet.show(
+                context,
+                themeController: widget.themeController,
+                localeController: widget.localeController,
+                notificationService: widget.notificationService,
+              ),
+            ),
           ),
         ),
         SliverToBoxAdapter(child: _pillsRow()),

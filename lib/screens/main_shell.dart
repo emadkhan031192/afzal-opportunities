@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
 
+import '../core/l10n/app_localizations.dart';
+import '../core/l10n/locale_controller.dart';
 import '../core/theme/theme_controller.dart';
 import '../services/advertisement_service.dart';
 import '../services/bookmark_service.dart';
+import '../services/notification_service.dart';
 import 'home/home_screen.dart';
 import 'saved/saved_screen.dart';
 
@@ -13,11 +16,15 @@ class MainShell extends StatefulWidget {
   const MainShell({
     super.key,
     required this.themeController,
+    required this.localeController,
     required this.bookmarkService,
+    required this.notificationService,
   });
 
   final ThemeController themeController;
+  final LocaleController localeController;
   final BookmarkService bookmarkService;
+  final NotificationService notificationService;
 
   @override
   State<MainShell> createState() => _MainShellState();
@@ -29,6 +36,7 @@ class _MainShellState extends State<MainShell> {
 
   @override
   Widget build(BuildContext context) {
+    final s = AppLocalizations.of(context);
     return Scaffold(
       body: SafeArea(
         child: IndexedStack(
@@ -38,6 +46,8 @@ class _MainShellState extends State<MainShell> {
               service: _service,
               bookmarks: widget.bookmarkService,
               themeController: widget.themeController,
+              localeController: widget.localeController,
+              notificationService: widget.notificationService,
               onOpenSaved: () => setState(() => _index = 1),
             ),
             SavedScreen(
@@ -51,16 +61,16 @@ class _MainShellState extends State<MainShell> {
       bottomNavigationBar: BottomNavigationBar(
         currentIndex: _index,
         onTap: (index) => setState(() => _index = index),
-        items: const [
+        items: [
           BottomNavigationBarItem(
-            icon: Icon(Icons.home_outlined),
-            activeIcon: Icon(Icons.home),
-            label: 'Home',
+            icon: const Icon(Icons.home_outlined),
+            activeIcon: const Icon(Icons.home),
+            label: s.home,
           ),
           BottomNavigationBarItem(
-            icon: Icon(Icons.bookmark_border),
-            activeIcon: Icon(Icons.bookmark),
-            label: 'Saved',
+            icon: const Icon(Icons.bookmark_border),
+            activeIcon: const Icon(Icons.bookmark),
+            label: s.saved,
           ),
         ],
       ),
