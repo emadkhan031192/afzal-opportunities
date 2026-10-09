@@ -161,7 +161,9 @@ service cloud.firestore {
             && request.auth.uid == resource.data.ownerUid);
       allow create: if isAdmin() || ownerCreateClean();
       allow update: if isAdmin() || ownerUpdateClean();
-      allow delete: if isAdmin();
+      allow delete: if isAdmin()
+        || (request.auth != null
+            && request.auth.uid == resource.data.ownerUid);
     }
 
     match /teacherProfiles/{profileId} {

@@ -8,6 +8,7 @@ import '../../../services/bookmark_service.dart';
 import '../../../services/teaching_auth.dart';
 import '../../../services/teaching_service.dart';
 import '../../../widgets/state_views.dart';
+import '../../../widgets/delete_account_button.dart';
 import '../../../widgets/teaching_vacancy_card.dart';
 import '../auth/verify_email_screen.dart';
 import '../teacher_profile_form_screen.dart';
@@ -48,6 +49,7 @@ class _TeacherDashboardState extends State<TeacherDashboard> {
       appBar: AppBar(
         title: Text(s.myProfile),
         actions: [
+          DeleteAccountButton(auth: widget.auth, service: widget.service),
           IconButton(
             icon: const Icon(Icons.logout_outlined),
             tooltip: s.logout,

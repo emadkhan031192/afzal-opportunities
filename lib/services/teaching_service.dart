@@ -287,6 +287,42 @@ class TeachingService {
         .delete();
   }
 
+  /// Deletes all of the caller's teaching data: their organization doc,
+  /// teacher profile doc, and every vacancy they posted. Used by the
+  /// in-app "Delete account" flow (Play Store data-deletion requirement).
+  /// The Firebase Auth user itself is deleted separately via
+  /// [TeachingAuth.deleteAccount].
+  Future<void> deleteMyAccountData(String uid) async {
+    if (!_ready) return;
+    final batch = _db.batch();
+
+    final orgSnap = await _db
+        .collection(AppConstants.teachingOrganizationsCollection)
+        .where('ownerUid', isEqualTo: uid)
+        .get();
+    for (final doc in orgSnap.docs) {
+      batch.delete(doc.reference);
+    }
+
+    final profileSnap = await _db
+        .collection(AppConstants.teacherProfilesCollection)
+        .where('ownerUid', isEqualTo: uid)
+        .get();
+    for (final doc in profileSnap.docs) {
+      batch.delete(doc.reference);
+    }
+
+    final vacancySnap = await _db
+        .collection(AppConstants.teachingVacanciesCollection)
+        .where('ownerUid', isEqualTo: uid)
+        .get();
+    for (final doc in vacancySnap.docs) {
+      batch.delete(doc.reference);
+    }
+
+    await batch.commit();
+  }
+
   // ------------------------------------------------------------------
   // Teacher records (owner-scoped)
   // ------------------------------------------------------------------

@@ -7,6 +7,7 @@ import '../../../models/teaching_vacancy.dart';
 import '../../../services/teaching_auth.dart';
 import '../../../services/teaching_service.dart';
 import '../../../widgets/state_views.dart';
+import '../../../widgets/delete_account_button.dart';
 import '../auth/verify_email_screen.dart';
 import 'vacancy_form_screen.dart';
 
@@ -31,6 +32,7 @@ class _OrgDashboardState extends State<OrgDashboard> {
       appBar: AppBar(
         title: Text(s.myVacancies),
         actions: [
+          DeleteAccountButton(auth: widget.auth, service: widget.service),
           IconButton(
             icon: const Icon(Icons.logout_outlined),
             tooltip: s.logout,

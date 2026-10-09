@@ -66,6 +66,10 @@ class AppLocalizations {
   String get checkForUpdatesNow => _t('checkForUpdatesNow');
   String get checkForUpdatesHint => _t('checkForUpdatesHint');
   String get checkCompleted => _t('checkCompleted');
+  String get deleteAccount => _t('deleteAccount');
+  String get deleteAccountWarning => _t('deleteAccountWarning');
+  String get deleteAccountRelogin => _t('deleteAccountRelogin');
+  String get accountDeleted => _t('accountDeleted');
 
   // Filters
   String get filter => _t('filter');
@@ -322,6 +326,12 @@ class AppLocalizations {
     'checkForUpdatesNow': 'Check for updates now',
     'checkForUpdatesHint': 'Manually run the new-ads check',
     'checkCompleted': 'Check completed',
+    'deleteAccount': 'Delete account',
+    'deleteAccountWarning':
+        'This permanently deletes your account, profile, and all vacancies you posted. This cannot be undone.',
+    'deleteAccountRelogin':
+        'For security, please sign out and sign in again, then retry deleting your account.',
+    'accountDeleted': 'Your account has been deleted.',
     'filter': 'Filter',
     'applyFilters': 'Apply filters',
     'resetFilters': 'Reset filters',
@@ -555,6 +565,12 @@ class AppLocalizations {
     'checkForUpdatesNow': 'ابھی اپ ڈیٹس چیک کریں',
     'checkForUpdatesHint': 'نئے اشتہارات کی جانچ دستی طور پر چلائیں',
     'checkCompleted': 'جانچ مکمل',
+    'deleteAccount': 'اکاؤنٹ حذف کریں',
+    'deleteAccountWarning':
+        'اس سے آپ کا اکاؤنٹ، پروفائل اور آپ کی پوسٹ کردہ تمام آسامیاں مستقل طور پر حذف ہو جائیں گی۔ یہ عمل واپس نہیں ہو سکتا۔',
+    'deleteAccountRelogin':
+        'سیکیورٹی کے لیے براہ کرم سائن آؤٹ کر کے دوبارہ سائن ان کریں، پھر اکاؤنٹ حذف کرنے کی کوشش کریں۔',
+    'accountDeleted': 'آپ کا اکاؤنٹ حذف کر دیا گیا ہے۔',
     'filter': 'فلٹر',
     'applyFilters': 'فلٹر لگائیں',
     'resetFilters': 'فلٹر صاف کریں',
