@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../core/constants/app_constants.dart';
+import '../core/l10n/app_localizations.dart';
 import '../core/theme/brand_colors.dart';
 import '../core/utils/feed_sort.dart';
 
@@ -66,6 +67,7 @@ class _FilterSheetState extends State<_FilterSheet> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final s = AppLocalizations.of(context);
     return SafeArea(
       child: SingleChildScrollView(
         padding: EdgeInsets.only(
@@ -91,42 +93,42 @@ class _FilterSheetState extends State<_FilterSheet> {
             const SizedBox(height: 12),
             Row(
               children: [
-                Text('Filter', style: theme.textTheme.titleLarge),
+                Text(s.filter, style: theme.textTheme.titleLarge),
                 const Spacer(),
-                TextButton(onPressed: _reset, child: const Text('Reset')),
+                TextButton(onPressed: _reset, child: Text(s.reset)),
               ],
             ),
             const SizedBox(height: 8),
-            Text('Category', style: theme.textTheme.labelLarge),
+            Text(s.category, style: theme.textTheme.labelLarge),
             const SizedBox(height: 8),
             Wrap(
               spacing: 8,
               runSpacing: 8,
               children: [
-                _categoryChip(AppConstants.allCategoriesId, 'All'),
+                _categoryChip(AppConstants.allCategoriesId, s.all),
                 for (final category in AppConstants.categories)
-                  _categoryChip(category.id, category.label),
+                  _categoryChip(category.id, _categoryLabel(category.id, s)),
               ],
             ),
             const SizedBox(height: 16),
-            Text('Sort by', style: theme.textTheme.labelLarge),
+            Text(s.sortBy, style: theme.textTheme.labelLarge),
             const SizedBox(height: 8),
             SegmentedButton<FeedSortMode>(
-              segments: const [
+              segments: [
                 ButtonSegment(
                   value: FeedSortMode.latest,
-                  label: Text('Latest'),
-                  icon: Icon(Icons.fiber_new_outlined),
+                  label: Text(s.latest),
+                  icon: const Icon(Icons.fiber_new_outlined),
                 ),
                 ButtonSegment(
                   value: FeedSortMode.nearestDeadline,
-                  label: Text('Deadline'),
-                  icon: Icon(Icons.schedule_outlined),
+                  label: Text(s.deadline),
+                  icon: const Icon(Icons.schedule_outlined),
                 ),
                 ButtonSegment(
                   value: FeedSortMode.relevance,
-                  label: Text('Relevance'),
-                  icon: Icon(Icons.auto_awesome_outlined),
+                  label: Text(s.relevance),
+                  icon: const Icon(Icons.auto_awesome_outlined),
                 ),
               ],
               selected: {_sort},
@@ -139,8 +141,8 @@ class _FilterSheetState extends State<_FilterSheet> {
             SwitchListTile(
               value: _closingSoonOnly,
               onChanged: (value) => setState(() => _closingSoonOnly = value),
-              title: const Text('Closing soon only'),
-              subtitle: const Text('Only advertisements closing within 7 days'),
+              title: Text(s.closingSoonOnly),
+              subtitle: Text(s.closingSoonHint),
               activeThumbColor: BrandColors.mint,
               contentPadding: EdgeInsets.zero,
             ),
@@ -153,7 +155,7 @@ class _FilterSheetState extends State<_FilterSheet> {
                   closingSoonOnly: _closingSoonOnly,
                 ),
               ),
-              child: const Text('Apply filters'),
+              child: Text(s.applyFilters),
             ),
           ],
         ),
@@ -167,5 +169,19 @@ class _FilterSheetState extends State<_FilterSheet> {
       selected: _category == id,
       onSelected: (_) => setState(() => _category = id),
     );
+  }
+
+  String _categoryLabel(String id, AppLocalizations s) {
+    switch (id) {
+      case 'jobs':
+        return s.jobs;
+      case 'scholarships':
+        return s.scholarships;
+      case 'admissions':
+        return s.admissions;
+      case 'other':
+      default:
+        return s.other;
+    }
   }
 }

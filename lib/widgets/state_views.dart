@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '../core/l10n/app_localizations.dart';
+
 /// Shared loading / empty / error views for the feed screens.
 class LoadingView extends StatelessWidget {
   const LoadingView({super.key});
@@ -93,7 +95,7 @@ class ErrorView extends StatelessWidget {
             ),
             const SizedBox(height: 16),
             Text(
-              'Something went wrong',
+              AppLocalizations.of(context).somethingWentWrong,
               style: theme.textTheme.titleLarge,
               textAlign: TextAlign.center,
             ),
@@ -107,7 +109,7 @@ class ErrorView extends StatelessWidget {
             ElevatedButton.icon(
               onPressed: onRetry,
               icon: const Icon(Icons.refresh),
-              label: const Text('Retry'),
+              label: Text(AppLocalizations.of(context).retry),
             ),
           ],
         ),

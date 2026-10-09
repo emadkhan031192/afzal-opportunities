@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '../utils/deadline.dart';
+
 /// Hand-rolled localization for Afzal E Services (English + Urdu).
 ///
 /// A code-generated l10n setup was deliberately avoided so the strings
@@ -43,6 +45,9 @@ class AppLocalizations {
   String get gridView => _t('gridView');
   String get noAdsFound => _t('noAdsFound');
   String get noAdsFoundHint => _t('noAdsFoundHint');
+  String get noSavedAds => _t('noSavedAds');
+  String get noSavedAdsHint => _t('noSavedAdsHint');
+  String get loadSavedFailed => _t('loadSavedFailed');
   String get browseAds => _t('browseAds');
   String get somethingWentWrong => _t('somethingWentWrong');
   String get retry => _t('retry');
@@ -80,17 +85,29 @@ class AppLocalizations {
   String get officialWebsite => _t('officialWebsite');
 
   // Deadline labels (localized equivalents of DeadlineInfo.label)
-  String get lastDateNotSpecified => _t('lastDateNotSpecified');
-  String get lastDateToday => _t('lastDateToday');
+  String get lastDateNotSpecified => _t('lastDateNotSpecified');  String get lastDateToday => _t('lastDateToday');
   String get closingTomorrow => _t('closingTomorrow');
   String get closingSoonLabel => _t('closingSoonLabel');
   String get newBadge => _t('newBadge');
   String get expired => _t('expired');
   String get today => _t('today');
+  String get applyBeforeLastDate => _t('applyBeforeLastDate');
 
   String daysLeft(int n) =>
       isUrdu ? '$n ${_t('daysLeftUnit')}' : '$n ${_t('daysLeftUnit')}';
   String dayLeft() => isUrdu ? '1 ${_t('dayLeftUnit')}' : '1 ${_t('dayLeftUnit')}';
+
+  /// Localized equivalent of [DeadlineInfo.label], derived from the
+  /// structured fields so widgets never hard-code English deadline copy.
+  String deadlineLabel(DeadlineInfo info) {
+    final days = info.daysLeft;
+    if (days == null) return lastDateNotSpecified;
+    if (days < 0) return expired;
+    if (days == 0) return lastDateToday;
+    if (days == 1) return closingTomorrow;
+    if (days <= 7) return closingSoonLabel;
+    return daysLeft(days);
+  }
 
   // Settings
   String get settings => _t('settings');
@@ -185,6 +202,10 @@ class AppLocalizations {
     'gridView': 'Grid',
     'noAdsFound': 'No advertisements found',
     'noAdsFoundHint': 'Try a different search or clear the filters.',
+    'noSavedAds': 'No saved advertisements',
+    'noSavedAdsHint': 'Tap the bookmark icon on any advertisement to save it here.',
+    'loadSavedFailed':
+        'Could not load saved advertisements. Check your connection and try again.',
     'browseAds': 'Browse advertisements',
     'somethingWentWrong': 'Something went wrong',
     'retry': 'Retry',
@@ -222,6 +243,7 @@ class AppLocalizations {
     'newBadge': 'NEW',
     'expired': 'EXPIRED',
     'today': 'Today',
+    'applyBeforeLastDate': 'Apply before the last date.',
     'daysLeftUnit': 'days left',
     'dayLeftUnit': 'day left',
     'settings': 'Settings',
@@ -312,6 +334,11 @@ class AppLocalizations {
     'gridView': 'گرڈ',
     'noAdsFound': 'کوئی اشتہار نہیں ملا',
     'noAdsFoundHint': 'کوئی اور تلاش آزمائیں یا فلٹر صاف کریں۔',
+    'noSavedAds': 'کوئی محفوظ شدہ اشتہار نہیں',
+    'noSavedAdsHint':
+        'کسی بھی اشتہار پر بک مارک کے نشان پر ٹیپ کریں تاکہ وہ یہاں محفوظ ہو۔',
+    'loadSavedFailed':
+        'محفوظ شدہ اشتہارات لوڈ نہیں ہو سکے۔ کنکشن چیک کر کے دوبارہ کوشش کریں۔',
     'browseAds': 'اشتہارات دیکھیں',
     'somethingWentWrong': 'کچھ غلط ہو گیا',
     'retry': 'دوبارہ کوشش کریں',
@@ -349,6 +376,7 @@ class AppLocalizations {
     'newBadge': 'نیا',
     'expired': 'میعاد ختم',
     'today': 'آج',
+    'applyBeforeLastDate': 'آخری تاریخ سے پہلے اپلائی کریں۔',
     'daysLeftUnit': 'دن باقی',
     'dayLeftUnit': 'دن باقی',
     'settings': 'ترتیبات',

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../core/constants/app_constants.dart';
+import '../../core/l10n/app_localizations.dart';
 import '../../core/l10n/locale_controller.dart';
 import '../../core/theme/brand_colors.dart';
 import '../../core/theme/theme_controller.dart';
@@ -114,9 +115,18 @@ class _HomeScreenState extends State<HomeScreen> {
       _closingSoonOnly ||
       _query.trim().isNotEmpty;
 
-  String get _sectionTitle {
-    if (_category == AppConstants.allCategoriesId) return 'Jobs';
-    return AppConstants.categoryLabel(_category);
+  String _sectionTitle(AppLocalizations s) {
+    if (_category == AppConstants.allCategoriesId) return s.jobs;
+    switch (_category) {
+      case 'scholarships':
+        return s.scholarships;
+      case 'admissions':
+        return s.admissions;
+      case 'other':
+        return s.other;
+      default:
+        return AppConstants.categoryLabel(_category);
+    }
   }
 
   @override
@@ -175,7 +185,7 @@ class _HomeScreenState extends State<HomeScreen> {
           child: Padding(
             padding: const EdgeInsets.fromLTRB(16, 16, 16, 0),
             child: MockupHeader(
-              sectionTitle: _sectionTitle,
+              sectionTitle: _sectionTitle(AppLocalizations.of(context)),
               onOpenSettings: () => SettingsSheet.show(
                 context,
                 themeController: widget.themeController,
@@ -200,10 +210,10 @@ class _HomeScreenState extends State<HomeScreen> {
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                const EmptyView(
+                EmptyView(
                   icon: Icons.search_off_outlined,
-                  title: 'No advertisements found',
-                  message: 'Try a different search term or category.',
+                  title: AppLocalizations.of(context).noAdsFound,
+                  message: AppLocalizations.of(context).noAdsFoundHint,
                 ),
                 if (_hasActiveFilters)
                   Padding(
@@ -211,7 +221,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     child: TextButton.icon(
                       onPressed: _resetFilters,
                       icon: const Icon(Icons.filter_alt_off_outlined),
-                      label: const Text('Reset filters'),
+                      label: Text(AppLocalizations.of(context).resetFilters),
                     ),
                   ),
               ],
@@ -228,14 +238,15 @@ class _HomeScreenState extends State<HomeScreen> {
   /// Blue pills row: static "Latest advertisements" label + tappable
   /// list/grid view toggle, as in the mockups.
   Widget _pillsRow() {
+    final s = AppLocalizations.of(context);
     return Padding(
       padding: const EdgeInsets.fromLTRB(16, 18, 16, 0),
       child: Row(
         children: [
-          _Pill(label: 'Latest advertisements', onTap: null),
+          _Pill(label: s.latestAdvertisements, onTap: null),
           const SizedBox(width: 10),
           _Pill(
-            label: _gridView ? 'Grid View' : 'List View',
+            label: _gridView ? s.gridView : s.listView,
             onTap: () => setState(() => _gridView = !_gridView),
           ),
         ],
@@ -248,6 +259,7 @@ class _HomeScreenState extends State<HomeScreen> {
   Widget _searchRow() {
     final theme = Theme.of(context);
     final dark = theme.brightness == Brightness.dark;
+    final s = AppLocalizations.of(context);
     return Padding(
       padding: const EdgeInsets.fromLTRB(16, 12, 16, 0),
       child: Row(
@@ -260,7 +272,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 onChanged: (value) => setState(() => _query = value),
                 textInputAction: TextInputAction.search,
                 decoration: InputDecoration(
-                  hintText: 'Search advertisements…',
+                  hintText: s.searchHint,
                   prefixIcon: const Icon(Icons.search, size: 20),
                   contentPadding: const EdgeInsets.symmetric(vertical: 8),
                   filled: true,
@@ -309,12 +321,13 @@ class _HomeScreenState extends State<HomeScreen> {
   Widget _sectionHeader() {
     final theme = Theme.of(context);
     final dark = theme.brightness == Brightness.dark;
+    final s = AppLocalizations.of(context);
     return Padding(
       padding: const EdgeInsets.fromLTRB(20, 18, 20, 12),
       child: Row(
         children: [
           Text(
-            _closingSoonOnly ? 'Closing soon' : 'Latest advertisements',
+            _closingSoonOnly ? s.closingSoon : s.latestAdvertisements,
             style: TextStyle(
               fontSize: 20,
               fontWeight: FontWeight.w800,
@@ -337,7 +350,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     ),
                   ),
                 Text(
-                  _closingSoonOnly ? 'Show all' : 'See all',
+                  s.seeAll,
                   style: const TextStyle(
                     fontSize: 14,
                     fontWeight: FontWeight.w600,
@@ -362,7 +375,6 @@ class _HomeScreenState extends State<HomeScreen> {
             animation: widget.bookmarks,
             builder: (context, _) => JobListCard(
               ad: ad,
-              index: index,
               isSaved: widget.bookmarks.isBookmarked(ad.id),
               onTap: () => _openDetails(ad),
               onToggleSave: () => widget.bookmarks.toggle(ad.id),
@@ -381,7 +393,6 @@ class _HomeScreenState extends State<HomeScreen> {
           final ad = ads[index];
           return JobGridCard(
             ad: ad,
-            index: index,
             onTap: () => _openDetails(ad),
           );
         }, childCount: ads.length),

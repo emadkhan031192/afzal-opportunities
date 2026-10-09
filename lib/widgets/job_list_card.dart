@@ -1,39 +1,34 @@
 import 'package:flutter/material.dart';
 
-import '../core/theme/brand_colors.dart';
+import '../core/l10n/app_localizations.dart';
+import '../core/theme/card_tints.dart';
 import '../core/utils/deadline.dart';
 import '../models/advertisement.dart';
+import 'deadline_badge.dart';
 
-/// List-view advertisement card recreating the user's designed Page 2:
-/// full-width pill cards alternating pastel yellow and mockup blue, with an
-/// organization avatar, title, organization name and a deadline chip.
-/// Salary and logos are never invented: the card shows only real ad data.
+/// List-view advertisement card (v1.3.0): full-width pill card tinted by
+/// category, with an organization avatar, title, organization name and an
+/// urgency-colored deadline badge. Salary and logos are never invented:
+/// the card shows only real ad data.
 class JobListCard extends StatelessWidget {
   const JobListCard({
     super.key,
     required this.ad,
-    required this.index,
     required this.isSaved,
     required this.onTap,
     required this.onToggleSave,
   });
 
   final Advertisement ad;
-  final int index;
   final bool isSaved;
   final VoidCallback onTap;
   final VoidCallback onToggleSave;
 
-  bool get _isBlue => index.isOdd;
-
   @override
   Widget build(BuildContext context) {
-    final blue = _isBlue;
-    final bg = blue ? BrandColors.mockupBlue : BrandColors.cardYellow;
-    final ink = blue ? Colors.white : BrandColors.nightBlue;
-    final subInk = blue
-        ? Colors.white.withValues(alpha: 0.82)
-        : BrandColors.nightBlue.withValues(alpha: 0.62);
+    final dark = Theme.of(context).brightness == Brightness.dark;
+    final tint = cardTintForCategory(ad.category, dark);
+    final s = AppLocalizations.of(context);
     final info = getDeadlineInfo(
       lastDate: ad.lastDate,
       publishedAt: ad.publishedAt,
@@ -42,7 +37,7 @@ class JobListCard extends StatelessWidget {
     return Container(
       margin: const EdgeInsets.only(bottom: 14),
       decoration: BoxDecoration(
-        color: bg,
+        color: tint.background,
         borderRadius: BorderRadius.circular(44),
       ),
       child: Material(
@@ -68,9 +63,7 @@ class JobListCard extends StatelessWidget {
                     style: TextStyle(
                       fontSize: 24,
                       fontWeight: FontWeight.w800,
-                      color: blue
-                          ? BrandColors.mockupBlue
-                          : BrandColors.nightBlue,
+                      color: _avatarInk(ad.category),
                     ),
                   ),
                 ),
@@ -87,7 +80,7 @@ class JobListCard extends StatelessWidget {
                         style: TextStyle(
                           fontSize: 17,
                           fontWeight: FontWeight.w700,
-                          color: ink,
+                          color: tint.ink,
                           height: 1.2,
                         ),
                       ),
@@ -96,8 +89,10 @@ class JobListCard extends StatelessWidget {
                         ad.organization,
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
-                        style: TextStyle(fontSize: 14, color: subInk),
+                        style: TextStyle(fontSize: 14, color: tint.subInk),
                       ),
+                      const SizedBox(height: 6),
+                      DeadlineBadge(info: info, compact: true),
                     ],
                   ),
                 ),
@@ -106,14 +101,31 @@ class JobListCard extends StatelessWidget {
                   mainAxisSize: MainAxisSize.min,
                   crossAxisAlignment: CrossAxisAlignment.end,
                   children: [
-                    _DeadlineChip(info: info, dark: blue),
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 10,
+                        vertical: 5,
+                      ),
+                      decoration: BoxDecoration(
+                        color: tint.chip,
+                        borderRadius: BorderRadius.circular(999),
+                      ),
+                      child: Text(
+                        _categoryLabel(ad.category, s),
+                        style: TextStyle(
+                          fontSize: 11,
+                          fontWeight: FontWeight.w700,
+                          color: tint.ink,
+                        ),
+                      ),
+                    ),
                     GestureDetector(
                       onTap: onToggleSave,
                       child: Padding(
                         padding: const EdgeInsets.only(top: 6),
                         child: Icon(
                           isSaved ? Icons.bookmark : Icons.bookmark_border,
-                          color: ink,
+                          color: tint.ink,
                           size: 22,
                         ),
                       ),
@@ -132,47 +144,33 @@ class JobListCard extends StatelessWidget {
     final trimmed = organization.trim();
     return trimmed.isEmpty ? '•' : trimmed[0].toUpperCase();
   }
-}
 
-/// Compact deadline chip shown on list cards. Renders nothing when the ad
-/// has no deadline and is not new.
-class _DeadlineChip extends StatelessWidget {
-  const _DeadlineChip({required this.info, required this.dark});
-
-  final DeadlineInfo info;
-  final bool dark;
-
-  @override
-  Widget build(BuildContext context) {
-    final label = _shortLabel(info);
-    if (label == null) return const SizedBox.shrink();
-    final bg = dark ? Colors.white : BrandColors.nightBlue;
-    final fg = dark ? BrandColors.nightBlue : Colors.white;
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-      decoration: BoxDecoration(
-        color: bg,
-        borderRadius: BorderRadius.circular(999),
-      ),
-      child: Text(
-        label,
-        style: TextStyle(
-          fontSize: 11.5,
-          fontWeight: FontWeight.w800,
-          color: fg,
-        ),
-      ),
-    );
+  /// Avatar letter color: readable on the white circle for every tint.
+  static Color _avatarInk(String categoryId) {
+    switch (categoryId) {
+      case 'scholarships':
+        return const Color(0xFF2E7D55);
+      case 'admissions':
+        return const Color(0xFF9A7418);
+      case 'other':
+        return const Color(0xFFB05E5E);
+      case 'jobs':
+      default:
+        return const Color(0xFF1F66CC);
+    }
   }
 
-  static String? _shortLabel(DeadlineInfo info) {
-    final days = info.daysLeft;
-    if (days == null) {
-      return info.isNew ? 'NEW' : null;
+  static String _categoryLabel(String id, AppLocalizations s) {
+    switch (id) {
+      case 'jobs':
+        return s.jobs;
+      case 'scholarships':
+        return s.scholarships;
+      case 'admissions':
+        return s.admissions;
+      case 'other':
+      default:
+        return s.other;
     }
-    if (days < 0) return 'EXPIRED';
-    if (days == 0) return 'TODAY';
-    if (days == 1) return '1 DAY LEFT';
-    return '$days DAYS LEFT';
   }
 }

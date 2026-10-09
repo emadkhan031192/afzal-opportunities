@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:share_plus/share_plus.dart';
 
 import '../../core/constants/app_constants.dart';
+import '../../core/l10n/app_localizations.dart';
 import '../../core/theme/brand_colors.dart';
 import '../../core/utils/deadline.dart';
 import '../../core/utils/url_utils.dart';
@@ -27,14 +29,47 @@ class DetailsScreen extends StatelessWidget {
     final opened = await openUrl(url);
     if (!opened && context.mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Could not open the $label link.')),
+        SnackBar(content: Text(AppLocalizations.of(context).linkOpenFailed)),
       );
     }
+  }
+
+  /// Shares the advertisement: title, deadline, short description and a
+  /// link back (official source URL when available).
+  Future<void> _shareAd(BuildContext context) async {
+    final s = AppLocalizations.of(context);
+    final info = getDeadlineInfo(
+      lastDate: ad.lastDate,
+      publishedAt: ad.publishedAt,
+    );
+    final deadlineLine = ad.lastDate != null
+        ? '${s.lastDate}: ${DateFormat('d MMMM yyyy').format(ad.lastDate!)} '
+            '(${s.deadlineLabel(info)})'
+        : '${s.lastDate}: ${s.notSpecified}';
+    final link = (ad.sourceUrl ?? '').trim().isNotEmpty
+        ? ad.sourceUrl!.trim()
+        : (ad.applicationUrl ?? '').trim();
+    final text = StringBuffer()
+      ..writeln(ad.title)
+      ..writeln(ad.organization)
+      ..writeln(deadlineLine)
+      ..writeln()
+      ..writeln(_shortDescription(ad.description));
+    if (link.isNotEmpty) {
+      text.writeln(link);
+    }
+    await Share.share(text.toString(), subject: ad.title);
+  }
+
+  static String _shortDescription(String description) {
+    final trimmed = description.trim().replaceAll(RegExp(r'\s+'), ' ');
+    return trimmed.length > 220 ? '${trimmed.substring(0, 220)}…' : trimmed;
   }
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final s = AppLocalizations.of(context);
     final info = getDeadlineInfo(
       lastDate: ad.lastDate,
       publishedAt: ad.publishedAt,
@@ -90,19 +125,18 @@ class DetailsScreen extends StatelessWidget {
                     _urgencyBanner(context, info, daysLeft),
                   ],
                   const SizedBox(height: 24),
-                  Text('Description', style: theme.textTheme.titleLarge),
+                  Text(s.description, style: theme.textTheme.titleLarge),
                   const SizedBox(height: 8),
                   Text(ad.description, style: theme.textTheme.bodyLarge),
                   if (hasSource || hasApplication) ...[
                     const SizedBox(height: 24),
                     Text(
-                      'Official information',
+                      s.officialInfoTitle,
                       style: theme.textTheme.titleLarge,
                     ),
                     const SizedBox(height: 4),
                     Text(
-                      'The links below come directly from the advertising '
-                      'organization.',
+                      s.officialInfoBody,
                       style: theme.textTheme.bodySmall,
                     ),
                     const SizedBox(height: 8),
@@ -148,7 +182,7 @@ class DetailsScreen extends StatelessWidget {
                           onPressed: () =>
                               _openLink(context, ad.sourceUrl, 'source'),
                           icon: const Icon(Icons.link),
-                          label: const Text('Official Source'),
+                          label: Text(s.officialSource),
                           style: OutlinedButton.styleFrom(
                             foregroundColor: BrandColors.mockupBlue,
                             side: const BorderSide(
@@ -170,7 +204,7 @@ class DetailsScreen extends StatelessWidget {
                             'application',
                           ),
                           icon: const Icon(Icons.open_in_new),
-                          label: const Text('Apply Now'),
+                          label: Text(s.applyNow),
                           style: ElevatedButton.styleFrom(
                             backgroundColor: BrandColors.mockupBlue,
                             foregroundColor: Colors.white,
@@ -237,17 +271,31 @@ class DetailsScreen extends StatelessWidget {
           Positioned(
             top: topPadding,
             right: 12,
-            child: AnimatedBuilder(
-              animation: bookmarks,
-              builder: (context, _) {
-                final saved = bookmarks.isBookmarked(ad.id);
-                return _circleButton(
-                  icon: saved ? Icons.bookmark : Icons.bookmark_border,
-                  tooltip: saved ? 'Remove bookmark' : 'Save advertisement',
-                  color: saved ? BrandColors.mint : BrandColors.nightBlack,
-                  onPressed: () => bookmarks.toggle(ad.id),
-                );
-              },
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                AnimatedBuilder(
+                  animation: bookmarks,
+                  builder: (context, _) {
+                    final saved = bookmarks.isBookmarked(ad.id);
+                    final s = AppLocalizations.of(context);
+                    return _circleButton(
+                      icon: saved ? Icons.bookmark : Icons.bookmark_border,
+                      tooltip: s.save,
+                      color: saved ? BrandColors.mint : BrandColors.nightBlack,
+                      onPressed: () => bookmarks.toggle(ad.id),
+                    );
+                  },
+                ),
+                const SizedBox(height: 8),
+                Builder(
+                  builder: (context) => _circleButton(
+                    icon: Icons.share_outlined,
+                    tooltip: AppLocalizations.of(context).share,
+                    onPressed: () => _shareAd(context),
+                  ),
+                ),
+              ],
             ),
           ),
         ],
@@ -278,22 +326,23 @@ class DetailsScreen extends StatelessWidget {
 
   Widget _statRow(BuildContext context, DateFormat dateFormat) {
     final location = (ad.location ?? '').trim();
+    final s = AppLocalizations.of(context);
     return Row(
       children: [
         Expanded(
           child: _StatCard(
             icon: Icons.event_outlined,
-            label: 'Last Date',
+            label: s.lastDate,
             value: ad.lastDate != null
                 ? dateFormat.format(ad.lastDate!)
-                : 'Not specified',
+                : s.notSpecified,
           ),
         ),
         const SizedBox(width: 8),
         Expanded(
           child: _StatCard(
             icon: Icons.location_on_outlined,
-            label: 'Location',
+            label: s.location,
             value: location.isEmpty ? '—' : location,
           ),
         ),
@@ -301,16 +350,31 @@ class DetailsScreen extends StatelessWidget {
         Expanded(
           child: _StatCard(
             icon: Icons.category_outlined,
-            label: 'Category',
-            value: AppConstants.categoryLabel(ad.category),
+            label: s.category,
+            value: _categoryLabel(ad.category, s),
           ),
         ),
       ],
     );
   }
 
+  static String _categoryLabel(String id, AppLocalizations s) {
+    switch (id) {
+      case 'jobs':
+        return s.jobs;
+      case 'scholarships':
+        return s.scholarships;
+      case 'admissions':
+        return s.admissions;
+      case 'other':
+      default:
+        return s.other;
+    }
+  }
+
   Widget _urgencyBanner(BuildContext context, DeadlineInfo info, int daysLeft) {
     final urgent = daysLeft <= 1;
+    final s = AppLocalizations.of(context);
     return Container(
       padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
@@ -329,7 +393,7 @@ class DetailsScreen extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  info.label,
+                  s.deadlineLabel(info),
                   style: TextStyle(
                     fontWeight: FontWeight.w800,
                     letterSpacing: 0.4,
@@ -340,7 +404,7 @@ class DetailsScreen extends StatelessWidget {
                 ),
                 const SizedBox(height: 2),
                 Text(
-                  'Apply before the last date.',
+                  s.applyBeforeLastDate,
                   style: Theme.of(context).textTheme.bodySmall?.copyWith(
                     color: urgent
                         ? BrandColors.dangerStrong
