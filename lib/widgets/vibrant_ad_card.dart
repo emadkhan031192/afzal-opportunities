@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../core/l10n/app_localizations.dart';
 import '../core/utils/deadline.dart';
+import '../core/utils/share_text.dart';
 import '../core/utils/url_utils.dart';
 import '../models/advertisement.dart';
 import '../widgets/whatsapp_icon.dart';
@@ -38,9 +39,8 @@ class VibrantAdCard extends StatelessWidget {
       : Colors.white.withValues(alpha: 0.2);
 
   Future<void> _shareWhatsApp(BuildContext context) async {
-    final text = Uri.encodeComponent(
-      'Check out this job opportunity: ${ad.title}\n',
-    );
+    final s = AppLocalizations.of(context);
+    final text = Uri.encodeComponent(buildAdShareText(ad, s));
     await openUrl('https://api.whatsapp.com/send?text=$text');
   }
 

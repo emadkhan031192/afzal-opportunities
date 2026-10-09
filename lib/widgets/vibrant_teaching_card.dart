@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../core/l10n/app_localizations.dart';
 import '../core/utils/deadline.dart';
+import '../core/utils/share_text.dart';
 import '../core/utils/url_utils.dart';
 import '../models/teaching_vacancy.dart';
 import '../services/teaching_service.dart';
@@ -38,9 +39,7 @@ class VibrantTeachingCard extends StatelessWidget {
       : Colors.white.withValues(alpha: 0.2);
 
   Future<void> _shareWhatsApp(BuildContext context) async {
-    final text = Uri.encodeComponent(
-      'Check out this teaching job: ${vacancy.jobTitle} at ${vacancy.institutionName}\n',
-    );
+    final text = Uri.encodeComponent(buildVacancyShareText(vacancy));
     await openUrl('https://api.whatsapp.com/send?text=$text');
   }
 

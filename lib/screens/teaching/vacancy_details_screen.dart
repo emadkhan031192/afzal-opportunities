@@ -5,6 +5,7 @@ import 'package:share_plus/share_plus.dart';
 import '../../core/l10n/app_localizations.dart';
 import '../../core/theme/brand_colors.dart';
 import '../../core/utils/deadline.dart';
+import '../../core/utils/share_text.dart';
 import '../../core/utils/url_utils.dart';
 import '../../models/teaching_vacancy.dart';
 import '../../services/bookmark_service.dart';
@@ -27,34 +28,11 @@ class VacancyDetailsScreen extends StatelessWidget {
   final BookmarkService bookmarks;
 
   Future<void> _share(BuildContext context) async {
-    final s = AppLocalizations.of(context);
     final v = vacancy;
-    final info = getDeadlineInfo(
-      lastDate: v.applicationDeadline,
-      publishedAt: v.publishedAt,
-    );
-    final text = StringBuffer()
-      ..writeln(v.jobTitle)
-      ..writeln(v.institutionName)
-      ..writeln(
-        '${v.district}'
-        '${(v.city ?? '').isNotEmpty ? ' · ${v.city}' : ''}',
-      )
-      ..writeln(
-        '${s.applicationDeadline}: ${v.applicationDeadline != null ? DateFormat('d MMMM yyyy').format(v.applicationDeadline!) : s.notSpecified} (${s.deadlineLabel(info)})',
-      )
-      ..writeln()
-      ..writeln(_short(v.description));
-    final link = (v.applicationUrl ?? '').trim();
-    if (link.isNotEmpty) text.writeln(link);
+    final text = buildVacancyShareText(v, forWhatsApp: false);
     await SharePlus.instance.share(
-      ShareParams(text: text.toString(), subject: v.jobTitle),
+      ShareParams(text: text, subject: v.jobTitle),
     );
-  }
-
-  static String _short(String text) {
-    final trimmed = text.trim().replaceAll(RegExp(r'\s+'), ' ');
-    return trimmed.length > 220 ? '${trimmed.substring(0, 220)}…' : trimmed;
   }
 
   @override
