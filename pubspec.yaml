@@ -22,7 +22,7 @@ dependencies:
   intl: ^0.20.2
   cached_network_image: ^3.4.1
   flutter_svg: ^2.1.0
-  workmanager: ^0.9.0+3
+  workmanager: ^0.9.2
   flutter_local_notifications: ^19.4.1
   share_plus: ^11.0.0
   package_info_plus: ^8.3.0
@@ -50,3 +50,10 @@ flutter:
     - assets/logo/afzal_e_services_logo.png
     - assets/logo/a_mark.svg
     - assets/icon/app_icon.png
+
+# workmanager_apple 0.9.4 (pulled by workmanager 0.9.2) does not implement the
+# foregroundServiceConfig parameter added in workmanager_platform_interface
+# 0.9.4, which breaks the release build. 0.9.6 is the matching Apple
+# implementation for the 0.9.x interface line.
+dependency_overrides:
+  workmanager_apple: 0.9.6

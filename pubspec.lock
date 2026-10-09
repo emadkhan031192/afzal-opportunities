@@ -978,13 +978,13 @@ packages:
     source: hosted
     version: "0.9.3"
   workmanager_apple:
-    dependency: transitive
+    dependency: "direct overridden"
     description:
       name: workmanager_apple
-      sha256: b02e6289839dc3e85457fac3f5e7221e75b208de98b292f8fbd539244fdf2a81
+      sha256: f960e829eea48859c7bdd730f59c4972f22259fb052416d611798e3976a3f4eb
       url: "https://pub.dev"
     source: hosted
-    version: "0.9.4"
+    version: "0.9.6"
   workmanager_platform_interface:
     dependency: transitive
     description:
