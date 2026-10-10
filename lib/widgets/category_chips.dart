@@ -23,7 +23,7 @@ class CategoryChips extends StatelessWidget {
         _ChipItem(category.id, _label(category.id, s)),
     ];
     return Padding(
-      padding: const EdgeInsets.only(top: 12),
+      padding: const EdgeInsets.only(top: 8),
       child: SizedBox(
         height: 44,
         child: ListView.separated(

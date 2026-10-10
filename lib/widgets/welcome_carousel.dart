@@ -2,16 +2,14 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 
-import '../core/l10n/app_localizations.dart';
 import '../models/carousel_slide.dart';
 import '../services/carousel_service.dart';
 
 /// Auto-sliding welcome carousel.
 ///
 /// Slides come from Firestore (`carouselSlides` collection, managed in the
-/// admin panel) and fall back to hardcoded EN/UR defaults when unavailable.
-/// One slide is always English, one always Urdu — independent of the app's
-/// current locale, as the user requested.
+/// admin panel). When no slides exist yet, the carousel hides itself
+/// instead of showing placeholder content.
 class WelcomeCarousel extends StatefulWidget {
   const WelcomeCarousel({super.key, this.teaching = false});
 
@@ -49,7 +47,7 @@ class _WelcomeCarouselState extends State<WelcomeCarousel> {
   Future<void> _loadSlides() async {
     final slides = await _service.getSlides(teaching: widget.teaching);
     if (mounted) {
-      setState(() => _slides = slides.isEmpty ? null : slides);
+      setState(() => _slides = slides);
     }
   }
 
@@ -60,36 +58,14 @@ class _WelcomeCarouselState extends State<WelcomeCarousel> {
     super.dispose();
   }
 
-  List<CarouselSlide> _displaySlides(AppLocalizations ur) {
-    if (_slides != null) return _slides!;
-    return [
-      CarouselSlide(
-        badge: widget.teaching ? 'Private Education' : 'Welcome',
-        title: widget.teaching
-            ? 'Private School & Academy Vacancies'
-            : 'Welcome to Afzal-E Services',
-        desc: widget.teaching
-            ? 'Exclusive portal for private schools and academies to post teaching vacancies, and for qualified teachers to find jobs.'
-            : 'Your trusted hub for verified job alerts, scholarships, and career opportunities across Pakistan.',
-        rtl: false,
-      ),
-      CarouselSlide(
-        badge: widget.teaching
-            ? ur.carouselTeachingBadge
-            : ur.carouselHomeBadge,
-        title: widget.teaching
-            ? ur.carouselTeachingTitle
-            : ur.carouselHomeTitle,
-        desc: widget.teaching ? ur.carouselTeachingDesc : ur.carouselHomeDesc,
-        rtl: true,
-      ),
-    ];
-  }
-
   @override
   Widget build(BuildContext context) {
-    final ur = AppLocalizations(const Locale('ur'));
-    final displaySlides = _displaySlides(ur);
+    final slides = _slides;
+    // Still loading: reserve no space yet. No slides: hide the carousel
+    // entirely instead of showing placeholder content.
+    if (slides == null || slides.isEmpty) {
+      return const SizedBox.shrink();
+    }
 
     return Container(
       margin: const EdgeInsets.fromLTRB(20, 8, 20, 0),
@@ -116,10 +92,10 @@ class _WelcomeCarouselState extends State<WelcomeCarousel> {
         children: [
           PageView.builder(
             controller: _controller,
-            itemCount: displaySlides.length,
+            itemCount: slides.length,
             onPageChanged: (i) => setState(() => _index = i),
             itemBuilder: (context, i) {
-              final slide = displaySlides[i];
+              final slide = slides[i];
               return Padding(
                 padding: const EdgeInsets.fromLTRB(22, 20, 22, 36),
                 child: Column(
@@ -189,7 +165,7 @@ class _WelcomeCarouselState extends State<WelcomeCarousel> {
             child: Row(
               mainAxisSize: MainAxisSize.min,
               children: List.generate(
-                displaySlides.length,
+                slides.length,
                 (i) => GestureDetector(
                   onTap: () => _controller.animateToPage(
                     i,

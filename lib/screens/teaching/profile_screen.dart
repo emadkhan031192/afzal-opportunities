@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../core/l10n/app_localizations.dart';
 import '../../models/teaching_accounts.dart';
+import '../../models/teaching_vacancy.dart';
 import '../../services/teaching_auth.dart';
 import '../../services/teaching_service.dart';
 import '../../widgets/state_views.dart';
@@ -212,6 +213,7 @@ class _InstitutionInfo extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final s = AppLocalizations.of(context);
+    final uid = auth.currentUser!.uid;
     return ListView(
       padding: const EdgeInsets.all(20),
       children: [
@@ -220,30 +222,108 @@ class _InstitutionInfo extends StatelessWidget {
           title: org.institutionName,
           subtitle: org.institutionType,
         ),
-        const SizedBox(height: 16),
-        _InfoRow(label: s.contactPerson, value: org.contactPerson),
-        _InfoRow(label: s.email, value: org.email),
-        _InfoRow(label: s.district, value: org.district),
-        _InfoRow(label: s.city, value: org.city ?? s.notSpecified),
-        _InfoRow(label: s.status, value: org.approvalStatus),
-        const SizedBox(height: 24),
-        OutlinedButton.icon(
-          onPressed: () {
-            Navigator.of(context).push(
-              MaterialPageRoute(
-                builder: (_) =>
-                    OrgDashboard(auth: auth, service: TeachingService()),
-              ),
+        const SizedBox(height: 20),
+        // Section 1: My vacancies.
+        _SectionTitle(icon: Icons.work_outline, title: s.myVacancies),
+        const SizedBox(height: 8),
+        StreamBuilder(
+          stream: TeachingService().watchMyVacancies(uid),
+          builder: (context, snapshot) {
+            final vacancies = snapshot.data ?? [];
+            if (snapshot.connectionState == ConnectionState.waiting) {
+              return const Padding(
+                padding: EdgeInsets.all(16),
+                child: Center(child: CircularProgressIndicator()),
+              );
+            }
+            if (vacancies.isEmpty) {
+              return Padding(
+                padding: const EdgeInsets.symmetric(vertical: 8),
+                child: Text(
+                  s.noVacanciesFound,
+                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                    color: Theme.of(context).colorScheme.onSurfaceVariant,
+                  ),
+                ),
+              );
+            }
+            return Column(
+              children: vacancies
+                  .map(
+                    (v) => Card(
+                      margin: const EdgeInsets.only(bottom: 8),
+                      child: ListTile(
+                        title: Text(
+                          v.jobTitle,
+                          style: const TextStyle(fontWeight: FontWeight.w700),
+                        ),
+                        subtitle: Text(
+                          '${v.district} · ${_statusText(s, v.approvalStatus)}',
+                        ),
+                        trailing: const Icon(Icons.chevron_right),
+                        onTap: () {
+                          Navigator.of(context).push(
+                            MaterialPageRoute(
+                              builder: (_) => OrgDashboard(
+                                auth: auth,
+                                service: TeachingService(),
+                              ),
+                            ),
+                          );
+                        },
+                      ),
+                    ),
+                  )
+                  .toList(),
             );
           },
-          icon: const Icon(Icons.dashboard_outlined),
-          label: Text(s.myVacancies),
         ),
-        const SizedBox(height: 12),
+        const SizedBox(height: 20),
+        // Section 2: Org details.
+        _SectionTitle(icon: Icons.business_outlined, title: s.orgDetails),
+        const SizedBox(height: 8),
+        Card(
+          child: Padding(
+            padding: const EdgeInsets.all(16),
+            child: Column(
+              children: [
+                _InfoRow(label: s.contactPerson, value: org.contactPerson),
+                _InfoRow(label: s.email, value: org.email),
+                _InfoRow(label: s.district, value: org.district),
+                _InfoRow(label: s.city, value: org.city ?? s.notSpecified),
+                _InfoRow(label: s.status, value: org.approvalStatus),
+              ],
+            ),
+          ),
+        ),
+        const SizedBox(height: 24),
         OutlinedButton.icon(
           onPressed: () async => auth.signOut(),
           icon: const Icon(Icons.logout_outlined),
           label: Text(s.logout),
+        ),
+      ],
+    );
+  }
+}
+
+class _SectionTitle extends StatelessWidget {
+  const _SectionTitle({required this.icon, required this.title});
+
+  final IconData icon;
+  final String title;
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      children: [
+        Icon(icon, size: 20, color: Theme.of(context).colorScheme.primary),
+        const SizedBox(width: 8),
+        Text(
+          title,
+          style: Theme.of(
+            context,
+          ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w800),
         ),
       ],
     );
@@ -359,5 +439,19 @@ class _InfoRow extends StatelessWidget {
         ],
       ),
     );
+  }
+}
+
+String _statusText(AppLocalizations s, String status) {
+  switch (status) {
+    case TeachingApproval.approved:
+      return s.statusApproved;
+    case TeachingApproval.rejected:
+      return s.statusRejected;
+    case TeachingApproval.suspended:
+      return s.statusSuspended;
+    case TeachingApproval.pending:
+    default:
+      return s.statusPending;
   }
 }

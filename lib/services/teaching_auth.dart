@@ -8,7 +8,23 @@ import 'package:flutter/foundation.dart';
 /// organization can submit vacancies or a teacher can publish their
 /// profile.
 class TeachingAuth extends ChangeNotifier {
-  TeachingAuth({FirebaseAuth? auth}) : _auth = auth ?? FirebaseAuth.instance;
+  TeachingAuth._internal({FirebaseAuth? auth})
+    : _auth = auth ?? FirebaseAuth.instance {
+    // One shared instance: every screen reads the same login state, and a
+    // sign-in/out from any screen notifies all listeners. Firebase itself
+    // is also watched so external auth changes (e.g. token refresh,
+    // session restore) propagate too.
+    _auth.authStateChanges().listen((_) {
+      notifyListeners();
+    });
+  }
+
+  static final TeachingAuth _instance = TeachingAuth._internal();
+
+  /// Shared app-wide instance. Pass [auth] only in tests to get an
+  /// isolated instance bound to a fake FirebaseAuth.
+  factory TeachingAuth({FirebaseAuth? auth}) =>
+      auth == null ? _instance : TeachingAuth._internal(auth: auth);
 
   final FirebaseAuth _auth;
 

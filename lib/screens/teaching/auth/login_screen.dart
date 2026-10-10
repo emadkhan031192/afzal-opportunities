@@ -164,6 +164,26 @@ class _LoginScreenState extends State<LoginScreen> {
                   ],
                 ),
               ),
+              const SizedBox(height: 8),
+              // Continue without an account (guest browsing).
+              OutlinedButton(
+                onPressed: _busy
+                    ? null
+                    : () => Navigator.of(context).pop(false),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text(s.continueAsGuest),
+                    const SizedBox(height: 2),
+                    Text(
+                      s.continueAsGuestUrdu,
+                      style: Theme.of(context).textTheme.bodySmall,
+                      textDirection: TextDirection.rtl,
+                      textAlign: TextAlign.center,
+                    ),
+                  ],
+                ),
+              ),
             ],
           ),
         ),

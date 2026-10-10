@@ -116,6 +116,7 @@ class AppLocalizations {
   String get profile => _t('profile');
   String get subjects => _t('subjects');
   String get status => _t('status');
+  String get orgDetails => _t('orgDetails');
   String welcomeInstitution(String name) =>
       _t('welcomeInstitution').replaceAll('{name}', name);
   String welcomeTeacher(String name) =>
@@ -426,6 +427,7 @@ class AppLocalizations {
     'profile': 'Profile',
     'subjects': 'Subjects',
     'status': 'Status',
+    'orgDetails': 'Organization details',
     'filter': 'Filter',
     'applyFilters': 'Apply filters',
     'resetFilters': 'Reset filters',
@@ -708,6 +710,7 @@ class AppLocalizations {
     'profile': 'پروفائل',
     'subjects': 'مضامین',
     'status': 'حیثیت',
+    'orgDetails': 'ادارے کی تفصیلات',
     'filter': 'فلٹر',
     'applyFilters': 'فلٹر لگائیں',
     'resetFilters': 'فلٹر صاف کریں',

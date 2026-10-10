@@ -334,7 +334,8 @@ class _HomeScreenState extends State<HomeScreen> {
     final dark = theme.brightness == Brightness.dark;
     final s = AppLocalizations.of(context);
     return Padding(
-      padding: const EdgeInsets.fromLTRB(20, 18, 20, 12),
+      // Tightened to save vertical space (was 18/12).
+      padding: const EdgeInsets.fromLTRB(20, 8, 20, 8),
       child: Row(
         children: [
           Text(

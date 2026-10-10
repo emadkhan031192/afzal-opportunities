@@ -58,7 +58,9 @@ class _AccountScreenState extends State<AccountScreen> {
       body: AnimatedBuilder(
         animation: _auth,
         builder: (context, _) {
-          if (!_auth.isSignedIn) return const _SignedOutView();
+          if (!_auth.isSignedIn) {
+            return _SignedOutView(returnVacancy: widget.returnVacancy);
+          }
           return _SignedInView(auth: _auth, service: _service);
         },
       ),
@@ -67,36 +69,56 @@ class _AccountScreenState extends State<AccountScreen> {
 }
 
 class _SignedOutView extends StatelessWidget {
-  const _SignedOutView();
+  const _SignedOutView({this.returnVacancy});
+
+  /// When set, this chooser was opened from the Login screen's
+  /// "Create account" button — the "Already have an account?" card is
+  /// hidden since the user just came from login.
+  final TeachingVacancy? returnVacancy;
 
   @override
   Widget build(BuildContext context) {
     final s = AppLocalizations.of(context);
     final theme = Theme.of(context);
     return SingleChildScrollView(
-      padding: const EdgeInsets.all(24),
+      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 20),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          const SizedBox(height: 16),
-          Icon(
-            Icons.school_outlined,
-            size: 64,
-            color: theme.colorScheme.primary,
+          // Compact centered header.
+          Center(
+            child: Container(
+              width: 72,
+              height: 72,
+              decoration: BoxDecoration(
+                color: theme.colorScheme.primaryContainer,
+                shape: BoxShape.circle,
+              ),
+              child: Icon(
+                Icons.school_outlined,
+                size: 36,
+                color: theme.colorScheme.primary,
+              ),
+            ),
           ),
           const SizedBox(height: 16),
           Text(
             s.teachingTitle,
-            style: theme.textTheme.headlineSmall,
+            style: theme.textTheme.headlineSmall?.copyWith(
+              fontWeight: FontWeight.w800,
+            ),
             textAlign: TextAlign.center,
           ),
-          const SizedBox(height: 8),
+          const SizedBox(height: 6),
           Text(
             s.teachingSubtitle,
-            style: theme.textTheme.bodyMedium,
+            style: theme.textTheme.bodyMedium?.copyWith(
+              color: theme.colorScheme.onSurfaceVariant,
+            ),
             textAlign: TextAlign.center,
           ),
-          const SizedBox(height: 32),
+          const SizedBox(height: 28),
+          // Balanced, equal choice cards.
           _ChoiceCard(
             icon: Icons.business_outlined,
             title: s.iAmInstitution,
@@ -114,22 +136,17 @@ class _SignedOutView extends StatelessWidget {
               MaterialPageRoute(builder: (_) => const TeacherRegisterScreen()),
             ),
           ),
-          const SizedBox(height: 12),
-          _ChoiceCard(
-            icon: Icons.login,
-            title: s.haveAccount,
-            subtitle: s.haveAccountUrdu,
-            onTap: () => Navigator.of(
-              context,
-            ).push(MaterialPageRoute(builder: (_) => const LoginScreen())),
-          ),
-          const SizedBox(height: 12),
-          _ChoiceCard(
-            icon: Icons.visibility_outlined,
-            title: s.continueAsGuest,
-            subtitle: s.continueAsGuestUrdu,
-            onTap: () => Navigator.of(context).pop(),
-          ),
+          if (returnVacancy == null) ...[
+            const SizedBox(height: 12),
+            _ChoiceCard(
+              icon: Icons.login,
+              title: s.haveAccount,
+              subtitle: s.haveAccountUrdu,
+              onTap: () => Navigator.of(
+                context,
+              ).push(MaterialPageRoute(builder: (_) => const LoginScreen())),
+            ),
+          ],
         ],
       ),
     );
