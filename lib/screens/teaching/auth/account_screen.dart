@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../../core/l10n/app_localizations.dart';
+import '../../../models/teaching_vacancy.dart';
 import '../../../services/teaching_auth.dart';
 import '../../../services/teaching_service.dart';
 import '../../../widgets/state_views.dart';
@@ -16,7 +17,12 @@ import 'teacher_register_screen.dart';
 /// to their organization or teacher dashboard (or the account-type
 /// chooser when they have no profile yet).
 class AccountScreen extends StatefulWidget {
-  const AccountScreen({super.key});
+  const AccountScreen({super.key, this.returnVacancy});
+
+  /// When set, the account flow was triggered from a job's apply flow;
+  /// on successful sign-in the screen pops with `true` so the caller can
+  /// return the applicant to that job.
+  final TeachingVacancy? returnVacancy;
 
   @override
   State<AccountScreen> createState() => _AccountScreenState();
@@ -25,6 +31,25 @@ class AccountScreen extends StatefulWidget {
 class _AccountScreenState extends State<AccountScreen> {
   final TeachingAuth _auth = TeachingAuth();
   final TeachingService _service = TeachingService();
+
+  @override
+  void initState() {
+    super.initState();
+    _auth.addListener(_onAuthChanged);
+  }
+
+  @override
+  void dispose() {
+    _auth.removeListener(_onAuthChanged);
+    super.dispose();
+  }
+
+  void _onAuthChanged() {
+    // Return-to-job flow: once signed in, pop with success.
+    if (widget.returnVacancy != null && _auth.isSignedIn && mounted) {
+      Navigator.of(context).pop(true);
+    }
+  }
 
   @override
   Widget build(BuildContext context) {

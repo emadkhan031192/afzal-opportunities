@@ -2,21 +2,25 @@ import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
 /// App bar from the user's final UI: A-mark logo + "AFZAL-E SERVICES"
-/// wordmark on the left; settings, notification bell (with dot), and
-/// profile avatar actions on the right.
+/// wordmark on the left; settings, notification bell (with dot), account
+/// and logout actions on the right.
 class AppHeader extends StatelessWidget {
   const AppHeader({
     super.key,
     this.onOpenSettings,
     this.onOpenNotifications,
     this.onOpenProfile,
+    this.onLogout,
     this.hasUnreadNotifications = false,
+    this.isSignedIn = false,
   });
 
   final VoidCallback? onOpenSettings;
   final VoidCallback? onOpenNotifications;
   final VoidCallback? onOpenProfile;
+  final VoidCallback? onLogout;
   final bool hasUnreadNotifications;
+  final bool isSignedIn;
 
   @override
   Widget build(BuildContext context) {
@@ -113,6 +117,14 @@ class AppHeader extends StatelessWidget {
               ),
             ),
           ),
+          if (isSignedIn) ...[
+            const SizedBox(width: 8),
+            _HeaderIconButton(
+              background: iconBg,
+              onTap: onLogout,
+              child: Icon(Icons.logout_outlined, size: 18, color: ink),
+            ),
+          ],
         ],
       ),
     );

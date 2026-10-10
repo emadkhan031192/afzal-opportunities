@@ -10,6 +10,7 @@ import '../services/teaching_service.dart';
 import '../widgets/whatsapp_fab.dart';
 import 'home/home_screen.dart';
 import 'saved/saved_screen.dart';
+import 'teaching/profile_screen.dart';
 import 'teaching/teaching_screen.dart';
 
 /// Root scaffold: bottom navigation between the discovery feed, teaching
@@ -69,6 +70,7 @@ class _MainShellState extends State<MainShell> {
               bookmarks: widget.bookmarkService,
               onBrowse: () => setState(() => _index = 0),
             ),
+            const ProfileScreen(),
           ],
         ),
       ),
@@ -90,6 +92,11 @@ class _MainShellState extends State<MainShell> {
             icon: const Icon(Icons.bookmark_border),
             activeIcon: const Icon(Icons.bookmark),
             label: s.saved,
+          ),
+          BottomNavigationBarItem(
+            icon: const Icon(Icons.person_outline),
+            activeIcon: const Icon(Icons.person),
+            label: s.profile,
           ),
         ],
       ),

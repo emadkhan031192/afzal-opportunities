@@ -269,15 +269,6 @@ class _TeachingScreenState extends State<TeachingScreen> {
               onPressed: () => setState(() => _savedOnly = !_savedOnly),
             ),
           ),
-          const SizedBox(width: 8),
-          _IconButton(
-            icon: Icons.person_outline,
-            tooltip: s.account,
-            active: false,
-            onPressed: () => Navigator.of(
-              context,
-            ).push(MaterialPageRoute(builder: (_) => const AccountScreen())),
-          ),
         ],
       ),
     );

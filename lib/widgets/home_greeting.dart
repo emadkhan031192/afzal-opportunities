@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 
-import '../../core/l10n/app_localizations.dart';
-import '../../services/teaching_auth.dart';
-import '../../services/teaching_service.dart';
+import '../core/l10n/app_localizations.dart';
+import '../services/teaching_auth.dart';
+import '../services/teaching_service.dart';
 
-/// Role-appropriate home greeting.
+/// Attractive greeting banner shown above the welcome carousel.
 ///
 /// - Guest: "Welcome to Afzal-E Services."
 /// - Institution: "Welcome, {Institution Name}."
@@ -74,25 +74,59 @@ class _HomeGreetingState extends State<HomeGreeting> {
   @override
   Widget build(BuildContext context) {
     final s = AppLocalizations.of(context);
-    final theme = Theme.of(context);
+    final dark = Theme.of(context).brightness == Brightness.dark;
     String text;
-    if (_loading) {
+    IconData icon;
+    if (_loading || _name == null) {
       text = s.welcomeGuest;
-    } else if (_name == null) {
-      text = s.welcomeGuest;
+      icon = Icons.waving_hand_outlined;
     } else if (_isInstitution) {
       text = s.welcomeInstitution(_name!);
+      icon = Icons.business_outlined;
     } else {
       text = s.welcomeTeacher(_name!);
+      icon = Icons.person_outline;
     }
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(20, 12, 20, 4),
-      child: Text(
-        text,
-        style: theme.textTheme.titleMedium?.copyWith(
-          fontWeight: FontWeight.w700,
-          color: theme.colorScheme.primary,
+    return Container(
+      margin: const EdgeInsets.fromLTRB(20, 4, 20, 8),
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: dark
+              ? const [Color(0xFF065F46), Color(0xFF047857)]
+              : const [Color(0xFFECFDF5), Color(0xFFD1FAE5)],
         ),
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(
+          color: const Color(0xFF10B981).withValues(alpha: 0.3),
+        ),
+      ),
+      child: Row(
+        children: [
+          Container(
+            width: 36,
+            height: 36,
+            decoration: const BoxDecoration(
+              color: Color(0xFF10B981),
+              shape: BoxShape.circle,
+            ),
+            child: Icon(icon, size: 18, color: Colors.white),
+          ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Text(
+              text,
+              style: TextStyle(
+                fontSize: 15,
+                fontWeight: FontWeight.w800,
+                color: dark ? Colors.white : const Color(0xFF065F46),
+                height: 1.3,
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }

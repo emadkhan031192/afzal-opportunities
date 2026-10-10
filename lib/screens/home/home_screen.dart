@@ -11,6 +11,7 @@ import '../../models/advertisement.dart';
 import '../../services/advertisement_service.dart';
 import '../../services/bookmark_service.dart';
 import '../../services/notification_service.dart';
+import '../../services/teaching_auth.dart';
 import '../../widgets/app_header.dart';
 import '../../widgets/category_chips.dart';
 import '../../widgets/filter_sheet.dart';
@@ -20,6 +21,8 @@ import '../../widgets/settings_sheet.dart';
 import '../../widgets/state_views.dart';
 import '../../widgets/vibrant_ad_card.dart';
 import '../../widgets/welcome_carousel.dart';
+import '../teaching/auth/account_screen.dart';
+import '../teaching/auth/login_screen.dart';
 import '../details/details_screen.dart';
 
 /// Discovery feed rebuilt from the user's designed Pages 2–4:
@@ -49,6 +52,7 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
   final TextEditingController _searchController = TextEditingController();
+  final TeachingAuth _auth = TeachingAuth();
   String _category = AppConstants.allCategoriesId;
   FeedSortMode _sort = FeedSortMode.latest;
   bool _closingSoonOnly = false;
@@ -62,6 +66,29 @@ class _HomeScreenState extends State<HomeScreen> {
     super.initState();
     _future = widget.service.fetchPublished();
     _loadUnread();
+    _auth.addListener(_onAuthChanged);
+  }
+
+  void _onAuthChanged() {
+    if (mounted) setState(() {});
+  }
+
+  Future<void> _openAccount() async {
+    if (_auth.isSignedIn) {
+      // Signed in: open the account screen (dashboard or chooser).
+      await Navigator.of(context).push(
+        MaterialPageRoute(builder: (_) => const AccountScreen()),
+      );
+    } else {
+      // Signed out: go directly to the Login page.
+      await Navigator.of(context).push(
+        MaterialPageRoute(builder: (_) => const LoginScreen()),
+      );
+    }
+  }
+
+  Future<void> _logout() async {
+    await _auth.signOut();
   }
 
   Future<void> _loadUnread() async {
@@ -76,6 +103,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
   @override
   void dispose() {
+    _auth.removeListener(_onAuthChanged);
     _searchController.dispose();
     super.dispose();
   }
@@ -191,10 +219,13 @@ class _HomeScreenState extends State<HomeScreen> {
             ),
             onOpenNotifications: _openInbox,
             hasUnreadNotifications: _unreadCount > 0,
+            onOpenProfile: _openAccount,
+            onLogout: _logout,
+            isSignedIn: _auth.isSignedIn,
           ),
         ),
-        const SliverToBoxAdapter(child: WelcomeCarousel()),
         const SliverToBoxAdapter(child: HomeGreeting()),
+        const SliverToBoxAdapter(child: WelcomeCarousel()),
         SliverToBoxAdapter(child: _searchRow()),
         SliverToBoxAdapter(
           child: CategoryChips(

@@ -99,6 +99,9 @@ class AppLocalizations {
   String get tapForDetails => _t('tapForDetails');
   String get call => _t('call');
   String get whatsapp => _t('whatsapp');
+  String get noContactDetails => _t('noContactDetails');
+  String get createAccountWhy =>
+      'اکاؤنٹ بنائیں — نوکریوں پر درخواست دینے اور رابطے کی تفصیلات دیکھنے کے لیے ضروری ہے';
   String get iAmInstitutionUrdu =>
       'میں ایک اسکول یا اکیڈمی ہوں — آسامیاں پوسٹ کریں';
   String get iAmTeacherUrdu =>
@@ -107,6 +110,12 @@ class AppLocalizations {
   String get continueAsGuestUrdu =>
       'بغیر اکاؤنٹ کے نوکریاں دیکھیں — رابطے کی تفصیلات چھپی رہیں گی';
   String get welcomeGuest => _t('welcomeGuest');
+  String get profileGuestTitle => _t('profileGuestTitle');
+  String get profileGuestDesc => _t('profileGuestDesc');
+  String get years => _t('years');
+  String get profile => _t('profile');
+  String get subjects => _t('subjects');
+  String get status => _t('status');
   String welcomeInstitution(String name) =>
       _t('welcomeInstitution').replaceAll('{name}', name);
   String welcomeTeacher(String name) =>
@@ -406,9 +415,18 @@ class AppLocalizations {
     'tapForDetails': 'Tap the card for full job details.',
     'call': 'Call',
     'whatsapp': 'WhatsApp',
+    'noContactDetails':
+        'No contact details were provided for this job.',
     'welcomeGuest': 'Welcome to Afzal-E Services.',
     'welcomeInstitution': 'Welcome, {name}.',
     'welcomeTeacher': 'Welcome, {name}.',
+    'profileGuestTitle': 'Sign in to see your profile',
+    'profileGuestDesc':
+        'Log in as a teacher or an institution to see your information here.',
+    'years': 'years',
+    'profile': 'Profile',
+    'subjects': 'Subjects',
+    'status': 'Status',
     'filter': 'Filter',
     'applyFilters': 'Apply filters',
     'resetFilters': 'Reset filters',
@@ -680,9 +698,17 @@ class AppLocalizations {
     'tapForDetails': 'مکمل تفصیلات کے لیے کارڈ پر ٹیپ کریں۔',
     'call': 'کال',
     'whatsapp': 'واٹس ایپ',
+    'noContactDetails': 'اس نوکری کے لیے رابطے کی تفصیلات فراہم نہیں کی گئیں۔',
     'welcomeGuest': 'افضل ای سروسز میں خوش آمدید۔',
     'welcomeInstitution': 'خوش آمدید، {name}۔',
     'welcomeTeacher': 'خوش آمدید، {name}۔',
+    'profileGuestTitle': 'اپنی پروفائل دیکھنے کے لیے سائن اِن کریں',
+    'profileGuestDesc':
+        'اپنی معلومات یہاں دیکھنے کے لیے ٹیچر یا ادارے کے طور پر لاگ اِن کریں۔',
+    'years': 'سال',
+    'profile': 'پروفائل',
+    'subjects': 'مضامین',
+    'status': 'حیثیت',
     'filter': 'فلٹر',
     'applyFilters': 'فلٹر لگائیں',
     'resetFilters': 'فلٹر صاف کریں',

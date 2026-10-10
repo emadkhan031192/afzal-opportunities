@@ -4,7 +4,7 @@ import '../../../core/l10n/app_localizations.dart';
 import '../../../models/teaching_vacancy.dart';
 import '../../../services/teaching_auth.dart';
 import '../../../widgets/teaching_form_fields.dart';
-import 'teacher_register_screen.dart';
+import 'account_screen.dart';
 
 /// Email/password login for teaching-module accounts.
 ///
@@ -142,7 +142,7 @@ class _LoginScreenState extends State<LoginScreen> {
                           final navigator = Navigator.of(context);
                           final registered = await navigator.push<bool>(
                             MaterialPageRoute(
-                              builder: (_) => TeacherRegisterScreen(
+                              builder: (_) => AccountScreen(
                                 returnVacancy: widget.returnVacancy,
                               ),
                             ),
@@ -151,7 +151,19 @@ class _LoginScreenState extends State<LoginScreen> {
                             navigator.pop(true);
                           }
                         },
-                  child: Text(s.registerAsTeacher),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Text(s.createAccount),
+                      const SizedBox(height: 2),
+                      Text(
+                        s.createAccountWhy,
+                        style: Theme.of(context).textTheme.bodySmall,
+                        textDirection: TextDirection.rtl,
+                        textAlign: TextAlign.center,
+                      ),
+                    ],
+                  ),
                 ),
               ],
             ],

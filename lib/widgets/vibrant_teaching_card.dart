@@ -354,28 +354,57 @@ class _ApplyOptionsRowState extends State<_ApplyOptionsRow> {
 
   Future<void> _call() async {
     final contact = await _service.getVacancyContact(widget.vacancy.id);
-    if (contact?.applyPhone == null || !mounted) return;
+    if (!mounted) return;
+    if (contact?.applyPhone == null) {
+      _showNoDetails();
+      return;
+    }
     final merged = widget.vacancy.withContact(contact!);
-    if (merged.canCall) openUrl('tel:${merged.applyPhone}');
+    if (merged.canCall) {
+      openUrl('tel:${merged.applyPhone}');
+    } else {
+      _showNoDetails();
+    }
   }
 
   Future<void> _whatsapp() async {
     if (!mounted) return;
     final contact = await _service.getVacancyContact(widget.vacancy.id);
-    if (contact?.applyWhatsapp == null || !mounted) return;
+    if (!mounted) return;
+    if (contact?.applyWhatsapp == null) {
+      _showNoDetails();
+      return;
+    }
     final merged = widget.vacancy.withContact(contact!);
-    if (merged.canWhatsapp) WhatsappTemplateSheet.show(context, merged);
+    if (merged.canWhatsapp) {
+      WhatsappTemplateSheet.show(context, merged);
+    } else {
+      _showNoDetails();
+    }
   }
 
   Future<void> _email() async {
     final contact = await _service.getVacancyContact(widget.vacancy.id);
-    if (contact?.applyEmail == null || !mounted) return;
+    if (!mounted) return;
+    if (contact?.applyEmail == null) {
+      _showNoDetails();
+      return;
+    }
     final merged = widget.vacancy.withContact(contact!);
-    if (!merged.canEmail) return;
+    if (!merged.canEmail) {
+      _showNoDetails();
+      return;
+    }
     final subject = Uri.encodeComponent(
       'Application: ${merged.jobTitle} at ${merged.institutionName}',
     );
     openUrl('mailto:${merged.applyEmail}?subject=$subject');
+  }
+
+  void _showNoDetails() {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text(AppLocalizations.of(context).noContactDetails)),
+    );
   }
 
   @override

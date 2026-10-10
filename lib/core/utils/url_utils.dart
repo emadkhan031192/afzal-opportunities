@@ -1,11 +1,12 @@
 import 'package:flutter/foundation.dart';
 import 'package:url_launcher/url_launcher.dart';
 
-/// Returns true when [raw] is a safe, openable web URL.
+/// Returns true when [raw] is a safe, openable URL.
 ///
-/// Only `http`/`https` URLs with a non-empty host are accepted. Anything
-/// else — deep links, `javascript:` pseudo-URLs, malformed text — is
-/// rejected so advertisement text can never be treated as executable code.
+/// `http`/`https` URLs need a non-empty host. `tel:` and `mailto:` links
+/// are also accepted (user-initiated call/email actions). Anything else —
+/// deep links, `javascript:` pseudo-URLs, malformed text — is rejected so
+/// advertisement text can never be treated as executable code.
 bool isSafeHttpUrl(String? raw) {
   if (raw == null) {
     return false;
@@ -19,6 +20,9 @@ bool isSafeHttpUrl(String? raw) {
     return false;
   }
   final scheme = uri.scheme.toLowerCase();
+  if (scheme == 'tel' || scheme == 'mailto') {
+    return true;
+  }
   if (scheme != 'http' && scheme != 'https') {
     return false;
   }

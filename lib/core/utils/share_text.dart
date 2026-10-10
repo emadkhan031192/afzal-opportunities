@@ -59,9 +59,10 @@ String buildVacancyShareText(TeachingVacancy v, {bool forWhatsApp = true}) {
   }
   final desc = v.description.trim();
   if (desc.isNotEmpty) {
+    // Full job description (not a snippet) for teaching vacancies.
     text
       ..writeln()
-      ..writeln(_shortDescription(desc));
+      ..writeln(desc);
   }
   text
     ..writeln()
