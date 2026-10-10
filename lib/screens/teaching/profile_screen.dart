@@ -92,9 +92,9 @@ class _GuestView extends StatelessWidget {
             const SizedBox(height: 24),
             ElevatedButton(
               onPressed: () {
-                Navigator.of(context).push(
-                  MaterialPageRoute(builder: (_) => const LoginScreen()),
-                );
+                Navigator.of(
+                  context,
+                ).push(MaterialPageRoute(builder: (_) => const LoginScreen()));
               },
               child: Text(s.login),
             ),
@@ -133,8 +133,12 @@ class _SignedInView extends StatelessWidget {
           return const LoadingView();
         }
         final results = snapshot.data ?? [];
-        final org = results.isNotEmpty ? results[0] as TeachingOrganization? : null;
-        final profile = results.length > 1 ? results[1] as TeacherProfile? : null;
+        final org = results.isNotEmpty
+            ? results[0] as TeachingOrganization?
+            : null;
+        final profile = results.length > 1
+            ? results[1] as TeacherProfile?
+            : null;
         if (org != null) {
           return _InstitutionInfo(org: org, auth: auth);
         }
@@ -167,10 +171,7 @@ class _TeacherInfo extends StatelessWidget {
         const SizedBox(height: 16),
         _InfoRow(label: s.email, value: profile.email),
         _InfoRow(label: s.district, value: profile.district),
-        _InfoRow(
-          label: s.subjects,
-          value: profile.subjects.join(', '),
-        ),
+        _InfoRow(label: s.subjects, value: profile.subjects.join(', ')),
         _InfoRow(
           label: s.experience,
           value: profile.experienceYears != null
@@ -183,7 +184,8 @@ class _TeacherInfo extends StatelessWidget {
           onPressed: () {
             Navigator.of(context).push(
               MaterialPageRoute(
-                builder: (_) => TeacherDashboard(auth: auth, service: TeachingService()),
+                builder: (_) =>
+                    TeacherDashboard(auth: auth, service: TeachingService()),
               ),
             );
           },
@@ -229,7 +231,8 @@ class _InstitutionInfo extends StatelessWidget {
           onPressed: () {
             Navigator.of(context).push(
               MaterialPageRoute(
-                builder: (_) => OrgDashboard(auth: auth, service: TeachingService()),
+                builder: (_) =>
+                    OrgDashboard(auth: auth, service: TeachingService()),
               ),
             );
           },
@@ -261,7 +264,10 @@ class _NoAccountView extends StatelessWidget {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Text(s.noProfileFound, style: Theme.of(context).textTheme.headlineSmall),
+            Text(
+              s.noProfileFound,
+              style: Theme.of(context).textTheme.headlineSmall,
+            ),
             const SizedBox(height: 24),
             OutlinedButton.icon(
               onPressed: () async => auth.signOut(),
@@ -306,15 +312,12 @@ class _Header extends StatelessWidget {
             children: [
               Text(
                 title,
-                style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                  fontWeight: FontWeight.w800,
-                ),
+                style: Theme.of(
+                  context,
+                ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w800),
               ),
               if (subtitle.isNotEmpty)
-                Text(
-                  subtitle,
-                  style: Theme.of(context).textTheme.bodyMedium,
-                ),
+                Text(subtitle, style: Theme.of(context).textTheme.bodyMedium),
             ],
           ),
         ),
@@ -348,9 +351,9 @@ class _InfoRow extends StatelessWidget {
           Expanded(
             child: Text(
               value.isEmpty ? '—' : value,
-              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                fontWeight: FontWeight.w600,
-              ),
+              style: Theme.of(
+                context,
+              ).textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.w600),
             ),
           ),
         ],

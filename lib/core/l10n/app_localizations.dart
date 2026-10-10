@@ -415,8 +415,7 @@ class AppLocalizations {
     'tapForDetails': 'Tap the card for full job details.',
     'call': 'Call',
     'whatsapp': 'WhatsApp',
-    'noContactDetails':
-        'No contact details were provided for this job.',
+    'noContactDetails': 'No contact details were provided for this job.',
     'welcomeGuest': 'Welcome to Afzal-E Services.',
     'welcomeInstitution': 'Welcome, {name}.',
     'welcomeTeacher': 'Welcome, {name}.',

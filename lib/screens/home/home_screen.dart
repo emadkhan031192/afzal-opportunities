@@ -76,14 +76,14 @@ class _HomeScreenState extends State<HomeScreen> {
   Future<void> _openAccount() async {
     if (_auth.isSignedIn) {
       // Signed in: open the account screen (dashboard or chooser).
-      await Navigator.of(context).push(
-        MaterialPageRoute(builder: (_) => const AccountScreen()),
-      );
+      await Navigator.of(
+        context,
+      ).push(MaterialPageRoute(builder: (_) => const AccountScreen()));
     } else {
       // Signed out: go directly to the Login page.
-      await Navigator.of(context).push(
-        MaterialPageRoute(builder: (_) => const LoginScreen()),
-      );
+      await Navigator.of(
+        context,
+      ).push(MaterialPageRoute(builder: (_) => const LoginScreen()));
     }
   }
 

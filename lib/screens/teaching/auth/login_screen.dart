@@ -135,35 +135,35 @@ class _LoginScreenState extends State<LoginScreen> {
               ),
               const SizedBox(height: 8),
               OutlinedButton(
-                  onPressed: _busy
-                      ? null
-                      : () async {
-                          final navigator = Navigator.of(context);
-                          final registered = await navigator.push<bool>(
-                            MaterialPageRoute(
-                              builder: (_) => AccountScreen(
-                                returnVacancy: widget.returnVacancy,
-                              ),
+                onPressed: _busy
+                    ? null
+                    : () async {
+                        final navigator = Navigator.of(context);
+                        final registered = await navigator.push<bool>(
+                          MaterialPageRoute(
+                            builder: (_) => AccountScreen(
+                              returnVacancy: widget.returnVacancy,
                             ),
-                          );
-                          if (registered == true && mounted) {
-                            navigator.pop(true);
-                          }
-                        },
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Text(s.createAccount),
-                      const SizedBox(height: 2),
-                      Text(
-                        s.createAccountWhy,
-                        style: Theme.of(context).textTheme.bodySmall,
-                        textDirection: TextDirection.rtl,
-                        textAlign: TextAlign.center,
-                      ),
-                    ],
-                  ),
+                          ),
+                        );
+                        if (registered == true && mounted) {
+                          navigator.pop(true);
+                        }
+                      },
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text(s.createAccount),
+                    const SizedBox(height: 2),
+                    Text(
+                      s.createAccountWhy,
+                      style: Theme.of(context).textTheme.bodySmall,
+                      textDirection: TextDirection.rtl,
+                      textAlign: TextAlign.center,
+                    ),
+                  ],
                 ),
+              ),
             ],
           ),
         ),
