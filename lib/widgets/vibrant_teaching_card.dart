@@ -326,7 +326,11 @@ class _CardContactButtonsState extends State<_CardContactButtons> {
       mainAxisSize: MainAxisSize.min,
       children: [
         if (v.enableCall)
-          _ContactIcon(icon: Icons.call_outlined, tooltip: 'Call', onTap: _call),
+          _ContactIcon(
+            icon: Icons.call_outlined,
+            tooltip: 'Call',
+            onTap: _call,
+          ),
         if (v.enableWhatsapp)
           _ContactIcon(
             icon: Icons.chat_outlined,

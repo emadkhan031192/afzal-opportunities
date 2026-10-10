@@ -29,8 +29,11 @@ void main() {
             schoolName: 'The City School',
             city: 'Peshawar',
           );
-          expect(msg.contains('['), isFalse,
-              reason: 'version $version urdu=$urdu has unfilled placeholder');
+          expect(
+            msg.contains('['),
+            isFalse,
+            reason: 'version $version urdu=$urdu has unfilled placeholder',
+          );
           expect(msg.contains('Science Teacher'), isTrue);
           expect(msg.contains('The City School'), isTrue);
           expect(msg.contains('Peshawar'), isTrue);

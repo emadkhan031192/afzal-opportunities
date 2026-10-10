@@ -14,22 +14,16 @@ class WhatsappTemplates {
   /// Template versions 1–3.
   static const List<({String en, String ur})> versions = [
     (
-      en:
-          'Assalam-o-Alaikum,\n\nI am interested in applying for the position of [Job Title] at [School Name], [City]. Please share the application procedure and any further details.\n\nThank you.',
-      ur:
-          'السلام علیکم!\n\nمیں [School Name]، [City] میں [Job Title] کی آسامی کے لیے درخواست دینا چاہتا/چاہتی ہوں۔ براہِ کرم درخواست دینے کا طریقہ اور مزید تفصیلات بتا دیں۔\n\nشکریہ۔',
+      en: 'Assalam-o-Alaikum,\n\nI am interested in applying for the position of [Job Title] at [School Name], [City]. Please share the application procedure and any further details.\n\nThank you.',
+      ur: 'السلام علیکم!\n\nمیں [School Name]، [City] میں [Job Title] کی آسامی کے لیے درخواست دینا چاہتا/چاہتی ہوں۔ براہِ کرم درخواست دینے کا طریقہ اور مزید تفصیلات بتا دیں۔\n\nشکریہ۔',
     ),
     (
-      en:
-          'Assalam-o-Alaikum,\n\nI saw your vacancy for [Job Title] at [School Name], [City]. Could you please tell me the required qualifications, experience, documents, and last date to apply?\n\nThank you.',
-      ur:
-          'السلام علیکم!\n\nمیں نے [School Name]، [City] میں [Job Title] کی آسامی دیکھی ہے۔ براہِ کرم مطلوبہ تعلیمی قابلیت، تجربے، ضروری دستاویزات اور درخواست جمع کرانے کی آخری تاریخ کے بارے میں رہنمائی فرما دیں۔\n\nشکریہ۔',
+      en: 'Assalam-o-Alaikum,\n\nI saw your vacancy for [Job Title] at [School Name], [City]. Could you please tell me the required qualifications, experience, documents, and last date to apply?\n\nThank you.',
+      ur: 'السلام علیکم!\n\nمیں نے [School Name]، [City] میں [Job Title] کی آسامی دیکھی ہے۔ براہِ کرم مطلوبہ تعلیمی قابلیت، تجربے، ضروری دستاویزات اور درخواست جمع کرانے کی آخری تاریخ کے بارے میں رہنمائی فرما دیں۔\n\nشکریہ۔',
     ),
     (
-      en:
-          'Assalam-o-Alaikum,\n\nI would like to apply for [Job Title] at [School Name], [City]. Please let me know how I can submit my CV and supporting documents. I can share my details for your consideration.\n\nRegards.',
-      ur:
-          'السلام علیکم!\n\nمیں [School Name]، [City] میں [Job Title] کے لیے درخواست دینا چاہتا/چاہتی ہوں۔ براہِ کرم بتا دیں کہ میں اپنا سی وی اور ضروری دستاویزات کیسے جمع کرا سکتا/سکتی ہوں۔ میں غور و خوض کے لیے اپنی تفصیلات فراہم کر سکتا/سکتی ہوں۔\n\nشکریہ۔',
+      en: 'Assalam-o-Alaikum,\n\nI would like to apply for [Job Title] at [School Name], [City]. Please let me know how I can submit my CV and supporting documents. I can share my details for your consideration.\n\nRegards.',
+      ur: 'السلام علیکم!\n\nمیں [School Name]، [City] میں [Job Title] کے لیے درخواست دینا چاہتا/چاہتی ہوں۔ براہِ کرم بتا دیں کہ میں اپنا سی وی اور ضروری دستاویزات کیسے جمع کرا سکتا/سکتی ہوں۔ میں غور و خوض کے لیے اپنی تفصیلات فراہم کر سکتا/سکتی ہوں۔\n\nشکریہ۔',
     ),
   ];
 

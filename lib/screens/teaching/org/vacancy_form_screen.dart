@@ -135,36 +135,40 @@ class _VacancyFormScreenState extends State<VacancyFormScreen> {
       return;
     }
     // At least one enabled channel with valid details is required.
-    final phoneOk = _enableCall &&
+    final phoneOk =
+        _enableCall &&
         TeachingVacancy.isValidPhone(_phoneController.text.trim());
-    final waOk = _enableWhatsapp &&
+    final waOk =
+        _enableWhatsapp &&
         TeachingVacancy.isValidPhone(_whatsappController.text.trim());
-    final emailOk = _enableEmail &&
+    final emailOk =
+        _enableEmail &&
         TeachingVacancy.isValidEmail(_emailController.text.trim());
-    final legacyOk = _appUrlController.text.trim().isNotEmpty ||
+    final legacyOk =
+        _appUrlController.text.trim().isNotEmpty ||
         _contactController.text.trim().isNotEmpty;
     if (!phoneOk && !waOk && !emailOk && !legacyOk) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(s.applyMethodRequired)),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(s.applyMethodRequired)));
       return;
     }
     if (_enableCall && !phoneOk) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(s.invalidPhone)),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(s.invalidPhone)));
       return;
     }
     if (_enableWhatsapp && !waOk) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(s.invalidPhone)),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(s.invalidPhone)));
       return;
     }
     if (_enableEmail && !emailOk) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(s.invalidEmail)),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(s.invalidEmail)));
       return;
     }
     setState(() => _busy = true);
@@ -213,8 +217,8 @@ class _VacancyFormScreenState extends State<VacancyFormScreen> {
             : null,
         applyWhatsapp:
             _enableWhatsapp && _whatsappController.text.trim().isNotEmpty
-                ? _whatsappController.text.trim()
-                : null,
+            ? _whatsappController.text.trim()
+            : null,
         applyEmail: _enableEmail && _emailController.text.trim().isNotEmpty
             ? _emailController.text.trim()
             : null,
@@ -462,10 +466,7 @@ class _ChannelToggle extends StatelessWidget {
         value: enabled,
         onChanged: onChanged,
         secondary: Icon(icon, color: BrandColors.mintDark),
-        title: Text(
-          title,
-          style: Theme.of(context).textTheme.labelLarge,
-        ),
+        title: Text(title, style: Theme.of(context).textTheme.labelLarge),
         contentPadding: EdgeInsets.zero,
         dense: true,
       ),

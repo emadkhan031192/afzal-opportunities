@@ -87,9 +87,9 @@ class _TeacherRegisterScreenState extends State<TeacherRegisterScreen> {
       if (mounted) {
         if (widget.returnVacancy != null) {
           // Guest apply flow: verify email, then return to the job.
-          await Navigator.of(context).push(
-            MaterialPageRoute(builder: (_) => const VerifyEmailScreen()),
-          );
+          await Navigator.of(
+            context,
+          ).push(MaterialPageRoute(builder: (_) => const VerifyEmailScreen()));
           if (mounted) Navigator.of(context).pop(true);
         } else {
           Navigator.of(context).pushReplacement(

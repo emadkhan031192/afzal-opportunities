@@ -286,10 +286,7 @@ void main() {
         isTrue,
       );
       expect(
-        withMethods(
-          whatsapp: true,
-          wa: '03161185662',
-        ).hasValidApplyMethod,
+        withMethods(whatsapp: true, wa: '03161185662').hasValidApplyMethod,
         isTrue,
       );
       expect(

@@ -333,11 +333,7 @@ bool _optionalBool(dynamic value) {
 /// Read: owner, admin, or any signed-in user. Write: owner or admin.
 /// Guests (not signed in) cannot read these via Firebase rules.
 class VacancyContact {
-  const VacancyContact({
-    this.applyPhone,
-    this.applyWhatsapp,
-    this.applyEmail,
-  });
+  const VacancyContact({this.applyPhone, this.applyWhatsapp, this.applyEmail});
 
   final String? applyPhone;
   final String? applyWhatsapp;

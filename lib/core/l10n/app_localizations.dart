@@ -90,7 +90,8 @@ class AppLocalizations {
   String get applyViaEmail => _t('applyViaEmail');
   String get registerAsTeacher => _t('registerAsTeacher');
   String get continueAsGuest => _t('continueAsGuest');
-  String get iAmInstitutionUrdu => 'میں ایک اسکول یا اکیڈمی ہوں — آسامیاں پوسٹ کریں';
+  String get iAmInstitutionUrdu =>
+      'میں ایک اسکول یا اکیڈمی ہوں — آسامیاں پوسٹ کریں';
   String get iAmTeacherUrdu =>
       'میں نوکری تلاش کر رہا/رہی ہوں — آسامیوں پر درخواست دیں';
   String get haveAccountUrdu => 'پہلے سے اکاؤنٹ ہے — لاگ اِن کریں';
@@ -636,8 +637,7 @@ class AppLocalizations {
     'emailAddress': 'ای میل ایڈریس',
     'applicationUrlOptional': 'درخواست کا لنک (اختیاری)',
     'contactInstructionsOptional': 'رابطے کی ہدایات (اختیاری)',
-    'applyMethodRequired':
-        'کم از کم ایک درست درخواست کا طریقہ فعال کریں۔',
+    'applyMethodRequired': 'کم از کم ایک درست درخواست کا طریقہ فعال کریں۔',
     'invalidPhone': 'براہ کرم درست فون نمبر درج کریں۔',
     'loginToApply':
         'اس نوکری کے لیے رابطے کی تفصیلات دیکھنے اور درخواست دینے کے لیے لاگ اِن کریں یا ٹیچر اکاؤنٹ بنائیں۔',

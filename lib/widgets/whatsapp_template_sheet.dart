@@ -13,10 +13,7 @@ class WhatsappTemplateSheet extends StatefulWidget {
 
   final TeachingVacancy vacancy;
 
-  static Future<void> show(
-    BuildContext context,
-    TeachingVacancy vacancy,
-  ) {
+  static Future<void> show(BuildContext context, TeachingVacancy vacancy) {
     return showModalBottomSheet<void>(
       context: context,
       isScrollControlled: true,
@@ -71,9 +68,9 @@ class _WhatsappTemplateSheetState extends State<WhatsappTemplateSheet> {
     final ok = await openUrl('https://wa.me/$number?text=$text');
     if (!ok && mounted) {
       final s = AppLocalizations.of(context);
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(s.whatsappNotFound)),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(s.whatsappNotFound)));
     }
   }
 
@@ -95,10 +92,7 @@ class _WhatsappTemplateSheetState extends State<WhatsappTemplateSheet> {
           children: [
             Text(
               s.chooseMessage,
-              style: const TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.w800,
-              ),
+              style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w800),
             ),
             const SizedBox(height: 12),
             // Version selector.
@@ -125,8 +119,7 @@ class _WhatsappTemplateSheetState extends State<WhatsappTemplateSheet> {
                 ButtonSegment(value: true, label: Text(s.urdu)),
               ],
               selected: {_urdu},
-              onSelectionChanged: (sel) =>
-                  setState(() => _urdu = sel.first),
+              onSelectionChanged: (sel) => setState(() => _urdu = sel.first),
             ),
             const SizedBox(height: 12),
             // Preview.

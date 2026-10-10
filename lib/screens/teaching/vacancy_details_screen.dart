@@ -360,11 +360,7 @@ class _SignedInMethods extends StatelessWidget {
     final url = (v.applicationUrl ?? '').trim();
     if (url.isNotEmpty) {
       rows.add(
-        _MethodRow(
-          icon: Icons.link,
-          label: url,
-          onTap: () => openUrl(url),
-        ),
+        _MethodRow(icon: Icons.link, label: url, onTap: () => openUrl(url)),
       );
     }
     if ((v.contactInstructions ?? '').trim().isNotEmpty) {
@@ -433,9 +429,9 @@ class _MethodRow extends StatelessWidget {
               Expanded(
                 child: Text(
                   label,
-                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                    fontWeight: FontWeight.w600,
-                  ),
+                  style: Theme.of(
+                    context,
+                  ).textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.w600),
                 ),
               ),
               const Icon(
@@ -574,13 +570,13 @@ class _ApplyBar extends StatelessWidget {
                       ? _PrimaryApplyButton(vacancy: vacancy)
                       : ElevatedButton.icon(
                           onPressed: () async {
-                            final loggedIn =
-                                await Navigator.of(context).push<bool>(
-                              MaterialPageRoute(
-                                builder: (_) =>
-                                    LoginScreen(returnVacancy: vacancy),
-                              ),
-                            );
+                            final loggedIn = await Navigator.of(context)
+                                .push<bool>(
+                                  MaterialPageRoute(
+                                    builder: (_) =>
+                                        LoginScreen(returnVacancy: vacancy),
+                                  ),
+                                );
                             if (loggedIn == true) auth.reload();
                           },
                           icon: const Icon(Icons.login),
