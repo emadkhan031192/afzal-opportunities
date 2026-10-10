@@ -169,6 +169,14 @@ class _DashboardBodyState extends State<_DashboardBody> {
               );
             },
           ),
+          const SizedBox(height: 24),
+          OutlinedButton.icon(
+            onPressed: () async {
+              await auth.signOut();
+            },
+            icon: const Icon(Icons.logout_outlined),
+            label: Text(AppLocalizations.of(context).logout),
+          ),
         ],
       ),
     );

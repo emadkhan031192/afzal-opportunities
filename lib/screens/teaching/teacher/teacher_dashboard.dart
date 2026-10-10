@@ -9,7 +9,7 @@ import '../../../services/teaching_auth.dart';
 import '../../../services/teaching_service.dart';
 import '../../../widgets/state_views.dart';
 import '../../../widgets/delete_account_button.dart';
-import '../../../widgets/teaching_vacancy_card.dart';
+import '../../../widgets/vibrant_teaching_card.dart';
 import '../auth/verify_email_screen.dart';
 import '../teacher_profile_form_screen.dart';
 import '../vacancy_details_screen.dart';
@@ -70,10 +70,15 @@ class _TeacherDashboardState extends State<TeacherDashboard> {
           }
           final profile = snapshot.data;
           if (profile == null) {
-            return ErrorView(
-              message: s.somethingWentWrong,
-              onRetry: () async {
-                setState(() {});
+            return _NoProfileView(
+              onRetry: () => setState(() {}),
+              onCreate: () async {
+                final created = await Navigator.of(context).push<bool>(
+                  MaterialPageRoute(
+                    builder: (_) => const TeacherProfileFormScreen(),
+                  ),
+                );
+                if (created == true) setState(() {});
               },
             );
           }
@@ -146,6 +151,14 @@ class _Body extends StatelessWidget {
           Text(s.savedJobs, style: Theme.of(context).textTheme.titleLarge),
           const SizedBox(height: 8),
           _SavedJobsList(savedJobs: savedJobs, service: service),
+          const SizedBox(height: 24),
+          OutlinedButton.icon(
+            onPressed: () async {
+              await auth.signOut();
+            },
+            icon: const Icon(Icons.logout_outlined),
+            label: Text(s.logout),
+          ),
         ],
       ),
     );
@@ -403,8 +416,9 @@ class _SavedJobsList extends StatelessWidget {
             return Column(
               children: vacancies
                   .map(
-                    (v) => TeachingVacancyCard(
+                    (v) => VibrantTeachingCard(
                       vacancy: v,
+                      index: vacancies.indexOf(v),
                       isSaved: true,
                       onTap: () => Navigator.of(context).push(
                         MaterialPageRoute(
@@ -422,6 +436,59 @@ class _SavedJobsList extends StatelessWidget {
           },
         );
       },
+    );
+  }
+}
+
+/// Shown when a signed-in teacher has no profile document.
+/// Offers recovery instead of a dead-end error.
+class _NoProfileView extends StatelessWidget {
+  const _NoProfileView({required this.onRetry, required this.onCreate});
+
+  final VoidCallback onRetry;
+  final VoidCallback onCreate;
+
+  @override
+  Widget build(BuildContext context) {
+    final s = AppLocalizations.of(context);
+    return Center(
+      child: SingleChildScrollView(
+        padding: const EdgeInsets.all(32),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(
+              Icons.person_off_outlined,
+              size: 64,
+              color: Theme.of(context).colorScheme.primary,
+            ),
+            const SizedBox(height: 16),
+            Text(
+              s.noProfileFound,
+              style: Theme.of(context).textTheme.headlineSmall,
+              textAlign: TextAlign.center,
+            ),
+            const SizedBox(height: 8),
+            Text(
+              s.noProfileFoundDesc,
+              style: Theme.of(context).textTheme.bodyMedium,
+              textAlign: TextAlign.center,
+            ),
+            const SizedBox(height: 24),
+            ElevatedButton.icon(
+              onPressed: onCreate,
+              icon: const Icon(Icons.person_add_outlined),
+              label: Text(s.createProfile),
+            ),
+            const SizedBox(height: 12),
+            TextButton.icon(
+              onPressed: onRetry,
+              icon: const Icon(Icons.refresh),
+              label: Text(s.retry),
+            ),
+          ],
+        ),
+      ),
     );
   }
 }

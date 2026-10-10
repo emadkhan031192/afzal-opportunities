@@ -4,15 +4,19 @@ import 'package:flutter/services.dart';
 import '../../core/constants/app_constants.dart';
 import '../../core/l10n/app_localizations.dart';
 import '../../models/teaching_accounts.dart';
+import '../../models/teaching_vacancy.dart';
+import '../../services/teaching_auth.dart';
 import '../../services/teaching_service.dart';
 import '../../widgets/teaching_form_fields.dart';
 
 /// Edit an existing teacher profile. The approval status can never be
 /// escalated here — the service strips it from updates.
 class TeacherProfileFormScreen extends StatefulWidget {
-  const TeacherProfileFormScreen({super.key, required this.existing});
+  const TeacherProfileFormScreen({super.key, this.existing});
 
-  final TeacherProfile existing;
+  /// The profile to edit, or null to create a new one for the
+  /// currently signed-in user.
+  final TeacherProfile? existing;
 
   @override
   State<TeacherProfileFormScreen> createState() =>
@@ -37,20 +41,22 @@ class _TeacherProfileFormScreenState extends State<TeacherProfileFormScreen> {
   void initState() {
     super.initState();
     final p = widget.existing;
-    _nameController = TextEditingController(text: p.fullName);
+    _nameController = TextEditingController(text: p?.fullName ?? '');
     _qualificationController = TextEditingController(
-      text: p.qualification ?? '',
+      text: p?.qualification ?? '',
     );
-    _subjectsController = TextEditingController(text: p.subjects.join(', '));
+    _subjectsController = TextEditingController(
+      text: p?.subjects.join(', ') ?? '',
+    );
     _experienceController = TextEditingController(
-      text: p.experienceYears != null ? '${p.experienceYears}' : '',
+      text: p?.experienceYears != null ? '${p!.experienceYears}' : '',
     );
     _summaryController = TextEditingController(
-      text: p.professionalSummary ?? '',
+      text: p?.professionalSummary ?? '',
     );
-    _district = p.district;
-    _employmentType = p.preferredEmploymentType ?? 'Full-time';
-    _visibility = p.profileVisibility;
+    _district = p?.district ?? AppConstants.kpDistricts.first;
+    _employmentType = p?.preferredEmploymentType ?? 'Full-time';
+    _visibility = p?.profileVisibility ?? 'private';
   }
 
   @override
@@ -69,12 +75,13 @@ class _TeacherProfileFormScreenState extends State<TeacherProfileFormScreen> {
     setState(() => _busy = true);
     try {
       final p = widget.existing;
+      final user = TeachingAuth().currentUser;
       await _service.saveProfile(
         TeacherProfile(
-          id: p.id,
-          ownerUid: p.ownerUid,
+          id: p?.id ?? '',
+          ownerUid: p?.ownerUid ?? user?.uid ?? '',
           fullName: _nameController.text.trim(),
-          email: p.email,
+          email: p?.email ?? user?.email ?? '',
           district: _district,
           qualification: _qualificationController.text.trim().isEmpty
               ? null
@@ -85,9 +92,9 @@ class _TeacherProfileFormScreenState extends State<TeacherProfileFormScreen> {
           professionalSummary: _summaryController.text.trim().isEmpty
               ? null
               : _summaryController.text.trim(),
-          cvStoragePath: p.cvStoragePath,
+          cvStoragePath: p?.cvStoragePath,
           profileVisibility: _visibility,
-          approvalStatus: p.approvalStatus,
+          approvalStatus: p?.approvalStatus ?? TeachingApproval.pending,
         ),
       );
       if (mounted) {

@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 
 import '../core/l10n/app_localizations.dart';
-import '../core/utils/deadline.dart';
 import '../core/utils/share_text.dart';
 import '../core/utils/url_utils.dart';
 import '../models/teaching_vacancy.dart';
@@ -48,11 +47,6 @@ class VibrantTeachingCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final s = AppLocalizations.of(context);
-    final info = getDeadlineInfo(
-      lastDate: vacancy.applicationDeadline,
-      publishedAt: vacancy.publishedAt,
-    );
-    final expired = TeachingService.isExpired(vacancy);
 
     return Container(
       margin: const EdgeInsets.only(bottom: 14),
@@ -109,98 +103,99 @@ class VibrantTeachingCard extends StatelessWidget {
                   ],
                 ),
                 const SizedBox(height: 12),
+                // Job title.
                 Text(
                   vacancy.jobTitle,
                   maxLines: 2,
                   overflow: TextOverflow.ellipsis,
                   style: TextStyle(
-                    fontSize: 16,
+                    fontSize: 19,
                     fontWeight: FontWeight.w800,
                     color: _ink,
-                    height: 1.35,
+                    height: 1.25,
                   ),
                 ),
-                const SizedBox(height: 6),
+                const SizedBox(height: 4),
+                // School name.
                 Text(
-                  '🏫 ${vacancy.institutionName}',
+                  '${s.school}: ${vacancy.institutionName}',
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                   style: TextStyle(
-                    fontSize: 11,
+                    fontSize: 14,
                     fontWeight: FontWeight.w700,
                     color: _ink.withValues(alpha: 0.85),
                   ),
                 ),
-                const SizedBox(height: 2),
-                Text(
-                  '📍 ${vacancy.district}',
-                  style: TextStyle(
-                    fontSize: 11,
-                    fontWeight: FontWeight.w700,
-                    color: _subtleInk,
-                  ),
-                ),
-                if (vacancy.applicationDeadline != null) ...[
-                  const SizedBox(height: 2),
-                  Text(
-                    '📅 ${s.lastDate}: ${_formatDate(vacancy.applicationDeadline!)}',
-                    style: TextStyle(
-                      fontSize: 11,
-                      fontWeight: FontWeight.w700,
-                      color: _subtleInk,
+                const SizedBox(height: 8),
+                // Chips: type + location.
+                Wrap(
+                  spacing: 8,
+                  runSpacing: 6,
+                  children: [
+                    _Chip(
+                      label: s.privateSchool,
+                      background: _chipBg,
+                      textColor: _ink,
                     ),
-                  ),
-                ],
+                    _Chip(
+                      label: '📍 ${vacancy.district}',
+                      background: _chipBg,
+                      textColor: _ink,
+                    ),
+                  ],
+                ),
                 const SizedBox(height: 12),
-                Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 8,
-                    vertical: 5,
-                  ),
-                  decoration: BoxDecoration(
-                    color: _chipBg,
-                    borderRadius: BorderRadius.circular(6),
-                  ),
-                  child: Text(
-                    expired
-                        ? '⌛ ${s.expired}'.toUpperCase()
-                        : '⏳ ${s.deadlineLabel(info)}'.toUpperCase(),
-                    style: TextStyle(
-                      fontSize: 10,
-                      fontWeight: FontWeight.w800,
-                      color: _ink,
+                Divider(color: _ink.withValues(alpha: 0.15), height: 1),
+                const SizedBox(height: 12),
+                // Qualification | Last date.
+                Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Expanded(
+                      child: _FactColumn(
+                        label: s.qualification,
+                        value: vacancy.qualification.trim().isEmpty
+                            ? s.notSpecified
+                            : vacancy.qualification.trim(),
+                        ink: _ink,
+                      ),
                     ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: _FactColumn(
+                        label: s.lastDate,
+                        value: vacancy.applicationDeadline != null
+                            ? _formatDate(vacancy.applicationDeadline!)
+                            : s.notSpecified,
+                        ink: _ink,
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  s.tapForDetails,
+                  style: TextStyle(
+                    fontSize: 12,
+                    color: _subtleInk,
+                    height: 1.4,
+                  ),
+                ),
+                const SizedBox(height: 12),
+                Divider(color: _ink.withValues(alpha: 0.15), height: 1),
+                const SizedBox(height: 12),
+                // Apply options.
+                Text(
+                  s.applyOptions,
+                  style: TextStyle(
+                    fontSize: 15,
+                    fontWeight: FontWeight.w800,
+                    color: _ink,
                   ),
                 ),
                 const SizedBox(height: 10),
-                _CardContactButtons(vacancy: vacancy),
-                const SizedBox(height: 10),
-                SizedBox(
-                  width: double.infinity,
-                  child: GestureDetector(
-                    onTap: onTap,
-                    child: Container(
-                      padding: const EdgeInsets.symmetric(vertical: 10),
-                      decoration: BoxDecoration(
-                        color: _isYellow
-                            ? const Color(0xFF0F172A)
-                            : Colors.white,
-                        borderRadius: BorderRadius.circular(20),
-                      ),
-                      alignment: Alignment.center,
-                      child: Text(
-                        '${s.applyNow} ↗',
-                        style: TextStyle(
-                          fontSize: 12,
-                          fontWeight: FontWeight.w800,
-                          color: _isYellow
-                              ? Colors.white
-                              : const Color(0xFF1E40AF),
-                        ),
-                      ),
-                    ),
-                  ),
-                ),
+                _ApplyOptionsRow(vacancy: vacancy),
               ],
             ),
           ),
@@ -254,22 +249,90 @@ class _CardIconButton extends StatelessWidget {
   }
 }
 
-/// Small contact-method buttons for signed-in users.
+class _Chip extends StatelessWidget {
+  const _Chip({
+    required this.label,
+    required this.background,
+    required this.textColor,
+  });
+
+  final String label;
+  final Color background;
+  final Color textColor;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+      decoration: BoxDecoration(
+        color: background,
+        borderRadius: BorderRadius.circular(20),
+      ),
+      child: Text(
+        label,
+        style: TextStyle(
+          fontSize: 12,
+          fontWeight: FontWeight.w700,
+          color: textColor,
+        ),
+      ),
+    );
+  }
+}
+
+class _FactColumn extends StatelessWidget {
+  const _FactColumn({
+    required this.label,
+    required this.value,
+    required this.ink,
+  });
+
+  final String label;
+  final String value;
+  final Color ink;
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          label,
+          style: TextStyle(fontSize: 12, color: ink.withValues(alpha: 0.6)),
+        ),
+        const SizedBox(height: 4),
+        Text(
+          value,
+          maxLines: 2,
+          overflow: TextOverflow.ellipsis,
+          style: TextStyle(
+            fontSize: 15,
+            fontWeight: FontWeight.w800,
+            color: ink,
+            height: 1.3,
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+/// Apply option buttons matching the approved design: large tinted buttons
+/// with icon above label (Call / WhatsApp / Email).
 ///
-/// Only shown when the user is signed in and the vacancy has at least one
-/// enabled method. Tapping fetches the private contact details (single
-/// Firestore read) and performs the action directly — it never triggers
-/// card navigation. Guests see nothing here.
-class _CardContactButtons extends StatefulWidget {
-  const _CardContactButtons({required this.vacancy});
+/// Only enabled methods are shown, and only for signed-in users.
+/// Tapping performs the action directly — never triggers card navigation.
+/// Guests see a login button instead.
+class _ApplyOptionsRow extends StatefulWidget {
+  const _ApplyOptionsRow({required this.vacancy});
 
   final TeachingVacancy vacancy;
 
   @override
-  State<_CardContactButtons> createState() => _CardContactButtonsState();
+  State<_ApplyOptionsRow> createState() => _ApplyOptionsRowState();
 }
 
-class _CardContactButtonsState extends State<_CardContactButtons> {
+class _ApplyOptionsRowState extends State<_ApplyOptionsRow> {
   final TeachingAuth _auth = TeachingAuth();
   final TeachingService _service = TeachingService();
 
@@ -318,64 +381,113 @@ class _CardContactButtonsState extends State<_CardContactButtons> {
   @override
   Widget build(BuildContext context) {
     final v = widget.vacancy;
-    if (!_auth.isSignedIn) return const SizedBox.shrink();
-    if (!v.enableCall && !v.enableWhatsapp && !v.enableEmail) {
-      return const SizedBox.shrink();
+    final s = AppLocalizations.of(context);
+
+    if (!_auth.isSignedIn) {
+      return SizedBox(
+        width: double.infinity,
+        child: Container(
+          padding: const EdgeInsets.symmetric(vertical: 14),
+          decoration: BoxDecoration(
+            color: const Color(0xFF0F172A).withValues(alpha: 0.08),
+            borderRadius: BorderRadius.circular(14),
+          ),
+          alignment: Alignment.center,
+          child: Text(
+            s.loginToApplyShort,
+            style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w800),
+          ),
+        ),
+      );
+    }
+
+    final buttons = <Widget>[];
+    if (v.enableCall) {
+      buttons.add(
+        _ApplyOptionButton(
+          icon: Icons.call_outlined,
+          label: s.call,
+          background: const Color(0xFFE6F4EA),
+          foreground: const Color(0xFF137333),
+          onTap: _call,
+        ),
+      );
+    }
+    if (v.enableWhatsapp) {
+      buttons.add(
+        _ApplyOptionButton(
+          icon: Icons.chat_outlined,
+          label: s.whatsapp,
+          background: const Color(0xFFE6F4EA),
+          foreground: const Color(0xFF137333),
+          onTap: _whatsapp,
+        ),
+      );
+    }
+    if (v.enableEmail) {
+      buttons.add(
+        _ApplyOptionButton(
+          icon: Icons.email_outlined,
+          label: s.email,
+          background: const Color(0xFFE8EDFF),
+          foreground: const Color(0xFF1E40AF),
+          onTap: _email,
+        ),
+      );
+    }
+    if (buttons.isEmpty) {
+      return Text(s.notSpecified, style: const TextStyle(fontSize: 13));
     }
     return Row(
-      mainAxisSize: MainAxisSize.min,
       children: [
-        if (v.enableCall)
-          _ContactIcon(
-            icon: Icons.call_outlined,
-            tooltip: 'Call',
-            onTap: _call,
-          ),
-        if (v.enableWhatsapp)
-          _ContactIcon(
-            icon: Icons.chat_outlined,
-            tooltip: 'WhatsApp',
-            onTap: _whatsapp,
-          ),
-        if (v.enableEmail)
-          _ContactIcon(
-            icon: Icons.email_outlined,
-            tooltip: 'Email',
-            onTap: _email,
-          ),
+        for (var i = 0; i < buttons.length; i++) ...[
+          if (i > 0) const SizedBox(width: 10),
+          Expanded(child: buttons[i]),
+        ],
       ],
     );
   }
 }
 
-class _ContactIcon extends StatelessWidget {
-  const _ContactIcon({
+class _ApplyOptionButton extends StatelessWidget {
+  const _ApplyOptionButton({
     required this.icon,
-    required this.tooltip,
+    required this.label,
+    required this.background,
+    required this.foreground,
     required this.onTap,
   });
 
   final IconData icon;
-  final String tooltip;
+  final String label;
+  final Color background;
+  final Color foreground;
   final VoidCallback onTap;
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.only(right: 8),
-      child: GestureDetector(
-        onTap: onTap,
-        child: Tooltip(
-          message: tooltip,
-          child: Container(
-            width: 32,
-            height: 32,
-            decoration: BoxDecoration(
-              color: Colors.white.withValues(alpha: 0.25),
-              shape: BoxShape.circle,
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        padding: const EdgeInsets.symmetric(vertical: 14),
+        decoration: BoxDecoration(
+          color: background,
+          borderRadius: BorderRadius.circular(14),
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(icon, size: 22, color: foreground),
+            const SizedBox(height: 6),
+            Text(
+              label,
+              style: TextStyle(
+                fontSize: 13,
+                fontWeight: FontWeight.w700,
+                color: foreground,
+              ),
             ),
-            child: Icon(icon, size: 16, color: Colors.white),
-          ),
+          ],
         ),
       ),
     );

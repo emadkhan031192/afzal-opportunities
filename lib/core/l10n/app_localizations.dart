@@ -90,6 +90,15 @@ class AppLocalizations {
   String get applyViaEmail => _t('applyViaEmail');
   String get registerAsTeacher => _t('registerAsTeacher');
   String get continueAsGuest => _t('continueAsGuest');
+  String get noProfileFound => _t('noProfileFound');
+  String get noProfileFoundDesc => _t('noProfileFoundDesc');
+  String get createProfile => _t('createProfile');
+  String get school => _t('school');
+  String get privateSchool => _t('privateSchool');
+  String get applyOptions => _t('applyOptions');
+  String get tapForDetails => _t('tapForDetails');
+  String get call => _t('call');
+  String get whatsapp => _t('whatsapp');
   String get iAmInstitutionUrdu =>
       'میں ایک اسکول یا اکیڈمی ہوں — آسامیاں پوسٹ کریں';
   String get iAmTeacherUrdu =>
@@ -387,6 +396,16 @@ class AppLocalizations {
     'applyViaEmail': 'Apply via Email',
     'registerAsTeacher': 'No account? Register as a teacher',
     'continueAsGuest': 'Continue as guest',
+    'noProfileFound': 'No teacher profile found',
+    'noProfileFoundDesc':
+        'We could not find a teacher profile for this account. Create one to continue, or try again.',
+    'createProfile': 'Create profile',
+    'school': 'School',
+    'privateSchool': 'Private School',
+    'applyOptions': 'Apply options',
+    'tapForDetails': 'Tap the card for full job details.',
+    'call': 'Call',
+    'whatsapp': 'WhatsApp',
     'welcomeGuest': 'Welcome to Afzal-E Services.',
     'welcomeInstitution': 'Welcome, {name}.',
     'welcomeTeacher': 'Welcome, {name}.',
@@ -651,6 +670,16 @@ class AppLocalizations {
     'applyViaEmail': 'ای میل سے درخواست دیں',
     'registerAsTeacher': 'اکاؤنٹ نہیں ہے؟ ٹیچر کے طور پر رجسٹر کریں',
     'continueAsGuest': 'مہمان کے طور پر جاری رکھیں',
+    'noProfileFound': 'ٹیچر پروفائل نہیں ملا',
+    'noProfileFoundDesc':
+        'اس اکاؤنٹ کے لیے کوئی ٹیچر پروفائل نہیں ملا۔ جاری رکھنے کے لیے پروفائل بنائیں یا دوبارہ کوشش کریں۔',
+    'createProfile': 'پروفائل بنائیں',
+    'school': 'اسکول',
+    'privateSchool': 'پرائیویٹ اسکول',
+    'applyOptions': 'درخواست کے طریقے',
+    'tapForDetails': 'مکمل تفصیلات کے لیے کارڈ پر ٹیپ کریں۔',
+    'call': 'کال',
+    'whatsapp': 'واٹس ایپ',
     'welcomeGuest': 'افضل ای سروسز میں خوش آمدید۔',
     'welcomeInstitution': 'خوش آمدید، {name}۔',
     'welcomeTeacher': 'خوش آمدید، {name}۔',
