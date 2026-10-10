@@ -186,7 +186,7 @@ function initFirebase() {
 /* =================================================================
    View routing (simple JS view switching)
    ================================================================= */
-const VIEWS = ["view-login", "view-dashboard", "view-editor", "view-teaching", "view-carousel"];
+const VIEWS = ["view-login", "view-dashboard", "view-editor", "view-teaching", "view-accounts", "view-carousel"];
 function showView(id) {
   VIEWS.forEach((v) => {
     $(v).hidden = v !== id;
@@ -1629,6 +1629,191 @@ async function vacancyEdit(doc) {
   showView("view-login");
 })();
 
+/* ================= Accounts =================
+   All created teacher & institution accounts in one place, so the admin
+   can correct a user's details when they ask for changes.
+   Collections: teachingOrganizations, teacherProfiles (admin read/write). */
+
+let accountTab = "institutions";
+let accountSearch = "";
+let accountData = { institutions: [], teachers: [] };
+
+$("btn-accounts").addEventListener("click", () => {
+  showView("view-accounts");
+  loadAccounts();
+});
+$("btn-accounts-back").addEventListener("click", () => showView("view-dashboard"));
+$("btn-accounts-retry").addEventListener("click", loadAccounts);
+$("accounts-search-input").addEventListener("input", (e) => {
+  accountSearch = e.target.value.trim().toLowerCase();
+  renderAccounts();
+});
+
+document.querySelectorAll(".atab").forEach((tab) => {
+  tab.addEventListener("click", () => {
+    accountTab = tab.dataset.atab;
+    accountSearch = "";
+    $("accounts-search-input").value = "";
+    document.querySelectorAll(".atab").forEach((t) => {
+      const on = t === tab;
+      t.classList.toggle("active", on);
+      t.setAttribute("aria-selected", on ? "true" : "false");
+    });
+    renderAccounts();
+  });
+});
+
+async function loadAccounts() {
+  $("accounts-list-loading").hidden = false;
+  $("accounts-list-error").hidden = true;
+  $("accounts-list-empty").hidden = true;
+  $("accounts-list").innerHTML = "";
+  $("accounts-status").textContent = "";
+  try {
+    const [orgSnap, teachSnap] = await Promise.all([
+      db.collection(TEACH_COLLECTIONS.organizations).orderBy("updatedAt", "desc").limit(500).get(),
+      db.collection(TEACH_COLLECTIONS.teachers).orderBy("updatedAt", "desc").limit(500).get(),
+    ]);
+    accountData.institutions = orgSnap.docs.map((d) => ({ id: d.id, ...d.data() }));
+    accountData.teachers = teachSnap.docs.map((d) => ({ id: d.id, ...d.data() }));
+    renderAccounts();
+  } catch (e) {
+    console.error("Load accounts failed:", e);
+    $("accounts-list-error-detail").textContent = (e && e.message) || "Unknown error.";
+    $("accounts-list-error").hidden = false;
+  } finally {
+    $("accounts-list-loading").hidden = true;
+  }
+}
+
+function filteredAccounts() {
+  let list = accountData[accountTab] || [];
+  if (accountSearch) {
+    list = list.filter((d) => {
+      const parts =
+        accountTab === "institutions"
+          ? [d.institutionName, d.contactPerson, d.email, d.district, d.city, d.id]
+          : [d.fullName, d.email, d.district, d.qualification, arrJoin(d.subjects), d.id];
+      return parts.filter(Boolean).join(" ").toLowerCase().includes(accountSearch);
+    });
+  }
+  return list;
+}
+
+function renderAccounts() {
+  $("count-a-institutions").textContent = accountData.institutions.length;
+  $("count-a-teachers").textContent = accountData.teachers.length;
+  const list = filteredAccounts();
+  $("accounts-list-empty").hidden = list.length !== 0;
+  $("accounts-status").textContent =
+    list.length === 0 ? "" : `${list.length} account${list.length === 1 ? "" : "s"}`;
+  const wrap = $("accounts-list");
+  wrap.innerHTML = "";
+  list.forEach((d) => {
+    const card =
+      accountTab === "institutions" ? accountOrgCard(d) : accountTeacherCard(d);
+    wrap.appendChild(card);
+  });
+}
+
+function accountOrgCard(org) {
+  const loc = [org.district, org.city].filter(Boolean).join(", ");
+  const card = teachCardShell(
+    teachStatusBadge(org.approvalStatus),
+    org.institutionName || "Unnamed institution",
+    [org.institutionType, loc].filter(Boolean).join(" · "),
+    [
+      ["Contact person", org.contactPerson || "—"],
+      ["Email", org.email || "—"],
+      ["Phone", org.contactNumber || "—"],
+      ["District", org.district || "—"],
+      ["City", org.city || "—"],
+      ["Address", org.address || "—"],
+      ["Account ID", org.ownerUid || "—"],
+      ["Created", fmtTs(org.createdAt)],
+    ],
+    ""
+  );
+  const actions = card.querySelector(".ad-card-actions");
+  teachAddBtn(actions, "Edit details", "primary", () => editAccountOrg(org));
+  return card;
+}
+
+async function editAccountOrg(org) {
+  // Reuses the teaching-review institution editor, then refreshes this list.
+  await teachEditOrg(org);
+  await loadAccounts();
+}
+
+function accountTeacherCard(t) {
+  const exp =
+    t.experienceYears == null || t.experienceYears === ""
+      ? "—"
+      : `${t.experienceYears} yr${Number(t.experienceYears) === 1 ? "" : "s"}`;
+  const card = teachCardShell(
+    teachStatusBadge(t.approvalStatus),
+    t.fullName || "Unnamed teacher",
+    [t.qualification, t.district].filter(Boolean).join(" · "),
+    [
+      ["Email", t.email || "—"],
+      ["Phone", t.contactNumber || t.phoneNumber || "—"],
+      ["District", t.district || "—"],
+      ["Subjects", arrJoin(t.subjects)],
+      ["Experience", exp],
+      ["Account ID", t.ownerUid || "—"],
+      ["Created", fmtTs(t.createdAt)],
+    ],
+    t.professionalSummary
+      ? `<p class="small muted" style="margin:0.5rem 0 0">${esc(trunc(t.professionalSummary, 220))}</p>`
+      : ""
+  );
+  const actions = card.querySelector(".ad-card-actions");
+  teachAddBtn(actions, "Edit details", "primary", () => editAccountTeacher(t));
+  return card;
+}
+
+/* ---------- edit teacher details (admin correction) ---------- */
+async function editAccountTeacher(t) {
+  const result = await promptFields(
+    "Edit teacher details",
+    `Correcting details for "${t.fullName || t.id}". This only changes the teacher's own record.`,
+    [
+      { id: "fullName", label: "Full name", value: t.fullName || "", required: true },
+      { id: "contactNumber", label: "Phone number", value: t.contactNumber || t.phoneNumber || "" },
+      { id: "district", label: "District", value: t.district || "" },
+      { id: "qualification", label: "Qualification", value: t.qualification || "" },
+      { id: "subjects", label: "Subjects (comma separated)", value: arrJoin(t.subjects) },
+      { id: "experienceYears", label: "Experience (years)", value: t.experienceYears == null ? "" : String(t.experienceYears) },
+      { id: "professionalSummary", label: "Professional summary", value: t.professionalSummary || "", type: "textarea" },
+    ],
+    "Save changes"
+  );
+  if (!result) return;
+  if (!result.fullName.trim()) {
+    toast("Full name is required.", "error");
+    return;
+  }
+  const expYears = parseInt(result.experienceYears.trim(), 10);
+  try {
+    const ref = db.collection(TEACH_COLLECTIONS.teachers).doc(t.id);
+    await ref.update({
+      fullName: result.fullName.trim(),
+      contactNumber: result.contactNumber.trim(),
+      district: result.district.trim(),
+      qualification: result.qualification.trim(),
+      subjects: result.subjects.split(",").map((s) => s.trim()).filter(Boolean),
+      experienceYears: isNaN(expYears) ? null : expYears,
+      professionalSummary: result.professionalSummary.trim(),
+      updatedAt: firebase.firestore.FieldValue.serverTimestamp(),
+    });
+    toast("Teacher details updated.", "success");
+    await loadAccounts();
+  } catch (e) {
+    console.error("Edit teacher failed:", e);
+    toast("Could not save changes: " + (e.message || e), "error");
+  }
+}
+
 /* ================= Carousel slides =================
    Manages the welcome-carousel text shown in the app.
    Collection: carouselSlides (public read, admin write). */
@@ -1680,11 +1865,16 @@ function renderCarouselSlides() {
       ? '<span class="badge draft">Disabled</span>'
       : '<span class="badge published">Active</span>';
     const where = slide.teaching ? "Teaching" : "Home";
+    // Mini preview mimicking the app's carousel card.
+    const preview = `
+      <div class="slide-preview${slide.teaching ? " teaching" : ""}${slide.rtl ? " rtl" : ""}">
+        ${slide.badge ? `<div class="pv-badge">${esc(slide.badge)}</div>` : ""}
+        <p class="pv-title">${esc(slide.title || "(no title)")}</p>
+        <p class="pv-desc">${esc(slide.desc || "")}</p>
+      </div>`;
     card.innerHTML = `
       <div class="ad-card-head">${badge}<span class="muted small">${esc(where)}</span></div>
-      <h3>${esc(slide.title || "(no title)")}</h3>
-      <p class="muted small">${esc(slide.badge || "")}</p>
-      <p>${esc(trunc(slide.desc || "", 160))}</p>
+      ${preview}
       <p class="muted small">Order: ${esc(String(slide.order ?? 0))} · ${slide.rtl ? "RTL" : "LTR"}</p>
       <div class="ad-card-actions"></div>
     `;
@@ -1706,7 +1896,7 @@ async function editCarouselSlide(slide) {
   const isNew = !slide;
   const result = await promptFields(
     isNew ? "New carousel slide" : "Edit carousel slide",
-    "Badge, title and description support English or Urdu text.",
+    "Badge, title and description support English or Urdu text. “Teaching carousel? = yes” shows the slide on the Teaching tab, “no” on the Home tab. Lowest Order number shows first.",
     [
       { id: "badge", label: "Badge", value: slide?.badge || "", placeholder: "Welcome" },
       { id: "title", label: "Title", value: slide?.title || "", required: true },
@@ -1766,7 +1956,7 @@ async function toggleCarouselSlide(slide) {
 async function deleteCarouselSlide(slide) {
   const confirmed = await confirmDialog(
     "Delete slide",
-    `Delete "${slide.title}"? The app will fall back to its built-in text.`
+    `Delete "${slide.title}"? If a tab ends up with no active slides, its carousel stays hidden in the app.`
   );
   if (!confirmed) return;
   try {

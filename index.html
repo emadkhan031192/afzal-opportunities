@@ -58,6 +58,7 @@
         <span id="admin-email" class="muted small"></span>
         <button id="btn-new" class="btn primary">+ New advertisement</button>
         <button id="btn-teaching" class="btn">Teaching review</button>
+        <button id="btn-accounts" class="btn">Accounts</button>
         <button id="btn-carousel" class="btn">Carousel slides</button>
         <button id="btn-logout" class="btn ghost">Sign out</button>
       </div>
@@ -149,6 +150,51 @@
     </main>
   </section>
 
+  <!-- ============ VIEW: Accounts ============ -->
+  <section id="view-accounts" class="view" hidden>
+    <header class="topbar">
+      <button id="btn-accounts-back" class="btn ghost">&larr; Advertisements</button>
+      <h2>Accounts</h2>
+      <span class="muted small">All created teacher &amp; institution accounts</span>
+    </header>
+
+    <main class="dashboard">
+      <p class="muted small" style="margin:0 0 1rem">
+        Every teacher and institution account, regardless of approval status.
+        Use <strong>Edit details</strong> to correct a user's information when they ask for changes.
+      </p>
+      <nav class="tabs" role="tablist" aria-label="Account type">
+        <button class="atab active" data-atab="institutions" role="tab" aria-selected="true">
+          Institutions <span class="count" id="count-a-institutions">0</span>
+        </button>
+        <button class="atab" data-atab="teachers" role="tab" aria-selected="false">
+          Teachers <span class="count" id="count-a-teachers">0</span>
+        </button>
+      </nav>
+
+      <div class="tab-toolbar">
+        <input type="search" id="accounts-search-input" placeholder="Search accounts..." aria-label="Search accounts" />
+        <span id="accounts-status" class="muted small" role="status"></span>
+      </div>
+
+      <div id="accounts-list-loading" class="state-block" hidden>
+        <div class="spinner" aria-hidden="true"></div>
+        <p>Loading accounts...</p>
+      </div>
+      <div id="accounts-list-error" class="state-block error-block" hidden>
+        <p><strong>Could not load accounts.</strong></p>
+        <p class="muted small" id="accounts-list-error-detail"></p>
+        <button class="btn" id="btn-accounts-retry">Retry</button>
+      </div>
+      <div id="accounts-list-empty" class="state-block" hidden>
+        <p class="big">No accounts yet</p>
+        <p class="muted small">No records match.</p>
+      </div>
+
+      <div id="accounts-list" class="ad-grid" aria-live="polite"></div>
+    </main>
+  </section>
+
   <!-- ============ VIEW: Carousel slides ============ -->
   <section id="view-carousel" class="view" hidden>
     <header class="topbar">
@@ -158,6 +204,16 @@
     </header>
 
     <main class="dashboard">
+      <div class="hint-box">
+        <strong>How carousel slides work</strong>
+        <ul>
+          <li>Slides appear in the <strong>auto-sliding banner</strong> at the top of the app — on the <strong>Home</strong> tab or the <strong>Teaching</strong> tab.</li>
+          <li><strong>Teaching carousel? = yes</strong> → slide shows on the Teaching tab. <strong>No</strong> → shows on the Home tab.</li>
+          <li><strong>Order</strong> decides the sequence (lowest first). Slides auto-slide every 6 seconds when there are 2 or more.</li>
+          <li><strong>Disable</strong> hides a slide without deleting it. <strong>Right-to-left = yes</strong> for Urdu text.</li>
+          <li>If a tab has <strong>no active slides</strong>, the carousel area stays hidden in the app.</li>
+        </ul>
+      </div>
       <div class="toolbar">
         <button id="btn-carousel-new" class="btn primary">+ New slide</button>
         <button id="btn-carousel-retry" class="btn">Retry</button>
@@ -170,7 +226,7 @@
         <button class="btn" id="btn-carousel-retry2">Retry</button>
       </div>
       <div id="carousel-list-empty" class="empty" hidden>
-        <p class="muted">No slides yet. The app shows its built-in defaults.</p>
+        <p class="muted">No slides yet. The carousel stays hidden in the app until you add slides.</p>
       </div>
 
       <div id="carousel-list" class="ad-grid" aria-live="polite"></div>
