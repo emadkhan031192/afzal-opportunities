@@ -81,6 +81,8 @@ class AppLocalizations {
   String get applyMethodRequired => _t('applyMethodRequired');
   String get invalidPhone => _t('invalidPhone');
   String get loginToApply => _t('loginToApply');
+  String get applyInstructions => _t('applyInstructions');
+  String get goToProfile => _t('goToProfile');
   String get loginToApplyShort => _t('loginToApplyShort');
   String get chooseMessage => _t('chooseMessage');
   String get openWhatsapp => _t('openWhatsapp');
@@ -89,7 +91,6 @@ class AppLocalizations {
   String get applyViaCall => _t('applyViaCall');
   String get applyViaEmail => _t('applyViaEmail');
   String get registerAsTeacher => _t('registerAsTeacher');
-  String get continueAsGuest => _t('continueAsGuest');
   String get noProfileFound => _t('noProfileFound');
   String get noProfileFoundDesc => _t('noProfileFoundDesc');
   String get createProfile => _t('createProfile');
@@ -107,8 +108,6 @@ class AppLocalizations {
   String get iAmTeacherUrdu =>
       'میں نوکری تلاش کر رہا/رہی ہوں — آسامیوں پر درخواست دیں';
   String get haveAccountUrdu => 'پہلے سے اکاؤنٹ ہے — لاگ اِن کریں';
-  String get continueAsGuestUrdu =>
-      'بغیر اکاؤنٹ کے نوکریاں دیکھیں — رابطے کی تفصیلات چھپی رہیں گی';
   String get welcomeGuest => _t('welcomeGuest');
   String get profile => _t('profile');
   String get subjects => _t('subjects');
@@ -393,6 +392,9 @@ class AppLocalizations {
     'loginToApply':
         'Login or create a teacher account to view contact details and apply for this job.',
     'loginToApplyShort': 'Login to apply',
+    'applyInstructions':
+        'To apply directly by Call, WhatsApp or Email, please log in or create an account from the Profile page (bottom navigation).',
+    'goToProfile': 'Go to Profile page',
     'chooseMessage': 'Choose your WhatsApp message',
     'openWhatsapp': 'Open WhatsApp',
     'whatsappNotFound':
@@ -401,7 +403,6 @@ class AppLocalizations {
     'applyViaCall': 'Apply via Call',
     'applyViaEmail': 'Apply via Email',
     'registerAsTeacher': 'No account? Register as a teacher',
-    'continueAsGuest': 'Continue as guest',
     'noProfileFound': 'No teacher profile found',
     'noProfileFoundDesc':
         'We could not find a teacher profile for this account. Create one to continue, or try again.',
@@ -671,6 +672,9 @@ class AppLocalizations {
     'loginToApply':
         'اس نوکری کے لیے رابطے کی تفصیلات دیکھنے اور درخواست دینے کے لیے لاگ اِن کریں یا ٹیچر اکاؤنٹ بنائیں۔',
     'loginToApplyShort': 'درخواست کے لیے لاگ اِن کریں',
+    'applyInstructions':
+        'کال، واٹس ایپ یا ای میل سے براہ راست درخواست دینے کے لیے پروفائل پیج (نیچے نیویگیشن) سے لاگ اِن کریں یا اکاؤنٹ بنائیں۔',
+    'goToProfile': 'پروفائل پیج پر جائیں',
     'chooseMessage': 'اپنا واٹس ایپ پیغام منتخب کریں',
     'openWhatsapp': 'واٹس ایپ کھولیں',
     'whatsappNotFound':
@@ -679,7 +683,6 @@ class AppLocalizations {
     'applyViaCall': 'کال سے درخواست دیں',
     'applyViaEmail': 'ای میل سے درخواست دیں',
     'registerAsTeacher': 'اکاؤنٹ نہیں ہے؟ ٹیچر کے طور پر رجسٹر کریں',
-    'continueAsGuest': 'مہمان کے طور پر جاری رکھیں',
     'noProfileFound': 'ٹیچر پروفائل نہیں ملا',
     'noProfileFoundDesc':
         'اس اکاؤنٹ کے لیے کوئی ٹیچر پروفائل نہیں ملا۔ جاری رکھنے کے لیے پروفائل بنائیں یا دوبارہ کوشش کریں۔',

@@ -41,6 +41,13 @@ class _MainShellState extends State<MainShell> {
   final AdvertisementService _service = AdvertisementService();
   final TeachingService _teachingService = TeachingService();
 
+  /// Jumps to the Profile tab (used by the vacancy "apply instructions"
+  /// prompt): pops any pushed route (e.g. vacancy details) first.
+  void _goToProfile() {
+    Navigator.of(context).popUntil((route) => route.isFirst);
+    setState(() => _index = 3);
+  }
+
   @override
   Widget build(BuildContext context) {
     final s = AppLocalizations.of(context);
@@ -64,6 +71,7 @@ class _MainShellState extends State<MainShell> {
               themeController: widget.themeController,
               localeController: widget.localeController,
               notificationService: widget.notificationService,
+              onOpenProfile: _goToProfile,
             ),
             SavedScreen(
               service: _service,

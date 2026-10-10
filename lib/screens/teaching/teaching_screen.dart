@@ -30,6 +30,7 @@ class TeachingScreen extends StatefulWidget {
     required this.themeController,
     required this.localeController,
     required this.notificationService,
+    this.onOpenProfile,
   });
 
   final TeachingService service;
@@ -38,6 +39,10 @@ class TeachingScreen extends StatefulWidget {
   final ThemeController themeController;
   final LocaleController localeController;
   final NotificationService notificationService;
+
+  /// Jumps to the Profile tab (apply-instructions prompt). Null when the
+  /// screen is hosted outside MainShell.
+  final VoidCallback? onOpenProfile;
 
   @override
   State<TeachingScreen> createState() => _TeachingScreenState();
@@ -79,6 +84,7 @@ class _TeachingScreenState extends State<TeachingScreen> {
         builder: (_) => VacancyDetailsScreen(
           vacancy: vacancy,
           bookmarks: widget.teachingBookmarks,
+          onOpenProfile: widget.onOpenProfile,
         ),
       ),
     );

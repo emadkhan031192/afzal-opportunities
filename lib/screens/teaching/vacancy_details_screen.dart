@@ -13,7 +13,6 @@ import '../../services/teaching_auth.dart';
 import '../../services/teaching_service.dart';
 import '../../widgets/deadline_badge.dart';
 import '../../widgets/whatsapp_template_sheet.dart';
-import 'auth/login_screen.dart';
 
 /// Full teaching-vacancy view: headline, institution, key facts, urgency
 /// badge, description, how-to-apply instructions and a share button.
@@ -25,10 +24,15 @@ class VacancyDetailsScreen extends StatefulWidget {
     super.key,
     required this.vacancy,
     required this.bookmarks,
+    this.onOpenProfile,
   });
 
   final TeachingVacancy vacancy;
   final BookmarkService bookmarks;
+
+  /// Jumps to the Profile tab (apply-instructions prompt). Null when the
+  /// screen is opened from a context without MainShell tabs.
+  final VoidCallback? onOpenProfile;
 
   @override
   State<VacancyDetailsScreen> createState() => _VacancyDetailsScreenState();
@@ -162,7 +166,11 @@ class _VacancyDetailsScreenState extends State<VacancyDetailsScreen> {
             const SizedBox(height: 24),
             Text(s.howToApply, style: theme.textTheme.titleLarge),
             const SizedBox(height: 8),
-            _ApplyBox(vacancy: v, auth: _auth),
+            _ApplyBox(
+              vacancy: v,
+              auth: _auth,
+              onOpenProfile: widget.onOpenProfile,
+            ),
             if (expired) ...[
               const SizedBox(height: 16),
               _ExpiredNote(expiredLabel: s.expired),
@@ -170,7 +178,11 @@ class _VacancyDetailsScreenState extends State<VacancyDetailsScreen> {
           ],
         ),
       ),
-      bottomNavigationBar: _ApplyBar(vacancy: v, auth: _auth),
+      bottomNavigationBar: _ApplyBar(
+        vacancy: v,
+        auth: _auth,
+        onOpenProfile: widget.onOpenProfile,
+      ),
     );
   }
 }
@@ -286,10 +298,15 @@ class _FactCard extends StatelessWidget {
 /// (Call / WhatsApp / Email) plus any legacy application link. Guests see
 /// a login prompt instead — contact details are never shown to guests.
 class _ApplyBox extends StatelessWidget {
-  const _ApplyBox({required this.vacancy, required this.auth});
+  const _ApplyBox({
+    required this.vacancy,
+    required this.auth,
+    this.onOpenProfile,
+  });
 
   final TeachingVacancy vacancy;
   final TeachingAuth auth;
+  final VoidCallback? onOpenProfile;
 
   @override
   Widget build(BuildContext context) {
@@ -305,7 +322,7 @@ class _ApplyBox extends StatelessWidget {
           ),
           child: signedIn
               ? _SignedInMethods(vacancy: vacancy)
-              : _GuestPrompt(vacancy: vacancy, auth: auth),
+              : _ApplyInstructionsBox(onOpenProfile: onOpenProfile),
         );
       },
     );
@@ -448,11 +465,13 @@ class _MethodRow extends StatelessWidget {
 }
 
 /// Guests see a login prompt instead of contact details.
-class _GuestPrompt extends StatelessWidget {
-  const _GuestPrompt({required this.vacancy, required this.auth});
+/// Instructions for signed-out visitors: the direct apply options
+/// (Call / WhatsApp / Email) need an account. Points them to the Profile
+/// page (bottom navigation) where they can log in or create an account.
+class _ApplyInstructionsBox extends StatelessWidget {
+  const _ApplyInstructionsBox({this.onOpenProfile});
 
-  final TeachingVacancy vacancy;
-  final TeachingAuth auth;
+  final VoidCallback? onOpenProfile;
 
   @override
   Widget build(BuildContext context) {
@@ -461,33 +480,27 @@ class _GuestPrompt extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             const Icon(
-              Icons.lock_outline,
+              Icons.info_outline,
               size: 18,
               color: BrandColors.mintDark,
             ),
             const SizedBox(width: 8),
             Expanded(
               child: Text(
-                s.loginToApply,
+                s.applyInstructions,
                 style: Theme.of(context).textTheme.bodyMedium,
               ),
             ),
           ],
         ),
         const SizedBox(height: 12),
-        ElevatedButton(
-          onPressed: () async {
-            // After login, return to this job (post-login redirect).
-            final loggedIn = await Navigator.of(context).push<bool>(
-              MaterialPageRoute(
-                builder: (_) => LoginScreen(returnVacancy: vacancy),
-              ),
-            );
-            if (loggedIn == true) auth.reload();
-          },
-          child: Text(s.login),
+        ElevatedButton.icon(
+          onPressed: onOpenProfile,
+          icon: const Icon(Icons.person_outline),
+          label: Text(s.goToProfile),
         ),
       ],
     );
@@ -535,10 +548,15 @@ class _ExpiredNote extends StatelessWidget {
 /// available, else the first enabled channel). Guests get a login button
 /// that returns them to this job after signing in.
 class _ApplyBar extends StatelessWidget {
-  const _ApplyBar({required this.vacancy, required this.auth});
+  const _ApplyBar({
+    required this.vacancy,
+    required this.auth,
+    this.onOpenProfile,
+  });
 
   final TeachingVacancy vacancy;
   final TeachingAuth auth;
+  final VoidCallback? onOpenProfile;
 
   @override
   Widget build(BuildContext context) {
@@ -569,18 +587,9 @@ class _ApplyBar extends StatelessWidget {
                   child: signedIn
                       ? _PrimaryApplyButton(vacancy: vacancy)
                       : ElevatedButton.icon(
-                          onPressed: () async {
-                            final loggedIn = await Navigator.of(context)
-                                .push<bool>(
-                                  MaterialPageRoute(
-                                    builder: (_) =>
-                                        LoginScreen(returnVacancy: vacancy),
-                                  ),
-                                );
-                            if (loggedIn == true) auth.reload();
-                          },
-                          icon: const Icon(Icons.login),
-                          label: Text(s.loginToApplyShort),
+                          onPressed: onOpenProfile,
+                          icon: const Icon(Icons.person_outline),
+                          label: Text(s.goToProfile),
                           style: ElevatedButton.styleFrom(
                             backgroundColor: BrandColors.mockupBlue,
                             foregroundColor: Colors.white,

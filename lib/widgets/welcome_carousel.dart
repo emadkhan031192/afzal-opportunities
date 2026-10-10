@@ -4,13 +4,11 @@ import 'package:flutter/material.dart';
 
 import '../core/l10n/app_localizations.dart';
 import '../models/carousel_slide.dart';
-import '../services/carousel_service.dart';
 
-/// Auto-sliding welcome carousel (4s).
+/// Auto-sliding welcome carousel (4 seconds).
 ///
-/// Slides come from Firestore (`carouselSlides` collection, managed in the
-/// admin panel). When none exist, built-in English/Urdu welcome slides are
-/// shown (text only, no badge).
+/// Shows the built-in English + Urdu welcome slides (text only, no badge).
+/// Fully self-contained — no admin panel, no Firestore.
 class WelcomeCarousel extends StatefulWidget {
   const WelcomeCarousel({super.key, this.teaching = false});
 
@@ -22,21 +20,19 @@ class WelcomeCarousel extends StatefulWidget {
 
 class _WelcomeCarouselState extends State<WelcomeCarousel> {
   final PageController _controller = PageController();
-  final CarouselService _service = CarouselService();
   Timer? _timer;
   int _index = 0;
-  List<CarouselSlide>? _slides;
+  late final List<CarouselSlide> _slides;
 
   @override
   void initState() {
     super.initState();
-    _loadSlides();
-    // 4-second auto-slide.
+    _slides = _buildSlides();
+    // 4-second auto-slide over the actually displayed slides.
     _timer = Timer.periodic(const Duration(seconds: 4), (_) {
       if (!mounted) return;
-      final count = (_slides ?? []).length;
-      if (count < 2) return;
-      final next = (_index + 1) % count;
+      if (_slides.length < 2) return;
+      final next = (_index + 1) % _slides.length;
       _controller.animateToPage(
         next,
         duration: const Duration(milliseconds: 450),
@@ -45,24 +41,7 @@ class _WelcomeCarouselState extends State<WelcomeCarousel> {
     });
   }
 
-  Future<void> _loadSlides() async {
-    final slides = await _service.getSlides(teaching: widget.teaching);
-    if (mounted) {
-      setState(() => _slides = slides);
-    }
-  }
-
-  @override
-  void dispose() {
-    _timer?.cancel();
-    _controller.dispose();
-    super.dispose();
-  }
-
-  /// Built-in welcome slides (text only, no badge), used when the admin
-  /// has not added any carousel slides yet. English + Urdu so the
-  /// 4-second auto-slide keeps working.
-  List<CarouselSlide> _fallbackSlides() {
+  List<CarouselSlide> _buildSlides() {
     final en = AppLocalizations(const Locale('en'));
     final ur = AppLocalizations(const Locale('ur'));
     if (widget.teaching) {
@@ -98,12 +77,14 @@ class _WelcomeCarouselState extends State<WelcomeCarousel> {
   }
 
   @override
-  Widget build(BuildContext context) {
-    // Firestore slides first; built-in welcome text when none exist yet.
-    final slides = (_slides == null || _slides!.isEmpty)
-        ? _fallbackSlides()
-        : _slides!;
+  void dispose() {
+    _timer?.cancel();
+    _controller.dispose();
+    super.dispose();
+  }
 
+  @override
+  Widget build(BuildContext context) {
     return Container(
       margin: const EdgeInsets.fromLTRB(20, 8, 20, 0),
       // Taller to fit 3 lines of description without cutting.
@@ -129,10 +110,10 @@ class _WelcomeCarouselState extends State<WelcomeCarousel> {
         children: [
           PageView.builder(
             controller: _controller,
-            itemCount: slides.length,
+            itemCount: _slides.length,
             onPageChanged: (i) => setState(() => _index = i),
             itemBuilder: (context, i) {
-              final slide = slides[i];
+              final slide = _slides[i];
               return Padding(
                 padding: const EdgeInsets.fromLTRB(22, 20, 22, 36),
                 child: Column(
@@ -141,30 +122,6 @@ class _WelcomeCarouselState extends State<WelcomeCarousel> {
                       : CrossAxisAlignment.start,
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    // Badge only when the slide has one (built-in welcome
-                    // slides show text only).
-                    if (slide.badge.trim().isNotEmpty) ...[
-                      Container(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 10,
-                          vertical: 4,
-                        ),
-                        decoration: BoxDecoration(
-                          color: Colors.white.withValues(alpha: 0.2),
-                          borderRadius: BorderRadius.circular(8),
-                        ),
-                        child: Text(
-                          slide.badge.toUpperCase(),
-                          style: const TextStyle(
-                            fontSize: 10,
-                            fontWeight: FontWeight.w800,
-                            color: Colors.white,
-                            letterSpacing: 0.5,
-                          ),
-                        ),
-                      ),
-                      const SizedBox(height: 8),
-                    ],
                     Text(
                       slide.title,
                       textAlign: slide.rtl ? TextAlign.right : TextAlign.left,
@@ -206,7 +163,7 @@ class _WelcomeCarouselState extends State<WelcomeCarousel> {
             child: Row(
               mainAxisSize: MainAxisSize.min,
               children: List.generate(
-                slides.length,
+                _slides.length,
                 (i) => GestureDetector(
                   onTap: () => _controller.animateToPage(
                     i,
@@ -214,14 +171,14 @@ class _WelcomeCarouselState extends State<WelcomeCarousel> {
                     curve: Curves.easeInOut,
                   ),
                   child: Container(
-                    margin: const EdgeInsets.only(left: 6),
-                    width: _index == i ? 18 : 7,
-                    height: 7,
+                    width: 8,
+                    height: 8,
+                    margin: const EdgeInsets.symmetric(horizontal: 3),
                     decoration: BoxDecoration(
+                      shape: BoxShape.circle,
                       color: _index == i
-                          ? const Color(0xFF10B981)
+                          ? Colors.white
                           : Colors.white.withValues(alpha: 0.35),
-                      borderRadius: BorderRadius.circular(10),
                     ),
                   ),
                 ),
