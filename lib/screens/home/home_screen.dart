@@ -14,6 +14,7 @@ import '../../services/notification_service.dart';
 import '../../widgets/app_header.dart';
 import '../../widgets/category_chips.dart';
 import '../../widgets/filter_sheet.dart';
+import '../../widgets/home_greeting.dart';
 import '../../widgets/notification_inbox_sheet.dart';
 import '../../widgets/settings_sheet.dart';
 import '../../widgets/state_views.dart';
@@ -193,6 +194,7 @@ class _HomeScreenState extends State<HomeScreen> {
           ),
         ),
         const SliverToBoxAdapter(child: WelcomeCarousel()),
+        const SliverToBoxAdapter(child: HomeGreeting()),
         SliverToBoxAdapter(child: _searchRow()),
         SliverToBoxAdapter(
           child: CategoryChips(

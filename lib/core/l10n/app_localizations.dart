@@ -70,6 +70,38 @@ class AppLocalizations {
   String get deleteAccountWarning => _t('deleteAccountWarning');
   String get deleteAccountRelogin => _t('deleteAccountRelogin');
   String get accountDeleted => _t('accountDeleted');
+  String get applyByCall => _t('applyByCall');
+  String get applyByWhatsapp => _t('applyByWhatsapp');
+  String get applyByEmail => _t('applyByEmail');
+  String get phoneNumber => _t('phoneNumber');
+  String get whatsappNumber => _t('whatsappNumber');
+  String get emailAddress => _t('emailAddress');
+  String get applicationUrlOptional => _t('applicationUrlOptional');
+  String get contactInstructionsOptional => _t('contactInstructionsOptional');
+  String get applyMethodRequired => _t('applyMethodRequired');
+  String get invalidPhone => _t('invalidPhone');
+  String get loginToApply => _t('loginToApply');
+  String get loginToApplyShort => _t('loginToApplyShort');
+  String get chooseMessage => _t('chooseMessage');
+  String get openWhatsapp => _t('openWhatsapp');
+  String get whatsappNotFound => _t('whatsappNotFound');
+  String get applyViaWhatsapp => _t('applyViaWhatsapp');
+  String get applyViaCall => _t('applyViaCall');
+  String get applyViaEmail => _t('applyViaEmail');
+  String get registerAsTeacher => _t('registerAsTeacher');
+  String get continueAsGuest => _t('continueAsGuest');
+  String get iAmInstitutionUrdu =>
+      'میں ایک اسکول یا اکیڈمی ہوں — آسامیاں پوسٹ کریں';
+  String get iAmTeacherUrdu =>
+      'میں نوکری تلاش کر رہا/رہی ہوں — آسامیوں پر درخواست دیں';
+  String get haveAccountUrdu => 'پہلے سے اکاؤنٹ ہے — لاگ اِن کریں';
+  String get continueAsGuestUrdu =>
+      'بغیر اکاؤنٹ کے نوکریاں دیکھیں — رابطے کی تفصیلات چھپی رہیں گی';
+  String get welcomeGuest => _t('welcomeGuest');
+  String welcomeInstitution(String name) =>
+      _t('welcomeInstitution').replaceAll('{name}', name);
+  String welcomeTeacher(String name) =>
+      _t('welcomeTeacher').replaceAll('{name}', name);
 
   // Filters
   String get filter => _t('filter');
@@ -332,6 +364,32 @@ class AppLocalizations {
     'deleteAccountRelogin':
         'For security, please sign out and sign in again, then retry deleting your account.',
     'accountDeleted': 'Your account has been deleted.',
+    'applyByCall': 'Accept applications by phone call',
+    'applyByWhatsapp': 'Accept applications by WhatsApp',
+    'applyByEmail': 'Accept applications by email',
+    'phoneNumber': 'Phone number',
+    'whatsappNumber': 'WhatsApp number',
+    'emailAddress': 'Email address',
+    'applicationUrlOptional': 'Application link (optional)',
+    'contactInstructionsOptional': 'Contact instructions (optional)',
+    'applyMethodRequired':
+        'Enable at least one application method with valid details.',
+    'invalidPhone': 'Please enter a valid phone number.',
+    'loginToApply':
+        'Login or create a teacher account to view contact details and apply for this job.',
+    'loginToApplyShort': 'Login to apply',
+    'chooseMessage': 'Choose your WhatsApp message',
+    'openWhatsapp': 'Open WhatsApp',
+    'whatsappNotFound':
+        'WhatsApp is not installed on this device. You can copy the message and send it manually.',
+    'applyViaWhatsapp': 'Apply via WhatsApp',
+    'applyViaCall': 'Apply via Call',
+    'applyViaEmail': 'Apply via Email',
+    'registerAsTeacher': 'No account? Register as a teacher',
+    'continueAsGuest': 'Continue as guest',
+    'welcomeGuest': 'Welcome to Afzal-E Services.',
+    'welcomeInstitution': 'Welcome, {name}.',
+    'welcomeTeacher': 'Welcome, {name}.',
     'filter': 'Filter',
     'applyFilters': 'Apply filters',
     'resetFilters': 'Reset filters',
@@ -571,6 +629,31 @@ class AppLocalizations {
     'deleteAccountRelogin':
         'سیکیورٹی کے لیے براہ کرم سائن آؤٹ کر کے دوبارہ سائن ان کریں، پھر اکاؤنٹ حذف کرنے کی کوشش کریں۔',
     'accountDeleted': 'آپ کا اکاؤنٹ حذف کر دیا گیا ہے۔',
+    'applyByCall': 'فون کال کے ذریعے درخواستیں قبول کریں',
+    'applyByWhatsapp': 'واٹس ایپ کے ذریعے درخواستیں قبول کریں',
+    'applyByEmail': 'ای میل کے ذریعے درخواستیں قبول کریں',
+    'phoneNumber': 'فون نمبر',
+    'whatsappNumber': 'واٹس ایپ نمبر',
+    'emailAddress': 'ای میل ایڈریس',
+    'applicationUrlOptional': 'درخواست کا لنک (اختیاری)',
+    'contactInstructionsOptional': 'رابطے کی ہدایات (اختیاری)',
+    'applyMethodRequired': 'کم از کم ایک درست درخواست کا طریقہ فعال کریں۔',
+    'invalidPhone': 'براہ کرم درست فون نمبر درج کریں۔',
+    'loginToApply':
+        'اس نوکری کے لیے رابطے کی تفصیلات دیکھنے اور درخواست دینے کے لیے لاگ اِن کریں یا ٹیچر اکاؤنٹ بنائیں۔',
+    'loginToApplyShort': 'درخواست کے لیے لاگ اِن کریں',
+    'chooseMessage': 'اپنا واٹس ایپ پیغام منتخب کریں',
+    'openWhatsapp': 'واٹس ایپ کھولیں',
+    'whatsappNotFound':
+        'اس ڈیوائس پر واٹس ایپ انسٹال نہیں ہے۔ آپ پیغام کاپی کر کے خود بھیج سکتے ہیں۔',
+    'applyViaWhatsapp': 'واٹس ایپ سے درخواست دیں',
+    'applyViaCall': 'کال سے درخواست دیں',
+    'applyViaEmail': 'ای میل سے درخواست دیں',
+    'registerAsTeacher': 'اکاؤنٹ نہیں ہے؟ ٹیچر کے طور پر رجسٹر کریں',
+    'continueAsGuest': 'مہمان کے طور پر جاری رکھیں',
+    'welcomeGuest': 'افضل ای سروسز میں خوش آمدید۔',
+    'welcomeInstitution': 'خوش آمدید، {name}۔',
+    'welcomeTeacher': 'خوش آمدید، {name}۔',
     'filter': 'فلٹر',
     'applyFilters': 'فلٹر لگائیں',
     'resetFilters': 'فلٹر صاف کریں',

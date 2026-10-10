@@ -180,5 +180,29 @@ service cloud.firestore {
         || (request.auth != null
             && request.auth.uid == resource.data.ownerUid);
     }
+
+    // Private per-vacancy contact details (phone/WhatsApp/email).
+    //
+    // The public teachingVacancies documents carry only the enable flags;
+    // the actual contact details live here. Guests (not signed in) cannot
+    // read them — Firebase enforces this, not just the app UI.
+    // Read: owner, admin, or any signed-in user (teachers applying).
+    // Write: owner (their own vacancies) or admin.
+    match /teachingVacancyContacts/{vacancyId} {
+      allow get: if isAdmin()
+        || isOwner()
+        || request.auth != null;
+      allow list: if false;
+      allow create: if isAdmin()
+        || (request.auth != null
+            && request.resource.data.ownerUid == request.auth.uid);
+      allow update: if isAdmin()
+        || (request.auth != null
+            && request.auth.uid == resource.data.ownerUid
+            && request.resource.data.ownerUid == resource.data.ownerUid);
+      allow delete: if isAdmin()
+        || (request.auth != null
+            && request.auth.uid == resource.data.ownerUid);
+    }
   }
 }

@@ -75,6 +75,7 @@ class _SignedOutView extends StatelessWidget {
           _ChoiceCard(
             icon: Icons.business_outlined,
             title: s.iAmInstitution,
+            subtitle: s.iAmInstitutionUrdu,
             onTap: () => Navigator.of(context).push(
               MaterialPageRoute(builder: (_) => const OrgRegisterScreen()),
             ),
@@ -83,16 +84,26 @@ class _SignedOutView extends StatelessWidget {
           _ChoiceCard(
             icon: Icons.person_outline,
             title: s.iAmTeacher,
+            subtitle: s.iAmTeacherUrdu,
             onTap: () => Navigator.of(context).push(
               MaterialPageRoute(builder: (_) => const TeacherRegisterScreen()),
             ),
           ),
-          const SizedBox(height: 24),
-          TextButton(
-            onPressed: () => Navigator.of(
+          const SizedBox(height: 12),
+          _ChoiceCard(
+            icon: Icons.login,
+            title: s.haveAccount,
+            subtitle: s.haveAccountUrdu,
+            onTap: () => Navigator.of(
               context,
             ).push(MaterialPageRoute(builder: (_) => const LoginScreen())),
-            child: Text(s.haveAccount),
+          ),
+          const SizedBox(height: 12),
+          _ChoiceCard(
+            icon: Icons.visibility_outlined,
+            title: s.continueAsGuest,
+            subtitle: s.continueAsGuestUrdu,
+            onTap: () => Navigator.of(context).pop(),
           ),
         ],
       ),
@@ -104,11 +115,15 @@ class _ChoiceCard extends StatelessWidget {
   const _ChoiceCard({
     required this.icon,
     required this.title,
+    required this.subtitle,
     required this.onTap,
   });
 
   final IconData icon;
   final String title;
+
+  /// Urdu explanation shown under the title (always in Urdu script).
+  final String subtitle;
   final VoidCallback onTap;
 
   @override
@@ -124,7 +139,22 @@ class _ChoiceCard extends StatelessWidget {
             children: [
               Icon(icon, size: 32, color: theme.colorScheme.primary),
               const SizedBox(width: 16),
-              Expanded(child: Text(title, style: theme.textTheme.titleMedium)),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(title, style: theme.textTheme.titleMedium),
+                    const SizedBox(height: 4),
+                    Text(
+                      subtitle,
+                      style: theme.textTheme.bodySmall?.copyWith(
+                        color: theme.colorScheme.onSurfaceVariant,
+                      ),
+                      textDirection: TextDirection.rtl,
+                    ),
+                  ],
+                ),
+              ),
               const Icon(Icons.arrow_forward_ios, size: 18),
             ],
           ),
@@ -195,6 +225,7 @@ class _ChooseTypeView extends StatelessWidget {
           _ChoiceCard(
             icon: Icons.business_outlined,
             title: s.iAmInstitution,
+            subtitle: s.iAmInstitutionUrdu,
             onTap: () => Navigator.of(context).push(
               MaterialPageRoute(builder: (_) => const OrgRegisterScreen()),
             ),
@@ -203,6 +234,7 @@ class _ChooseTypeView extends StatelessWidget {
           _ChoiceCard(
             icon: Icons.person_outline,
             title: s.iAmTeacher,
+            subtitle: s.iAmTeacherUrdu,
             onTap: () => Navigator.of(context).push(
               MaterialPageRoute(builder: (_) => const TeacherRegisterScreen()),
             ),

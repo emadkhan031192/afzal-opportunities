@@ -1,12 +1,20 @@
 import 'package:flutter/material.dart';
 
 import '../../../core/l10n/app_localizations.dart';
+import '../../../models/teaching_vacancy.dart';
 import '../../../services/teaching_auth.dart';
 import '../../../widgets/teaching_form_fields.dart';
+import 'teacher_register_screen.dart';
 
 /// Email/password login for teaching-module accounts.
+///
+/// When [returnVacancy] is set, the login was triggered from a job's
+/// apply flow; on success the screen pops with `true` so the caller can
+/// return the applicant to that job.
 class LoginScreen extends StatefulWidget {
-  const LoginScreen({super.key});
+  const LoginScreen({super.key, this.returnVacancy});
+
+  final TeachingVacancy? returnVacancy;
 
   @override
   State<LoginScreen> createState() => _LoginScreenState();
@@ -38,7 +46,7 @@ class _LoginScreenState extends State<LoginScreen> {
         email: _emailController.text,
         password: _passwordController.text,
       );
-      if (mounted) Navigator.of(context).pop();
+      if (mounted) Navigator.of(context).pop(true);
     } catch (e) {
       setState(() => _errorKey = TeachingAuth.errorKey(e));
     } finally {
@@ -125,6 +133,27 @@ class _LoginScreenState extends State<LoginScreen> {
                 onPressed: _busy ? null : _forgotPassword,
                 child: Text(s.forgotPassword),
               ),
+              if (widget.returnVacancy != null) ...[
+                const SizedBox(height: 8),
+                OutlinedButton(
+                  onPressed: _busy
+                      ? null
+                      : () async {
+                          final navigator = Navigator.of(context);
+                          final registered = await navigator.push<bool>(
+                            MaterialPageRoute(
+                              builder: (_) => TeacherRegisterScreen(
+                                returnVacancy: widget.returnVacancy,
+                              ),
+                            ),
+                          );
+                          if (registered == true && mounted) {
+                            navigator.pop(true);
+                          }
+                        },
+                  child: Text(s.registerAsTeacher),
+                ),
+              ],
             ],
           ),
         ),
