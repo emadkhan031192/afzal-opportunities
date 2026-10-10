@@ -247,6 +247,8 @@ class TeachingService {
   }
 
   /// Submits a new vacancy as 'pending'. Never auto-publishes.
+  /// Contact details are written to the private teachingVacancyContacts
+  /// collection (never to the public vacancy document).
   Future<String> submitVacancy(TeachingVacancy vacancy) async {
     final data = vacancy.toJson()
       ..['approvalStatus'] = TeachingApproval.pending
@@ -257,7 +259,45 @@ class TeachingService {
     final ref = await _db
         .collection(AppConstants.teachingVacanciesCollection)
         .add(data);
+    await _writeVacancyContact(ref.id, vacancy);
     return ref.id;
+  }
+
+  /// Writes the private contact details for a vacancy. Deletes the contact
+  /// doc when no details remain.
+  Future<void> _writeVacancyContact(
+    String vacancyId,
+    TeachingVacancy vacancy,
+  ) async {
+    final contact = VacancyContact(
+      applyPhone: vacancy.applyPhone,
+      applyWhatsapp: vacancy.applyWhatsapp,
+      applyEmail: vacancy.applyEmail,
+    );
+    final ref = _db
+        .collection(AppConstants.teachingVacancyContactsCollection)
+        .doc(vacancyId);
+    if (contact.isEmpty) {
+      await ref.delete().catchError((_) {});
+    } else {
+      await ref.set(contact.toJson(vacancy.ownerUid));
+    }
+  }
+
+  /// Fetches the private contact details for a vacancy.
+  /// Returns null for guests (Firestore rules deny unauthenticated reads)
+  /// or when no contact details were saved.
+  Future<VacancyContact?> getVacancyContact(String vacancyId) async {
+    try {
+      final doc = await _db
+          .collection(AppConstants.teachingVacancyContactsCollection)
+          .doc(vacancyId)
+          .get();
+      if (!doc.exists) return null;
+      return VacancyContact.fromJson(doc.data() ?? {});
+    } catch (_) {
+      return null;
+    }
   }
 
   /// Updates the caller's own vacancy. Material changes to an approved
@@ -277,14 +317,21 @@ class TeachingService {
         .collection(AppConstants.teachingVacanciesCollection)
         .doc(vacancy.id)
         .update(data);
+    await _writeVacancyContact(vacancy.id, vacancy);
   }
 
   /// Deletes the caller's own vacancy (rules enforce ownership).
+  /// Also removes the private contact details.
   Future<void> deleteVacancy(String id) async {
     await _db
         .collection(AppConstants.teachingVacanciesCollection)
         .doc(id)
         .delete();
+    await _db
+        .collection(AppConstants.teachingVacancyContactsCollection)
+        .doc(id)
+        .delete()
+        .catchError((_) {});
   }
 
   /// Deletes all of the caller's teaching data: their organization doc,
@@ -318,6 +365,12 @@ class TeachingService {
         .get();
     for (final doc in vacancySnap.docs) {
       batch.delete(doc.reference);
+      // Also remove the private contact details for each vacancy.
+      batch.delete(
+        _db
+            .collection(AppConstants.teachingVacancyContactsCollection)
+            .doc(doc.id),
+      );
     }
 
     await batch.commit();

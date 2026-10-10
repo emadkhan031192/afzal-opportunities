@@ -4,6 +4,7 @@ import 'package:intl/intl.dart';
 
 import '../../../core/constants/app_constants.dart';
 import '../../../core/l10n/app_localizations.dart';
+import '../../../core/theme/brand_colors.dart';
 import '../../../models/teaching_vacancy.dart';
 import '../../../services/teaching_auth.dart';
 import '../../../services/teaching_service.dart';
@@ -38,11 +39,16 @@ class _VacancyFormScreenState extends State<VacancyFormScreen> {
   final _descriptionController = TextEditingController();
   final _appUrlController = TextEditingController();
   final _contactController = TextEditingController();
+  final _phoneController = TextEditingController();
+  final _whatsappController = TextEditingController();
+  final _emailController = TextEditingController();
 
   String _district = AppConstants.kpDistricts.first;
   String _employmentType = 'Full-time';
   String _gender = 'Any';
-  String _method = 'both';
+  bool _enableCall = false;
+  bool _enableWhatsapp = false;
+  bool _enableEmail = false;
   DateTime? _deadline;
 
   final _auth = TeachingAuth();
@@ -68,10 +74,21 @@ class _VacancyFormScreenState extends State<VacancyFormScreen> {
       _descriptionController.text = v.description;
       _appUrlController.text = v.applicationUrl ?? '';
       _contactController.text = v.contactInstructions ?? '';
+      _phoneController.text = v.applyPhone ?? '';
+      _whatsappController.text = v.applyWhatsapp ?? '';
+      _emailController.text = v.applyEmail ?? '';
       _district = v.district;
       _employmentType = v.employmentType ?? 'Full-time';
       _gender = v.genderEligibility ?? 'Any';
-      _method = v.applicationMethod ?? 'both';
+      _enableCall = v.enableCall;
+      _enableWhatsapp = v.enableWhatsapp;
+      _enableEmail = v.enableEmail;
+      // Legacy vacancies used the old method dropdown; map it onto the
+      // new toggles so editing them preserves the previous behavior.
+      if (!v.enableCall && !v.enableWhatsapp && !v.enableEmail) {
+        final m = v.applicationMethod;
+        if (m == 'contact' || m == 'both') _enableCall = true;
+      }
       _deadline = v.applicationDeadline;
     }
   }
@@ -90,6 +107,9 @@ class _VacancyFormScreenState extends State<VacancyFormScreen> {
     _descriptionController.dispose();
     _appUrlController.dispose();
     _contactController.dispose();
+    _phoneController.dispose();
+    _whatsappController.dispose();
+    _emailController.dispose();
     super.dispose();
   }
 
@@ -114,18 +134,37 @@ class _VacancyFormScreenState extends State<VacancyFormScreen> {
       ).push(MaterialPageRoute(builder: (_) => const VerifyEmailScreen()));
       return;
     }
-    if ((_method == 'url' || _method == 'both') &&
-        _appUrlController.text.trim().isEmpty) {
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text(s.requiredField)));
+    // At least one enabled channel with valid details is required.
+    final phoneOk = _enableCall &&
+        TeachingVacancy.isValidPhone(_phoneController.text.trim());
+    final waOk = _enableWhatsapp &&
+        TeachingVacancy.isValidPhone(_whatsappController.text.trim());
+    final emailOk = _enableEmail &&
+        TeachingVacancy.isValidEmail(_emailController.text.trim());
+    final legacyOk = _appUrlController.text.trim().isNotEmpty ||
+        _contactController.text.trim().isNotEmpty;
+    if (!phoneOk && !waOk && !emailOk && !legacyOk) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(s.applyMethodRequired)),
+      );
       return;
     }
-    if ((_method == 'contact' || _method == 'both') &&
-        _contactController.text.trim().isEmpty) {
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text(s.requiredField)));
+    if (_enableCall && !phoneOk) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(s.invalidPhone)),
+      );
+      return;
+    }
+    if (_enableWhatsapp && !waOk) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(s.invalidPhone)),
+      );
+      return;
+    }
+    if (_enableEmail && !emailOk) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(s.invalidEmail)),
+      );
       return;
     }
     setState(() => _busy = true);
@@ -162,13 +201,26 @@ class _VacancyFormScreenState extends State<VacancyFormScreen> {
         genderEligibility: _gender == 'Any' ? null : _gender,
         description: _descriptionController.text.trim(),
         applicationDeadline: _deadline,
-        applicationMethod: _method,
+        applicationMethod: null,
         applicationUrl: _appUrlController.text.trim().isEmpty
             ? null
             : _appUrlController.text.trim(),
         contactInstructions: _contactController.text.trim().isEmpty
             ? null
             : _contactController.text.trim(),
+        applyPhone: _enableCall && _phoneController.text.trim().isNotEmpty
+            ? _phoneController.text.trim()
+            : null,
+        applyWhatsapp:
+            _enableWhatsapp && _whatsappController.text.trim().isNotEmpty
+                ? _whatsappController.text.trim()
+                : null,
+        applyEmail: _enableEmail && _emailController.text.trim().isNotEmpty
+            ? _emailController.text.trim()
+            : null,
+        enableCall: _enableCall,
+        enableWhatsapp: _enableWhatsapp,
+        enableEmail: _enableEmail,
         approvalStatus: TeachingApproval.pending,
       );
       if (_isEdit) {
@@ -321,31 +373,55 @@ class _VacancyFormScreenState extends State<VacancyFormScreen> {
                 onPick: _pickDeadline,
                 onClear: () => setState(() => _deadline = null),
               ),
-              LabeledDropdown<String>(
-                label: s.applicationMethod,
-                value: _method,
-                items: [
-                  DropdownMenuItem(value: 'url', child: Text(s.methodUrl)),
-                  DropdownMenuItem(
-                    value: 'contact',
-                    child: Text(s.methodContact),
-                  ),
-                  DropdownMenuItem(value: 'both', child: Text(s.methodBoth)),
-                ],
-                onChanged: (v) => setState(() => _method = v ?? 'both'),
+              _ChannelToggle(
+                icon: Icons.call_outlined,
+                title: s.applyByCall,
+                enabled: _enableCall,
+                onChanged: (v) => setState(() => _enableCall = v),
               ),
-              if (_method == 'url' || _method == 'both')
+              if (_enableCall)
                 LabeledTextField(
-                  label: s.applicationUrl,
-                  controller: _appUrlController,
-                  keyboardType: TextInputType.url,
+                  label: s.phoneNumber,
+                  controller: _phoneController,
+                  keyboardType: TextInputType.phone,
+                  hint: '0316 1185662',
                 ),
-              if (_method == 'contact' || _method == 'both')
+              _ChannelToggle(
+                icon: Icons.chat_outlined,
+                title: s.applyByWhatsapp,
+                enabled: _enableWhatsapp,
+                onChanged: (v) => setState(() => _enableWhatsapp = v),
+              ),
+              if (_enableWhatsapp)
                 LabeledTextField(
-                  label: s.contactInstructions,
-                  controller: _contactController,
-                  maxLines: 3,
+                  label: s.whatsappNumber,
+                  controller: _whatsappController,
+                  keyboardType: TextInputType.phone,
+                  hint: '0316 1185662',
                 ),
+              _ChannelToggle(
+                icon: Icons.email_outlined,
+                title: s.applyByEmail,
+                enabled: _enableEmail,
+                onChanged: (v) => setState(() => _enableEmail = v),
+              ),
+              if (_enableEmail)
+                LabeledTextField(
+                  label: s.emailAddress,
+                  controller: _emailController,
+                  keyboardType: TextInputType.emailAddress,
+                  hint: 'school@example.com',
+                ),
+              LabeledTextField(
+                label: s.applicationUrlOptional,
+                controller: _appUrlController,
+                keyboardType: TextInputType.url,
+              ),
+              LabeledTextField(
+                label: s.contactInstructionsOptional,
+                controller: _contactController,
+                maxLines: 3,
+              ),
               const SizedBox(height: 8),
               ElevatedButton(
                 onPressed: _busy ? null : _submit,
@@ -360,6 +436,38 @@ class _VacancyFormScreenState extends State<VacancyFormScreen> {
             ],
           ),
         ),
+      ),
+    );
+  }
+}
+
+class _ChannelToggle extends StatelessWidget {
+  const _ChannelToggle({
+    required this.icon,
+    required this.title,
+    required this.enabled,
+    required this.onChanged,
+  });
+
+  final IconData icon;
+  final String title;
+  final bool enabled;
+  final ValueChanged<bool> onChanged;
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 4),
+      child: SwitchListTile(
+        value: enabled,
+        onChanged: onChanged,
+        secondary: Icon(icon, color: BrandColors.mintDark),
+        title: Text(
+          title,
+          style: Theme.of(context).textTheme.labelLarge,
+        ),
+        contentPadding: EdgeInsets.zero,
+        dense: true,
       ),
     );
   }

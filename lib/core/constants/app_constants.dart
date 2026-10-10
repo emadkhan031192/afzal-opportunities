@@ -89,6 +89,8 @@ class AppConstants {
   static const String teachingOrganizationsCollection = 'teachingOrganizations';
   static const String teacherProfilesCollection = 'teacherProfiles';
   static const String teachingVacanciesCollection = 'teachingVacancies';
+  static const String teachingVacancyContactsCollection =
+      'teachingVacancyContacts';
   static const String teachingApplicationsCollection = 'teachingApplications';
 
   /// KP districts prioritized by the teaching module (extensible).

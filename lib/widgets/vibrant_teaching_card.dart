@@ -5,8 +5,10 @@ import '../core/utils/deadline.dart';
 import '../core/utils/share_text.dart';
 import '../core/utils/url_utils.dart';
 import '../models/teaching_vacancy.dart';
+import '../services/teaching_auth.dart';
 import '../services/teaching_service.dart';
 import '../widgets/whatsapp_icon.dart';
+import 'whatsapp_template_sheet.dart';
 
 /// Vibrant teaching vacancy card from the user's final UI: alternating
 /// yellow/blue backgrounds matching the advertisement cards, with the
@@ -171,6 +173,8 @@ class VibrantTeachingCard extends StatelessWidget {
                   ),
                 ),
                 const SizedBox(height: 10),
+                _CardContactButtons(vacancy: vacancy),
+                const SizedBox(height: 10),
                 SizedBox(
                   width: double.infinity,
                   child: GestureDetector(
@@ -245,6 +249,130 @@ class _CardIconButton extends StatelessWidget {
         decoration: BoxDecoration(color: background, shape: BoxShape.circle),
         alignment: Alignment.center,
         child: child,
+      ),
+    );
+  }
+}
+
+/// Small contact-method buttons for signed-in users.
+///
+/// Only shown when the user is signed in and the vacancy has at least one
+/// enabled method. Tapping fetches the private contact details (single
+/// Firestore read) and performs the action directly — it never triggers
+/// card navigation. Guests see nothing here.
+class _CardContactButtons extends StatefulWidget {
+  const _CardContactButtons({required this.vacancy});
+
+  final TeachingVacancy vacancy;
+
+  @override
+  State<_CardContactButtons> createState() => _CardContactButtonsState();
+}
+
+class _CardContactButtonsState extends State<_CardContactButtons> {
+  final TeachingAuth _auth = TeachingAuth();
+  final TeachingService _service = TeachingService();
+
+  @override
+  void initState() {
+    super.initState();
+    _auth.addListener(_onAuthChanged);
+  }
+
+  @override
+  void dispose() {
+    _auth.removeListener(_onAuthChanged);
+    super.dispose();
+  }
+
+  void _onAuthChanged() {
+    if (mounted) setState(() {});
+  }
+
+  Future<void> _call() async {
+    final contact = await _service.getVacancyContact(widget.vacancy.id);
+    if (contact?.applyPhone == null || !mounted) return;
+    final merged = widget.vacancy.withContact(contact!);
+    if (merged.canCall) openUrl('tel:${merged.applyPhone}');
+  }
+
+  Future<void> _whatsapp() async {
+    if (!mounted) return;
+    final contact = await _service.getVacancyContact(widget.vacancy.id);
+    if (contact?.applyWhatsapp == null || !mounted) return;
+    final merged = widget.vacancy.withContact(contact!);
+    if (merged.canWhatsapp) WhatsappTemplateSheet.show(context, merged);
+  }
+
+  Future<void> _email() async {
+    final contact = await _service.getVacancyContact(widget.vacancy.id);
+    if (contact?.applyEmail == null || !mounted) return;
+    final merged = widget.vacancy.withContact(contact!);
+    if (!merged.canEmail) return;
+    final subject = Uri.encodeComponent(
+      'Application: ${merged.jobTitle} at ${merged.institutionName}',
+    );
+    openUrl('mailto:${merged.applyEmail}?subject=$subject');
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final v = widget.vacancy;
+    if (!_auth.isSignedIn) return const SizedBox.shrink();
+    if (!v.enableCall && !v.enableWhatsapp && !v.enableEmail) {
+      return const SizedBox.shrink();
+    }
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        if (v.enableCall)
+          _ContactIcon(icon: Icons.call_outlined, tooltip: 'Call', onTap: _call),
+        if (v.enableWhatsapp)
+          _ContactIcon(
+            icon: Icons.chat_outlined,
+            tooltip: 'WhatsApp',
+            onTap: _whatsapp,
+          ),
+        if (v.enableEmail)
+          _ContactIcon(
+            icon: Icons.email_outlined,
+            tooltip: 'Email',
+            onTap: _email,
+          ),
+      ],
+    );
+  }
+}
+
+class _ContactIcon extends StatelessWidget {
+  const _ContactIcon({
+    required this.icon,
+    required this.tooltip,
+    required this.onTap,
+  });
+
+  final IconData icon;
+  final String tooltip;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.only(right: 8),
+      child: GestureDetector(
+        onTap: onTap,
+        child: Tooltip(
+          message: tooltip,
+          child: Container(
+            width: 32,
+            height: 32,
+            decoration: BoxDecoration(
+              color: Colors.white.withValues(alpha: 0.25),
+              shape: BoxShape.circle,
+            ),
+            child: Icon(icon, size: 16, color: Colors.white),
+          ),
+        ),
       ),
     );
   }

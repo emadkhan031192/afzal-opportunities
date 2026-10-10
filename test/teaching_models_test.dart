@@ -213,4 +213,152 @@ void main() {
       expect(TeachingService.isExpired(_vacancy()), isFalse);
     });
   });
+
+  group('Application methods', () {
+    TeachingVacancy withMethods({
+      bool call = false,
+      bool whatsapp = false,
+      bool email = false,
+      String? phone,
+      String? wa,
+      String? mail,
+    }) {
+      return TeachingVacancy(
+        id: 'v1',
+        organizationId: 'org1',
+        ownerUid: 'uid1',
+        jobTitle: 'Mathematics Teacher',
+        institutionName: 'City Grammar School',
+        district: 'Mardan',
+        qualification: 'BS Mathematics',
+        description: 'Full-time mathematics teacher.',
+        approvalStatus: TeachingApproval.approved,
+        applyPhone: phone,
+        applyWhatsapp: wa,
+        applyEmail: mail,
+        enableCall: call,
+        enableWhatsapp: whatsapp,
+        enableEmail: email,
+      );
+    }
+
+    test('validates phone numbers', () {
+      expect(TeachingVacancy.isValidPhone('03161185662'), isTrue);
+      expect(TeachingVacancy.isValidPhone('+92 316 1185662'), isTrue);
+      expect(TeachingVacancy.isValidPhone('123'), isFalse);
+      expect(TeachingVacancy.isValidPhone(''), isFalse);
+      expect(TeachingVacancy.isValidPhone(null), isFalse);
+    });
+
+    test('validates email addresses', () {
+      expect(TeachingVacancy.isValidEmail('school@example.com'), isTrue);
+      expect(TeachingVacancy.isValidEmail('not-an-email'), isFalse);
+      expect(TeachingVacancy.isValidEmail(''), isFalse);
+      expect(TeachingVacancy.isValidEmail(null), isFalse);
+    });
+
+    test('canCall/canWhatsapp/canEmail respect enable flags', () {
+      final v = withMethods(
+        call: true,
+        whatsapp: true,
+        email: true,
+        phone: '03161185662',
+        wa: '03161185662',
+        mail: 'school@example.com',
+      );
+      expect(v.canCall, isTrue);
+      expect(v.canWhatsapp, isTrue);
+      expect(v.canEmail, isTrue);
+
+      // Enabled but invalid details → not usable.
+      final bad = withMethods(call: true, phone: '123');
+      expect(bad.canCall, isFalse);
+
+      // Valid details but not enabled → not usable.
+      final off = withMethods(phone: '03161185662');
+      expect(off.canCall, isFalse);
+    });
+
+    test('hasValidApplyMethod requires at least one valid method', () {
+      expect(withMethods().hasValidApplyMethod, isFalse);
+      expect(
+        withMethods(call: true, phone: '03161185662').hasValidApplyMethod,
+        isTrue,
+      );
+      expect(
+        withMethods(
+          whatsapp: true,
+          wa: '03161185662',
+        ).hasValidApplyMethod,
+        isTrue,
+      );
+      expect(
+        withMethods(
+          email: true,
+          mail: 'school@example.com',
+        ).hasValidApplyMethod,
+        isTrue,
+      );
+    });
+
+    test('legacy vacancies without new fields still load', () {
+      final v = _vacancy();
+      expect(v.enableCall, isFalse);
+      expect(v.enableWhatsapp, isFalse);
+      expect(v.enableEmail, isFalse);
+      expect(v.canCall, isFalse);
+      expect(v.hasValidApplyMethod, isFalse);
+    });
+
+    test('whatsappInternational normalizes Pakistani numbers', () {
+      final v = withMethods(whatsapp: true, wa: '03161185662');
+      expect(v.whatsappInternational, '923161185662');
+      final intl = withMethods(whatsapp: true, wa: '+923161185662');
+      expect(intl.whatsappInternational, '923161185662');
+    });
+
+    test('toJson excludes sensitive contact details', () {
+      final v = withMethods(
+        call: true,
+        whatsapp: true,
+        email: true,
+        phone: '03161185662',
+        wa: '03161185662',
+        mail: 'school@example.com',
+      );
+      final json = v.toJson();
+      expect(json.containsKey('applyPhone'), isFalse);
+      expect(json.containsKey('applyWhatsapp'), isFalse);
+      expect(json.containsKey('applyEmail'), isFalse);
+      expect(json['enableCall'], isTrue);
+      expect(json['enableWhatsapp'], isTrue);
+      expect(json['enableEmail'], isTrue);
+    });
+
+    test('withContact merges private details', () {
+      final v = withMethods(whatsapp: true);
+      expect(v.canWhatsapp, isFalse);
+      final merged = v.withContact(
+        const VacancyContact(applyWhatsapp: '03161185662'),
+      );
+      expect(merged.canWhatsapp, isTrue);
+      expect(merged.whatsappInternational, '923161185662');
+    });
+
+    test('VacancyContact round-trips through JSON', () {
+      const c = VacancyContact(
+        applyPhone: '03161185662',
+        applyWhatsapp: '03161185662',
+        applyEmail: 'school@example.com',
+      );
+      final restored = VacancyContact.fromJson(
+        c.toJson('uid1')..remove('updatedAt'),
+      );
+      expect(restored.applyPhone, '03161185662');
+      expect(restored.applyWhatsapp, '03161185662');
+      expect(restored.applyEmail, 'school@example.com');
+      expect(restored.isEmpty, isFalse);
+      expect(const VacancyContact().isEmpty, isTrue);
+    });
+  });
 }

@@ -41,6 +41,15 @@ class TeachingVacancy {
     this.applicationMethod,
     this.applicationUrl,
     this.contactInstructions,
+    // Per-method application channels (private vacancies). Each channel
+    // is shown only when its enable flag is true AND details are valid.
+    // Legacy vacancies without these fields keep working (all null/false).
+    this.applyPhone,
+    this.applyWhatsapp,
+    this.applyEmail,
+    this.enableCall = false,
+    this.enableWhatsapp = false,
+    this.enableEmail = false,
     required this.approvalStatus,
     this.rejectionReason,
     this.publishedAt,
@@ -72,6 +81,12 @@ class TeachingVacancy {
   final String? applicationMethod;
   final String? applicationUrl;
   final String? contactInstructions;
+  final String? applyPhone;
+  final String? applyWhatsapp;
+  final String? applyEmail;
+  final bool enableCall;
+  final bool enableWhatsapp;
+  final bool enableEmail;
   final String approvalStatus;
   final String? rejectionReason;
   final DateTime? publishedAt;
@@ -94,6 +109,43 @@ class TeachingVacancy {
   }
 
   bool get isApproved => approvalStatus == TeachingApproval.approved;
+
+  /// Phone is valid when it contains at least 7 digits.
+  static bool isValidPhone(String? value) {
+    if (value == null) return false;
+    final digits = value.replaceAll(RegExp(r'\D'), '');
+    return digits.length >= 7;
+  }
+
+  /// Email is valid with a basic user@domain.tld shape.
+  static bool isValidEmail(String? value) {
+    if (value == null) return false;
+    final v = value.trim();
+    return RegExp(r'^[^@\s]+@[^@\s]+\.[^@\s]+$').hasMatch(v);
+  }
+
+  bool get canCall => enableCall && isValidPhone(applyPhone);
+  bool get canWhatsapp => enableWhatsapp && isValidPhone(applyWhatsapp);
+  bool get canEmail => enableEmail && isValidEmail(applyEmail);
+
+  /// At least one enabled channel with valid details. New vacancies
+  /// must satisfy this; legacy vacancies without the new fields fall
+  /// back to the old applicationMethod/applicationUrl fields.
+  bool get hasValidApplyMethod {
+    if (canCall || canWhatsapp || canEmail) return true;
+    if ((applicationUrl ?? '').trim().isNotEmpty) return true;
+    if ((contactInstructions ?? '').trim().isNotEmpty) return true;
+    return false;
+  }
+
+  /// WhatsApp number in international format for wa.me links:
+  /// strips non-digits, converts leading 0 to Pakistan's 92.
+  String? get whatsappInternational {
+    if (!canWhatsapp) return null;
+    var digits = applyWhatsapp!.replaceAll(RegExp(r'\D'), '');
+    if (digits.startsWith('0')) digits = '92${digits.substring(1)}';
+    return digits;
+  }
 
   factory TeachingVacancy.fromJson(String id, Map<String, dynamic> json) {
     final jobTitle = _requiredString(json, 'jobTitle', id);
@@ -139,6 +191,12 @@ class TeachingVacancy {
       applicationMethod: _optionalString(json, 'applicationMethod'),
       applicationUrl: _optionalString(json, 'applicationUrl'),
       contactInstructions: _optionalString(json, 'contactInstructions'),
+      applyPhone: _optionalString(json, 'applyPhone'),
+      applyWhatsapp: _optionalString(json, 'applyWhatsapp'),
+      applyEmail: _optionalString(json, 'applyEmail'),
+      enableCall: _optionalBool(json['enableCall']),
+      enableWhatsapp: _optionalBool(json['enableWhatsapp']),
+      enableEmail: _optionalBool(json['enableEmail']),
       approvalStatus: approvalStatus,
       rejectionReason: _optionalString(json, 'rejectionReason'),
       publishedAt: _parseDateTime(json['publishedAt'], 'publishedAt', id),
@@ -171,6 +229,13 @@ class TeachingVacancy {
       if (applicationUrl != null) 'applicationUrl': applicationUrl,
       if (contactInstructions != null)
         'contactInstructions': contactInstructions,
+      // NOTE: applyPhone/applyWhatsapp/applyEmail are NEVER written to the
+      // public vacancy document. They live in the private
+      // teachingVacancyContacts collection (owner + signed-in users only).
+      // Only the enable flags are public.
+      'enableCall': enableCall,
+      'enableWhatsapp': enableWhatsapp,
+      'enableEmail': enableEmail,
       'approvalStatus': approvalStatus,
       if (rejectionReason != null) 'rejectionReason': rejectionReason,
       if (publishedAt != null) 'publishedAt': Timestamp.fromDate(publishedAt!),
@@ -202,6 +267,12 @@ class TeachingVacancy {
       applicationMethod: applicationMethod,
       applicationUrl: applicationUrl,
       contactInstructions: contactInstructions,
+      applyPhone: applyPhone,
+      applyWhatsapp: applyWhatsapp,
+      applyEmail: applyEmail,
+      enableCall: enableCall,
+      enableWhatsapp: enableWhatsapp,
+      enableEmail: enableEmail,
       approvalStatus: approvalStatus ?? this.approvalStatus,
       rejectionReason: rejectionReason ?? this.rejectionReason,
       publishedAt: publishedAt,
@@ -209,6 +280,96 @@ class TeachingVacancy {
       updatedAt: updatedAt,
     );
   }
+
+  /// Returns a copy with private contact details merged in (fetched from
+  /// the teachingVacancyContacts collection for signed-in users).
+  TeachingVacancy withContact(VacancyContact contact) {
+    return TeachingVacancy(
+      id: id,
+      organizationId: organizationId,
+      ownerUid: ownerUid,
+      jobTitle: jobTitle,
+      institutionName: institutionName,
+      district: district,
+      city: city,
+      subjects: subjects,
+      gradeLevels: gradeLevels,
+      qualification: qualification,
+      experienceRequired: experienceRequired,
+      positionsCount: positionsCount,
+      salaryMin: salaryMin,
+      salaryMax: salaryMax,
+      employmentType: employmentType,
+      genderEligibility: genderEligibility,
+      description: description,
+      applicationDeadline: applicationDeadline,
+      applicationMethod: applicationMethod,
+      applicationUrl: applicationUrl,
+      contactInstructions: contactInstructions,
+      applyPhone: contact.applyPhone,
+      applyWhatsapp: contact.applyWhatsapp,
+      applyEmail: contact.applyEmail,
+      enableCall: enableCall,
+      enableWhatsapp: enableWhatsapp,
+      enableEmail: enableEmail,
+      approvalStatus: approvalStatus,
+      rejectionReason: rejectionReason,
+      publishedAt: publishedAt,
+      createdAt: createdAt,
+      updatedAt: updatedAt,
+    );
+  }
+}
+
+bool _optionalBool(dynamic value) {
+  if (value is bool) return value;
+  if (value is String) return value.toLowerCase() == 'true';
+  return false;
+}
+
+/// Private contact details for a vacancy, stored in the
+/// `teachingVacancyContacts` collection (not in the public vacancy doc).
+///
+/// Read: owner, admin, or any signed-in user. Write: owner or admin.
+/// Guests (not signed in) cannot read these via Firebase rules.
+class VacancyContact {
+  const VacancyContact({
+    this.applyPhone,
+    this.applyWhatsapp,
+    this.applyEmail,
+  });
+
+  final String? applyPhone;
+  final String? applyWhatsapp;
+  final String? applyEmail;
+
+  factory VacancyContact.fromJson(Map<String, dynamic> json) {
+    String? opt(String key) {
+      final v = json[key];
+      if (v is! String) return null;
+      final t = v.trim();
+      return t.isEmpty ? null : t;
+    }
+
+    return VacancyContact(
+      applyPhone: opt('applyPhone'),
+      applyWhatsapp: opt('applyWhatsapp'),
+      applyEmail: opt('applyEmail'),
+    );
+  }
+
+  Map<String, dynamic> toJson(String ownerUid) {
+    return {
+      'ownerUid': ownerUid,
+      if (applyPhone != null) 'applyPhone': applyPhone,
+      if (applyWhatsapp != null) 'applyWhatsapp': applyWhatsapp,
+      if (applyEmail != null) 'applyEmail': applyEmail,
+      'updatedAt': FieldValue.serverTimestamp(),
+    };
+  }
+
+  bool get isEmpty =>
+      applyPhone == null && applyWhatsapp == null && applyEmail == null;
 }
 
 String _requiredString(Map<String, dynamic> json, String key, String id) {

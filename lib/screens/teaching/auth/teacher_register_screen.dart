@@ -13,7 +13,12 @@ import 'verify_email_screen.dart';
 /// Teacher registration: Firebase email/password account + teacher
 /// profile (private by default, pending admin review).
 class TeacherRegisterScreen extends StatefulWidget {
-  const TeacherRegisterScreen({super.key});
+  const TeacherRegisterScreen({super.key, this.returnVacancy});
+
+  /// When set, registration was triggered from a job's apply flow;
+  /// on success the screen pops with `true` so the caller returns the
+  /// applicant to that job.
+  final TeachingVacancy? returnVacancy;
 
   @override
   State<TeacherRegisterScreen> createState() => _TeacherRegisterScreenState();
@@ -80,9 +85,17 @@ class _TeacherRegisterScreenState extends State<TeacherRegisterScreen> {
         ),
       );
       if (mounted) {
-        Navigator.of(context).pushReplacement(
-          MaterialPageRoute(builder: (_) => const VerifyEmailScreen()),
-        );
+        if (widget.returnVacancy != null) {
+          // Guest apply flow: verify email, then return to the job.
+          await Navigator.of(context).push(
+            MaterialPageRoute(builder: (_) => const VerifyEmailScreen()),
+          );
+          if (mounted) Navigator.of(context).pop(true);
+        } else {
+          Navigator.of(context).pushReplacement(
+            MaterialPageRoute(builder: (_) => const VerifyEmailScreen()),
+          );
+        }
       }
     } catch (e) {
       setState(() => _errorKey = TeachingAuth.errorKey(e));
