@@ -2,14 +2,15 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 
+import '../core/l10n/app_localizations.dart';
 import '../models/carousel_slide.dart';
 import '../services/carousel_service.dart';
 
-/// Auto-sliding welcome carousel.
+/// Auto-sliding welcome carousel (4s).
 ///
 /// Slides come from Firestore (`carouselSlides` collection, managed in the
-/// admin panel). When no slides exist yet, the carousel hides itself
-/// instead of showing placeholder content.
+/// admin panel). When none exist, built-in English/Urdu welcome slides are
+/// shown (text only, no badge).
 class WelcomeCarousel extends StatefulWidget {
   const WelcomeCarousel({super.key, this.teaching = false});
 
@@ -30,8 +31,8 @@ class _WelcomeCarouselState extends State<WelcomeCarousel> {
   void initState() {
     super.initState();
     _loadSlides();
-    // Slower auto-slide (6s) so text can be read.
-    _timer = Timer.periodic(const Duration(seconds: 6), (_) {
+    // 4-second auto-slide.
+    _timer = Timer.periodic(const Duration(seconds: 4), (_) {
       if (!mounted) return;
       final count = (_slides ?? []).length;
       if (count < 2) return;
@@ -58,14 +59,50 @@ class _WelcomeCarouselState extends State<WelcomeCarousel> {
     super.dispose();
   }
 
+  /// Built-in welcome slides (text only, no badge), used when the admin
+  /// has not added any carousel slides yet. English + Urdu so the
+  /// 4-second auto-slide keeps working.
+  List<CarouselSlide> _fallbackSlides() {
+    final en = AppLocalizations(const Locale('en'));
+    final ur = AppLocalizations(const Locale('ur'));
+    if (widget.teaching) {
+      return [
+        CarouselSlide(
+          badge: '',
+          title: en.carouselTeachingTitle,
+          desc: en.carouselTeachingDesc,
+          rtl: false,
+        ),
+        CarouselSlide(
+          badge: '',
+          title: ur.carouselTeachingTitle,
+          desc: ur.carouselTeachingDesc,
+          rtl: true,
+        ),
+      ];
+    }
+    return [
+      CarouselSlide(
+        badge: '',
+        title: en.carouselHomeTitle,
+        desc: en.carouselHomeDesc,
+        rtl: false,
+      ),
+      CarouselSlide(
+        badge: '',
+        title: ur.carouselHomeTitle,
+        desc: ur.carouselHomeDesc,
+        rtl: true,
+      ),
+    ];
+  }
+
   @override
   Widget build(BuildContext context) {
-    final slides = _slides;
-    // Still loading: reserve no space yet. No slides: hide the carousel
-    // entirely instead of showing placeholder content.
-    if (slides == null || slides.isEmpty) {
-      return const SizedBox.shrink();
-    }
+    // Firestore slides first; built-in welcome text when none exist yet.
+    final slides = (_slides == null || _slides!.isEmpty)
+        ? _fallbackSlides()
+        : _slides!;
 
     return Container(
       margin: const EdgeInsets.fromLTRB(20, 8, 20, 0),
@@ -104,26 +141,30 @@ class _WelcomeCarouselState extends State<WelcomeCarousel> {
                       : CrossAxisAlignment.start,
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 10,
-                        vertical: 4,
-                      ),
-                      decoration: BoxDecoration(
-                        color: Colors.white.withValues(alpha: 0.2),
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                      child: Text(
-                        slide.badge.toUpperCase(),
-                        style: const TextStyle(
-                          fontSize: 10,
-                          fontWeight: FontWeight.w800,
-                          color: Colors.white,
-                          letterSpacing: 0.5,
+                    // Badge only when the slide has one (built-in welcome
+                    // slides show text only).
+                    if (slide.badge.trim().isNotEmpty) ...[
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 10,
+                          vertical: 4,
+                        ),
+                        decoration: BoxDecoration(
+                          color: Colors.white.withValues(alpha: 0.2),
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        child: Text(
+                          slide.badge.toUpperCase(),
+                          style: const TextStyle(
+                            fontSize: 10,
+                            fontWeight: FontWeight.w800,
+                            color: Colors.white,
+                            letterSpacing: 0.5,
+                          ),
                         ),
                       ),
-                    ),
-                    const SizedBox(height: 8),
+                      const SizedBox(height: 8),
+                    ],
                     Text(
                       slide.title,
                       textAlign: slide.rtl ? TextAlign.right : TextAlign.left,

@@ -1828,6 +1828,7 @@ $("btn-carousel-back").addEventListener("click", () => showView("view-dashboard"
 $("btn-carousel-retry").addEventListener("click", loadCarouselSlides);
 $("btn-carousel-retry2").addEventListener("click", loadCarouselSlides);
 $("btn-carousel-new").addEventListener("click", () => editCarouselSlide(null));
+$("btn-carousel-restore").addEventListener("click", restoreDefaultSlides);
 
 async function loadCarouselSlides() {
   $("carousel-list-loading").hidden = false;
@@ -1865,16 +1866,11 @@ function renderCarouselSlides() {
       ? '<span class="badge draft">Disabled</span>'
       : '<span class="badge published">Active</span>';
     const where = slide.teaching ? "Teaching" : "Home";
-    // Mini preview mimicking the app's carousel card.
-    const preview = `
-      <div class="slide-preview${slide.teaching ? " teaching" : ""}${slide.rtl ? " rtl" : ""}">
-        ${slide.badge ? `<div class="pv-badge">${esc(slide.badge)}</div>` : ""}
-        <p class="pv-title">${esc(slide.title || "(no title)")}</p>
-        <p class="pv-desc">${esc(slide.desc || "")}</p>
-      </div>`;
     card.innerHTML = `
       <div class="ad-card-head">${badge}<span class="muted small">${esc(where)}</span></div>
-      ${preview}
+      <h3>${esc(slide.title || "(no title)")}</h3>
+      <p class="muted small">${esc(slide.badge || "")}</p>
+      <p>${esc(trunc(slide.desc || "", 160))}</p>
       <p class="muted small">Order: ${esc(String(slide.order ?? 0))} · ${slide.rtl ? "RTL" : "LTR"}</p>
       <div class="ad-card-actions"></div>
     `;
@@ -1953,10 +1949,69 @@ async function toggleCarouselSlide(slide) {
   }
 }
 
-async function deleteCarouselSlide(slide) {
+/* ---------- restore the built-in welcome slides as editable rows ---------- */
+const DEFAULT_SLIDES = [
+  {
+    badge: "", teaching: false, rtl: false, order: 0,
+    title: "Welcome to Afzal-E Services",
+    desc: "Your trusted hub for verified job alerts, scholarships, and career opportunities across Pakistan.",
+  },
+  {
+    badge: "", teaching: false, rtl: true, order: 1,
+    title: "\u0627\u0641\u0636\u0644 \u0627\u06cc \u0633\u0631\u0648\u0633\u0632 \u0645\u06cc\u06ba \u062e\u0648\u0634 \u0622\u0645\u062f\u06cc\u062f",
+    desc: "\u067e\u0627\u06a9\u0633\u062a\u0627\u0646 \u0628\u06be\u0631 \u0645\u06cc\u06ba \u062a\u0635\u062f\u06cc\u0642 \u0634\u062f\u06c1 \u0646\u0648\u06a9\u0631\u06cc\u0648\u06ba\u060c \u0627\u0633\u06a9\u0627\u0644\u0631\u0634\u067e \u0627\u0648\u0631 \u06a9\u06cc\u0631\u06cc\u0626\u0631 \u06a9\u06d2 \u0645\u0648\u0627\u0642\u0639 \u062d\u0627\u0635\u0644 \u06a9\u0631\u0646\u06d2 \u06a9\u0627 \u0645\u0639\u062a\u0628\u0631 \u0630\u0631\u06cc\u0639\u06c1\u06d4",
+  },
+  {
+    badge: "", teaching: true, rtl: false, order: 0,
+    title: "Private School & Academy Vacancies",
+    desc: "Exclusive portal for private schools and academies to post teaching vacancies, and for qualified teachers to find jobs.",
+  },
+  {
+    badge: "", teaching: true, rtl: true, order: 1,
+    title: "\u067e\u0631\u0627\u0626\u06cc\u0648\u06cc\u0679 \u0627\u0633\u06a9\u0648\u0644\u0632 \u0627\u0648\u0631 \u0627\u06a9\u06cc\u0688\u0645\u06cc\u0632 \u06a9\u06cc \u0646\u0648\u06a9\u0631\u06cc\u0627\u06ba",
+    desc: "\u06cc\u06c1 \u0634\u0639\u0628\u06c1 \u062e\u0627\u0635 \u0637\u0648\u0631 \u067e\u0631 \u067e\u0631\u0627\u0626\u06cc\u0648\u06cc\u0679 \u0627\u0633\u06a9\u0648\u0644\u0648\u06ba \u0627\u0648\u0631 \u0627\u06a9\u06cc\u0688\u0645\u06cc\u0648\u06ba \u06a9\u06d2 \u0644\u06cc\u06d2 \u06c1\u06d2 \u062a\u0627\u06a9\u06c1 \u0648\u06c1 \u0646\u0648\u06a9\u0631\u06cc\u0627\u06ba \u067e\u0648\u0633\u0679 \u06a9\u0631 \u0633\u06a9\u06cc\u06ba \u0627\u0648\u0631 \u0627\u0633\u0627\u062a\u0630\u06c1 \u0646\u0648\u06a9\u0631\u06cc \u062d\u0627\u0635\u0644 \u06a9\u0631 \u0633\u06a9\u06cc\u06ba\u06d4",
+  },
+];
+
+async function restoreDefaultSlides() {
   const confirmed = await confirmDialog(
+    "Restore default slides",
+    "Add the built-in welcome slides (Home English + Urdu, Teaching English + Urdu) as editable rows? Slides that already exist are skipped."
+  );
+  if (!confirmed) return;
+  try {
+    const batch = db.batch();
+    let added = 0;
+    DEFAULT_SLIDES.forEach((d) => {
+      const exists = carouselSlides.some(
+        (s) => s.title === d.title && !!s.teaching === d.teaching
+      );
+      if (exists) return;
+      const ref = db.collection("carouselSlides").doc();
+      batch.set(ref, {
+        ...d,
+        active: true,
+        createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+        updatedAt: firebase.firestore.FieldValue.serverTimestamp(),
+      });
+      added++;
+    });
+    if (added === 0) {
+      toast("Default slides already exist.", "success");
+      return;
+    }
+    await batch.commit();
+    toast(`${added} default slide(s) restored.`, "success");
+    await loadCarouselSlides();
+  } catch (e) {
+    console.error("Restore defaults failed:", e);
+    toast("Could not restore: " + (e.message || e), "error");
+  }
+}
+
+async function deleteCarouselSlide(slide) {  const confirmed = await confirmDialog(
     "Delete slide",
-    `Delete "${slide.title}"? If a tab ends up with no active slides, its carousel stays hidden in the app.`
+    `Delete "${slide.title}"? The app will fall back to its built-in welcome text.`
   );
   if (!confirmed) return;
   try {
