@@ -186,7 +186,7 @@ function initFirebase() {
 /* =================================================================
    View routing (simple JS view switching)
    ================================================================= */
-const VIEWS = ["view-login", "view-dashboard", "view-editor", "view-teaching"];
+const VIEWS = ["view-login", "view-dashboard", "view-editor", "view-teaching", "view-carousel"];
 function showView(id) {
   VIEWS.forEach((v) => {
     $(v).hidden = v !== id;
@@ -1628,3 +1628,153 @@ async function vacancyEdit(doc) {
   wireAuthListener();
   showView("view-login");
 })();
+
+/* ================= Carousel slides =================
+   Manages the welcome-carousel text shown in the app.
+   Collection: carouselSlides (public read, admin write). */
+
+let carouselSlides = [];
+
+$("btn-carousel").addEventListener("click", () => {
+  showView("view-carousel");
+  loadCarouselSlides();
+});
+$("btn-carousel-back").addEventListener("click", () => showView("view-dashboard"));
+$("btn-carousel-retry").addEventListener("click", loadCarouselSlides);
+$("btn-carousel-retry2").addEventListener("click", loadCarouselSlides);
+$("btn-carousel-new").addEventListener("click", () => editCarouselSlide(null));
+
+async function loadCarouselSlides() {
+  $("carousel-list-loading").hidden = false;
+  $("carousel-list-error").hidden = true;
+  $("carousel-list-empty").hidden = true;
+  $("carousel-list").innerHTML = "";
+  $("carousel-status").textContent = "";
+  try {
+    const snap = await db
+      .collection("carouselSlides")
+      .orderBy("order")
+      .get();
+    carouselSlides = snap.docs.map((d) => ({ id: d.id, ...d.data() }));
+    renderCarouselSlides();
+  } catch (e) {
+    console.error("Load carousel slides failed:", e);
+    $("carousel-list-loading").hidden = true;
+    $("carousel-list-error").hidden = false;
+  }
+}
+
+function renderCarouselSlides() {
+  $("carousel-list-loading").hidden = true;
+  const list = $("carousel-list");
+  list.innerHTML = "";
+  if (!carouselSlides.length) {
+    $("carousel-list-empty").hidden = false;
+    return;
+  }
+  $("carousel-list-empty").hidden = true;
+  carouselSlides.forEach((slide) => {
+    const card = document.createElement("div");
+    card.className = "ad-card";
+    const badge = slide.active === false
+      ? '<span class="badge draft">Disabled</span>'
+      : '<span class="badge published">Active</span>';
+    const where = slide.teaching ? "Teaching" : "Home";
+    card.innerHTML = `
+      <div class="ad-card-head">${badge}<span class="muted small">${esc(where)}</span></div>
+      <h3>${esc(slide.title || "(no title)")}</h3>
+      <p class="muted small">${esc(slide.badge || "")}</p>
+      <p>${esc(trunc(slide.desc || "", 160))}</p>
+      <p class="muted small">Order: ${esc(String(slide.order ?? 0))} · ${slide.rtl ? "RTL" : "LTR"}</p>
+      <div class="ad-card-actions"></div>
+    `;
+    const actions = card.querySelector(".ad-card-actions");
+    teachAddBtn(actions, "Edit", "", () => editCarouselSlide(slide));
+    teachAddBtn(
+      actions,
+      slide.active === false ? "Enable" : "Disable",
+      "",
+      () => toggleCarouselSlide(slide)
+    );
+    teachAddBtn(actions, "Delete", "danger", () => deleteCarouselSlide(slide));
+    list.appendChild(card);
+  });
+  $("carousel-status").textContent = `${carouselSlides.length} slide(s)`;
+}
+
+async function editCarouselSlide(slide) {
+  const isNew = !slide;
+  const result = await promptFields(
+    isNew ? "New carousel slide" : "Edit carousel slide",
+    "Badge, title and description support English or Urdu text.",
+    [
+      { id: "badge", label: "Badge", value: slide?.badge || "", placeholder: "Welcome" },
+      { id: "title", label: "Title", value: slide?.title || "", required: true },
+      { id: "desc", label: "Description", value: slide?.desc || "", type: "textarea", required: true },
+      { id: "order", label: "Order (number)", value: String(slide?.order ?? carouselSlides.length) },
+      { id: "teaching", label: "Teaching carousel? (yes/no)", value: slide?.teaching ? "yes" : "no" },
+      { id: "rtl", label: "Right-to-left? (yes/no)", value: slide?.rtl ? "yes" : "no" },
+    ],
+    "Save slide"
+  );
+  if (!result) return;
+  if (!result.title.trim() || !result.desc.trim()) {
+    toast("Title and description are required.", "error");
+    return;
+  }
+  const data = {
+    badge: result.badge.trim(),
+    title: result.title.trim(),
+    desc: result.desc.trim(),
+    order: parseInt(result.order.trim(), 10) || 0,
+    teaching: result.teaching.trim().toLowerCase() === "yes",
+    rtl: result.rtl.trim().toLowerCase() === "yes",
+    active: slide?.active !== false,
+    updatedAt: firebase.firestore.FieldValue.serverTimestamp(),
+  };
+  try {
+    if (isNew) {
+      data.createdAt = firebase.firestore.FieldValue.serverTimestamp();
+      await db.collection("carouselSlides").add(data);
+    } else {
+      await db.collection("carouselSlides").doc(slide.id).update(data);
+    }
+    toast("Slide saved.", "success");
+    await loadCarouselSlides();
+  } catch (e) {
+    console.error("Save slide failed:", e);
+    toast("Could not save: " + (e.message || e), "error");
+  }
+}
+
+async function toggleCarouselSlide(slide) {
+  try {
+    await db
+      .collection("carouselSlides")
+      .doc(slide.id)
+      .update({
+        active: !(slide.active !== false),
+        updatedAt: firebase.firestore.FieldValue.serverTimestamp(),
+      });
+    await loadCarouselSlides();
+  } catch (e) {
+    console.error("Toggle slide failed:", e);
+    toast("Could not update: " + (e.message || e), "error");
+  }
+}
+
+async function deleteCarouselSlide(slide) {
+  const confirmed = await confirmDialog(
+    "Delete slide",
+    `Delete "${slide.title}"? The app will fall back to its built-in text.`
+  );
+  if (!confirmed) return;
+  try {
+    await db.collection("carouselSlides").doc(slide.id).delete();
+    toast("Slide deleted.", "success");
+    await loadCarouselSlides();
+  } catch (e) {
+    console.error("Delete slide failed:", e);
+    toast("Could not delete: " + (e.message || e), "error");
+  }
+}
