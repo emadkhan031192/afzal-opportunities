@@ -133,9 +133,8 @@ class _LoginScreenState extends State<LoginScreen> {
                 onPressed: _busy ? null : _forgotPassword,
                 child: Text(s.forgotPassword),
               ),
-              if (widget.returnVacancy != null) ...[
-                const SizedBox(height: 8),
-                OutlinedButton(
+              const SizedBox(height: 8),
+              OutlinedButton(
                   onPressed: _busy
                       ? null
                       : () async {
@@ -165,7 +164,6 @@ class _LoginScreenState extends State<LoginScreen> {
                     ],
                   ),
                 ),
-              ],
             ],
           ),
         ),
