@@ -1198,11 +1198,11 @@ function teachMatchesFilter(queue, doc, filter) {
 function teachSearchText(queue, doc) {
   const parts = [];
   if (queue === "organizations") {
-    parts.push(doc.institutionName, doc.contactPerson, doc.email, doc.district, doc.city, doc.institutionType);
+    parts.push(doc.institutionName, doc.contactPerson, doc.email, doc.district, doc.city, doc.institutionType, doc.id);
   } else if (queue === "teachers") {
-    parts.push(doc.fullName, doc.email, doc.district, doc.qualification, arrJoin(doc.subjects));
+    parts.push(doc.fullName, doc.email, doc.district, doc.qualification, arrJoin(doc.subjects), doc.id);
   } else {
-    parts.push(doc.jobTitle, doc.district, doc.city, doc.qualification, arrJoin(doc.subjects));
+    parts.push(doc.jobTitle, doc.district, doc.city, doc.qualification, arrJoin(doc.subjects), doc.id);
   }
   return parts.filter(Boolean).join(" ").toLowerCase();
 }
@@ -1319,7 +1319,47 @@ function orgCard(org) {
   if (st === "suspended") {
     teachAddBtn(actions, "Reactivate", "primary", () => teachReactivate("organizations", org));
   }
+  teachAddBtn(actions, "Edit details", "", () => teachEditOrg(org));
   return card;
+}
+
+/* ---------- edit institution details (admin correction) ---------- */
+async function teachEditOrg(org) {
+  const result = await promptFields(
+    "Edit institution details",
+    `Correcting details for "${org.institutionName || org.id}". This only changes the organization's own record.`,
+    [
+      { id: "institutionName", label: "Institution name", value: org.institutionName, required: true },
+      { id: "contactPerson", label: "Contact person", value: org.contactPerson },
+      { id: "contactNumber", label: "Phone number", value: org.contactNumber },
+      { id: "district", label: "District", value: org.district },
+      { id: "city", label: "City", value: org.city },
+      { id: "address", label: "Address", value: org.address, type: "textarea" },
+    ],
+    "Save changes"
+  );
+  if (!result) return;
+  if (!result.institutionName.trim()) {
+    toast("Institution name is required.", "error");
+    return;
+  }
+  try {
+    const ref = db.collection(TEACH_COLLECTIONS.organizations).doc(org.id);
+    await ref.update({
+      institutionName: result.institutionName.trim(),
+      contactPerson: result.contactPerson.trim(),
+      contactNumber: result.contactNumber.trim(),
+      district: result.district.trim(),
+      city: result.city.trim(),
+      address: result.address.trim(),
+      updatedAt: firebase.firestore.FieldValue.serverTimestamp(),
+    });
+    toast("Institution details updated.", "success");
+    await loadTeaching();
+  } catch (e) {
+    console.error("Edit institution failed:", e);
+    toast("Could not save changes: " + (e.message || e), "error");
+  }
 }
 
 function teacherCard(t) {
