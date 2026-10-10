@@ -204,5 +204,12 @@ service cloud.firestore {
         || (request.auth != null
             && request.auth.uid == resource.data.ownerUid);
     }
+
+    // Welcome-carousel slides. Public read (the app's home/teaching
+    // headers); admin-only write (managed in the admin panel).
+    match /carouselSlides/{slideId} {
+      allow get, list: if true;
+      allow create, update, delete: if isAdmin();
+    }
   }
 }

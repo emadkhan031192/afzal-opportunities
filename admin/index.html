@@ -58,6 +58,7 @@
         <span id="admin-email" class="muted small"></span>
         <button id="btn-new" class="btn primary">+ New advertisement</button>
         <button id="btn-teaching" class="btn">Teaching review</button>
+        <button id="btn-carousel" class="btn">Carousel slides</button>
         <button id="btn-logout" class="btn ghost">Sign out</button>
       </div>
     </header>
@@ -145,6 +146,34 @@
       </div>
 
       <div id="teaching-list" class="ad-grid" aria-live="polite"></div>
+    </main>
+  </section>
+
+  <!-- ============ VIEW: Carousel slides ============ -->
+  <section id="view-carousel" class="view" hidden>
+    <header class="topbar">
+      <button id="btn-carousel-back" class="btn ghost">&larr; Advertisements</button>
+      <h2>Carousel slides</h2>
+      <span class="muted small">Welcome carousel text (home + teaching)</span>
+    </header>
+
+    <main class="dashboard">
+      <div class="toolbar">
+        <button id="btn-carousel-new" class="btn primary">+ New slide</button>
+        <button id="btn-carousel-retry" class="btn">Retry</button>
+        <span id="carousel-status" class="muted small" role="status"></span>
+      </div>
+
+      <div id="carousel-list-loading" class="loading" hidden>Loading slides…</div>
+      <div id="carousel-list-error" class="error" hidden>
+        <p>Could not load carousel slides.</p>
+        <button class="btn" id="btn-carousel-retry2">Retry</button>
+      </div>
+      <div id="carousel-list-empty" class="empty" hidden>
+        <p class="muted">No slides yet. The app shows its built-in defaults.</p>
+      </div>
+
+      <div id="carousel-list" class="ad-grid" aria-live="polite"></div>
     </main>
   </section>
 

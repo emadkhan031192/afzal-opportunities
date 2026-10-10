@@ -3,11 +3,15 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 
 import '../core/l10n/app_localizations.dart';
+import '../models/carousel_slide.dart';
+import '../services/carousel_service.dart';
 
-/// Auto-sliding welcome carousel from the user's final UI: EN/UR slides
-/// with a badge, title, description and dot indicators. The [teaching]
-/// variant uses the green teaching gradient; otherwise the dark navy
-/// home gradient.
+/// Auto-sliding welcome carousel.
+///
+/// Slides come from Firestore (`carouselSlides` collection, managed in the
+/// admin panel) and fall back to hardcoded EN/UR defaults when unavailable.
+/// One slide is always English, one always Urdu — independent of the app's
+/// current locale, as the user requested.
 class WelcomeCarousel extends StatefulWidget {
   const WelcomeCarousel({super.key, this.teaching = false});
 
@@ -19,21 +23,34 @@ class WelcomeCarousel extends StatefulWidget {
 
 class _WelcomeCarouselState extends State<WelcomeCarousel> {
   final PageController _controller = PageController();
+  final CarouselService _service = CarouselService();
   Timer? _timer;
   int _index = 0;
+  List<CarouselSlide>? _slides;
 
   @override
   void initState() {
     super.initState();
-    _timer = Timer.periodic(const Duration(seconds: 4), (_) {
+    _loadSlides();
+    // Slower auto-slide (6s) so text can be read.
+    _timer = Timer.periodic(const Duration(seconds: 6), (_) {
       if (!mounted) return;
-      final next = (_index + 1) % 2;
+      final count = (_slides ?? []).length;
+      if (count < 2) return;
+      final next = (_index + 1) % count;
       _controller.animateToPage(
         next,
         duration: const Duration(milliseconds: 450),
         curve: Curves.easeInOut,
       );
     });
+  }
+
+  Future<void> _loadSlides() async {
+    final slides = await _service.getSlides(teaching: widget.teaching);
+    if (mounted) {
+      setState(() => _slides = slides.isEmpty ? null : slides);
+    }
   }
 
   @override
@@ -43,13 +60,10 @@ class _WelcomeCarouselState extends State<WelcomeCarousel> {
     super.dispose();
   }
 
-  @override
-  Widget build(BuildContext context) {
-    // One slide is always English, one is always Urdu — independent of
-    // the app's current locale, as the user requested.
-    final ur = AppLocalizations(const Locale('ur'));
-    final displaySlides = <_SlideData>[
-      _SlideData(
+  List<CarouselSlide> _displaySlides(AppLocalizations ur) {
+    if (_slides != null) return _slides!;
+    return [
+      CarouselSlide(
         badge: widget.teaching ? 'Private Education' : 'Welcome',
         title: widget.teaching
             ? 'Private School & Academy Vacancies'
@@ -59,7 +73,7 @@ class _WelcomeCarouselState extends State<WelcomeCarousel> {
             : 'Your trusted hub for verified job alerts, scholarships, and career opportunities across Pakistan.',
         rtl: false,
       ),
-      _SlideData(
+      CarouselSlide(
         badge: widget.teaching
             ? ur.carouselTeachingBadge
             : ur.carouselHomeBadge,
@@ -70,10 +84,17 @@ class _WelcomeCarouselState extends State<WelcomeCarousel> {
         rtl: true,
       ),
     ];
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final ur = AppLocalizations(const Locale('ur'));
+    final displaySlides = _displaySlides(ur);
 
     return Container(
       margin: const EdgeInsets.fromLTRB(20, 8, 20, 0),
-      height: 150,
+      // Taller to fit 3 lines of description without cutting.
+      height: 178,
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(22),
         gradient: LinearGradient(
@@ -100,7 +121,7 @@ class _WelcomeCarouselState extends State<WelcomeCarousel> {
             itemBuilder: (context, i) {
               final slide = displaySlides[i];
               return Padding(
-                padding: const EdgeInsets.fromLTRB(22, 20, 22, 34),
+                padding: const EdgeInsets.fromLTRB(22, 20, 22, 36),
                 child: Column(
                   crossAxisAlignment: slide.rtl
                       ? CrossAxisAlignment.end
@@ -133,6 +154,8 @@ class _WelcomeCarouselState extends State<WelcomeCarousel> {
                       textDirection: slide.rtl
                           ? TextDirection.rtl
                           : TextDirection.ltr,
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
                       style: const TextStyle(
                         fontSize: 17,
                         fontWeight: FontWeight.w800,
@@ -147,7 +170,7 @@ class _WelcomeCarouselState extends State<WelcomeCarousel> {
                       textDirection: slide.rtl
                           ? TextDirection.rtl
                           : TextDirection.ltr,
-                      maxLines: 2,
+                      maxLines: 3,
                       overflow: TextOverflow.ellipsis,
                       style: const TextStyle(
                         fontSize: 13,
@@ -192,18 +215,4 @@ class _WelcomeCarouselState extends State<WelcomeCarousel> {
       ),
     );
   }
-}
-
-class _SlideData {
-  const _SlideData({
-    required this.badge,
-    required this.title,
-    required this.desc,
-    required this.rtl,
-  });
-
-  final String badge;
-  final String title;
-  final String desc;
-  final bool rtl;
 }

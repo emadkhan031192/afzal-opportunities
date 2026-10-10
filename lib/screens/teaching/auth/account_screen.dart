@@ -197,7 +197,7 @@ class _SignedInView extends StatelessWidget {
         if (profile != null) {
           return TeacherDashboard(auth: auth, service: service);
         }
-        return const _ChooseTypeView();
+        return _ChooseTypeView(auth: auth);
       },
     );
   }
@@ -205,7 +205,9 @@ class _SignedInView extends StatelessWidget {
 
 /// Signed in but no profile yet: pick the account type to register.
 class _ChooseTypeView extends StatelessWidget {
-  const _ChooseTypeView();
+  const _ChooseTypeView({required this.auth});
+
+  final TeachingAuth auth;
 
   @override
   Widget build(BuildContext context) {
@@ -238,6 +240,14 @@ class _ChooseTypeView extends StatelessWidget {
             onTap: () => Navigator.of(context).push(
               MaterialPageRoute(builder: (_) => const TeacherRegisterScreen()),
             ),
+          ),
+          const SizedBox(height: 24),
+          OutlinedButton.icon(
+            onPressed: () async {
+              await auth.signOut();
+            },
+            icon: const Icon(Icons.logout_outlined),
+            label: Text(s.logout),
           ),
         ],
       ),
