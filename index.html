@@ -204,18 +204,9 @@
     </header>
 
     <main class="dashboard">
-      <div class="hint-box">
-        <strong>How carousel slides work</strong>
-        <ul>
-          <li>Slides appear in the <strong>auto-sliding banner</strong> at the top of the app — on the <strong>Home</strong> tab or the <strong>Teaching</strong> tab.</li>
-          <li><strong>Teaching carousel? = yes</strong> → slide shows on the Teaching tab. <strong>No</strong> → shows on the Home tab.</li>
-          <li><strong>Order</strong> decides the sequence (lowest first). Slides auto-slide every 6 seconds when there are 2 or more.</li>
-          <li><strong>Disable</strong> hides a slide without deleting it. <strong>Right-to-left = yes</strong> for Urdu text.</li>
-          <li>If a tab has <strong>no active slides</strong>, the carousel area stays hidden in the app.</li>
-        </ul>
-      </div>
       <div class="toolbar">
         <button id="btn-carousel-new" class="btn primary">+ New slide</button>
+        <button id="btn-carousel-restore" class="btn">Restore default slides</button>
         <button id="btn-carousel-retry" class="btn">Retry</button>
         <span id="carousel-status" class="muted small" role="status"></span>
       </div>
@@ -226,7 +217,7 @@
         <button class="btn" id="btn-carousel-retry2">Retry</button>
       </div>
       <div id="carousel-list-empty" class="empty" hidden>
-        <p class="muted">No slides yet. The carousel stays hidden in the app until you add slides.</p>
+        <p class="muted">No slides yet. The app shows its built-in welcome text.</p>
       </div>
 
       <div id="carousel-list" class="ad-grid" aria-live="polite"></div>
