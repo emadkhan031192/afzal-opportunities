@@ -6,16 +6,18 @@ import '../core/theme/theme_controller.dart';
 import '../services/advertisement_service.dart';
 import '../services/bookmark_service.dart';
 import '../services/notification_service.dart';
+import '../services/private_job_service.dart';
 import '../services/teaching_service.dart';
 import '../widgets/whatsapp_fab.dart';
 import 'home/home_screen.dart';
+import 'privatejobs/private_jobs_screen.dart';
 import 'saved/saved_screen.dart';
 import 'teaching/auth/account_screen.dart';
 import 'teaching/teaching_screen.dart';
 
 /// Root scaffold: bottom navigation between the discovery feed, teaching
-/// jobs and saved advertisements. The branded header lives inside each
-/// feed.
+/// jobs, private jobs and saved advertisements. The branded header lives
+/// inside each feed.
 class MainShell extends StatefulWidget {
   const MainShell({
     super.key,
@@ -40,12 +42,14 @@ class _MainShellState extends State<MainShell> {
   int _index = 0;
   final AdvertisementService _service = AdvertisementService();
   final TeachingService _teachingService = TeachingService();
+  final PrivateJobService _privateJobService = PrivateJobService();
 
-  /// Jumps to the Profile tab (used by the vacancy "apply instructions"
-  /// prompt): pops any pushed route (e.g. vacancy details) first.
+  /// Jumps to the Profile tab (used by the vacancy/private-job "apply
+  /// instructions" prompt): pops any pushed route (e.g. job details)
+  /// first.
   void _goToProfile() {
     Navigator.of(context).popUntil((route) => route.isFirst);
-    setState(() => _index = 3);
+    setState(() => _index = 4);
   }
 
   @override
@@ -62,12 +66,19 @@ class _MainShellState extends State<MainShell> {
               themeController: widget.themeController,
               localeController: widget.localeController,
               notificationService: widget.notificationService,
-              onOpenSaved: () => setState(() => _index = 2),
+              onOpenSaved: () => setState(() => _index = 3),
             ),
             TeachingScreen(
               service: _teachingService,
               bookmarks: widget.bookmarkService,
               teachingBookmarks: widget.teachingBookmarks,
+              themeController: widget.themeController,
+              localeController: widget.localeController,
+              notificationService: widget.notificationService,
+              onOpenProfile: _goToProfile,
+            ),
+            PrivateJobsScreen(
+              service: _privateJobService,
               themeController: widget.themeController,
               localeController: widget.localeController,
               notificationService: widget.notificationService,
@@ -97,6 +108,11 @@ class _MainShellState extends State<MainShell> {
             icon: const Icon(Icons.school_outlined),
             activeIcon: const Icon(Icons.school),
             label: s.teaching,
+          ),
+          BottomNavigationBarItem(
+            icon: const Icon(Icons.business_center_outlined),
+            activeIcon: const Icon(Icons.business_center),
+            label: s.privateJobs,
           ),
           BottomNavigationBarItem(
             icon: const Icon(Icons.bookmark_border),

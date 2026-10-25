@@ -133,7 +133,7 @@ textarea { resize: vertical; }
   display: flex; gap: 0.5rem; flex-wrap: wrap;
   margin-bottom: 1rem;
 }
-.tab, .ttab, .tftab {
+.tab, .ttab, .tftab, .ptab {
   border: 1px solid var(--border);
   background: var(--white);
   color: var(--muted);
@@ -143,12 +143,12 @@ textarea { resize: vertical; }
   cursor: pointer;
   display: inline-flex; align-items: center; gap: 0.5rem;
 }
-.tab.active, .ttab.active, .tftab.active { background: var(--night-blue); border-color: var(--night-blue); color: var(--white); }
-.tab .count, .ttab .count, .tftab .count {
+.tab.active, .ttab.active, .tftab.active, .ptab.active { background: var(--night-blue); border-color: var(--night-blue); color: var(--white); }
+.tab .count, .ttab .count, .tftab .count, .ptab .count {
   background: #EBEDF2; color: var(--night-blue);
   font-size: 0.75rem; padding: 0.1rem 0.55rem; border-radius: 999px;
 }
-.tab.active .count, .ttab.active .count, .tftab.active .count { background: var(--mint); color: var(--night-black); }
+.tab.active .count, .ttab.active .count, .tftab.active .count, .ptab.active .count { background: var(--mint); color: var(--night-black); }
 
 .tab-toolbar { display: flex; align-items: center; gap: 1rem; margin-bottom: 1rem; }
 .tab-toolbar input[type="search"] { max-width: 320px; }

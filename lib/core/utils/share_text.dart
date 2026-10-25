@@ -4,6 +4,7 @@ import '../constants/app_constants.dart';
 import '../l10n/app_localizations.dart';
 import '../utils/deadline.dart';
 import '../../models/advertisement.dart';
+import '../../models/private_job.dart';
 import '../../models/teaching_vacancy.dart';
 
 /// Builds the full WhatsApp share message: the ad/vacancy details followed
@@ -60,6 +61,27 @@ String buildVacancyShareText(TeachingVacancy v, {bool forWhatsApp = true}) {
   final desc = v.description.trim();
   if (desc.isNotEmpty) {
     // Full job description (not a snippet) for teaching vacancies.
+    text
+      ..writeln()
+      ..writeln(desc);
+  }
+  text
+    ..writeln()
+    ..writeln(_footer());
+  return text.toString().trim();
+}
+
+/// Builds the full WhatsApp share message for a private job.
+String buildPrivateJobShareText(PrivateJob job, {bool forWhatsApp = true}) {
+  final b = forWhatsApp ? '*' : '';
+  final text = StringBuffer()
+    ..writeln('$b${job.title}$b')
+    ..writeln(job.company);
+  if (job.city.trim().isNotEmpty) {
+    text.writeln(job.city.trim());
+  }
+  final desc = job.description.trim();
+  if (desc.isNotEmpty) {
     text
       ..writeln()
       ..writeln(desc);

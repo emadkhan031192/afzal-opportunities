@@ -335,10 +335,10 @@ class TeachingService {
   }
 
   /// Deletes all of the caller's teaching data: their organization doc,
-  /// teacher profile doc, and every vacancy they posted. Used by the
-  /// in-app "Delete account" flow (Play Store data-deletion requirement).
-  /// The Firebase Auth user itself is deleted separately via
-  /// [TeachingAuth.deleteAccount].
+  /// teacher profile doc, every vacancy they posted, and every private
+  /// job they posted. Used by the in-app "Delete account" flow (Play
+  /// Store data-deletion requirement). The Firebase Auth user itself is
+  /// deleted separately via [TeachingAuth.deleteAccount].
   Future<void> deleteMyAccountData(String uid) async {
     if (!_ready) return;
     final batch = _db.batch();
@@ -370,6 +370,18 @@ class TeachingService {
         _db
             .collection(AppConstants.teachingVacancyContactsCollection)
             .doc(doc.id),
+      );
+    }
+
+    final privateJobSnap = await _db
+        .collection(AppConstants.privateJobsCollection)
+        .where('postedBy', isEqualTo: uid)
+        .get();
+    for (final doc in privateJobSnap.docs) {
+      batch.delete(doc.reference);
+      // Also remove the private contact details for each job.
+      batch.delete(
+        _db.collection(AppConstants.privateJobContactsCollection).doc(doc.id),
       );
     }
 

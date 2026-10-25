@@ -205,6 +205,106 @@ service cloud.firestore {
             && request.auth.uid == resource.data.ownerUid);
     }
 
+    // --- Private Jobs module --------------------------------------
+    //
+    // Mirrors the teaching-vacancy rules, with two differences:
+    //  - Ownership is tracked by `postedBy` (not `ownerUid`).
+    //  - Public visibility needs BOTH approvalStatus == 'approved' AND
+    //    active == true (the admin's on/off switch).
+    //
+    // List-rule nuance: the app's public feed queries on approvalStatus
+    // only (no composite index), so the list rule checks approvalStatus
+    // alone; the active flag and deadline are filtered client-side
+    // (PrivateJobService.applyPublicFilter). Single-document reads
+    // (get) enforce approved AND active strictly.
+    //
+    // Approval flow: company posts are created with approvalStatus ==
+    // 'pending'. Only the administrator can move a record to 'approved'
+    // (or 'rejected'/'suspended'). Admin-panel posts are created as
+    // 'approved' directly (the panel signs in as an admin). Owners can
+    // never escalate their own status.
+    //
+    // At-least-one-apply-method is enforced by the app form and the
+    // admin panel (same as teaching vacancies); the rules do not
+    // re-validate it.
+
+    // True when a non-admin company create carries no privilege
+    // escalation: the poster owns the doc, it is a company post, and it
+    // starts pending.
+    function privateJobOwnerCreateClean() {
+      return request.auth != null
+        && request.resource.data.postedBy == request.auth.uid
+        && request.resource.data.postedByType == 'company'
+        && request.resource.data.approvalStatus == 'pending';
+    }
+
+    // True when a non-admin owner update carries no privilege
+    // escalation. Owners may leave approvalStatus untouched, or send a
+    // live (approved) job back to pending for re-approval after a
+    // material edit. Every other status transition is admin-only, and
+    // the poster/type fields may never change.
+    function privateJobOwnerUpdateClean() {
+      return request.auth != null
+        && request.auth.uid == resource.data.postedBy
+        && request.resource.data.postedBy == resource.data.postedBy
+        && request.resource.data.postedByType == resource.data.postedByType
+        && (
+          request.resource.data.approvalStatus == resource.data.approvalStatus
+          || (
+            resource.data.approvalStatus == 'approved'
+            && request.resource.data.approvalStatus == 'pending'
+          )
+        );
+    }
+
+    match /privateJobs/{jobId} {
+      // Public single read: approved AND active jobs only.
+      // Owners: their own submissions in any status. Admins: everything.
+      allow get: if isAdmin()
+        || (resource.data.approvalStatus == 'approved'
+            && resource.data.get('active', false) == true)
+        || (request.auth != null
+            && request.auth.uid == resource.data.postedBy);
+      // Public listing (the app's feed query filters approvalStatus ==
+      // 'approved'; active is filtered client-side — see note above).
+      allow list: if isAdmin()
+        || resource.data.approvalStatus == 'approved'
+        || (request.auth != null
+            && request.auth.uid == resource.data.postedBy);
+      // Company posts submit as pending; admin posts go live directly.
+      allow create: if isAdmin() || privateJobOwnerCreateClean();
+      allow update: if isAdmin() || privateJobOwnerUpdateClean();
+      // Owners may delete their own postings; admins may delete anything.
+      allow delete: if isAdmin()
+        || (request.auth != null
+            && request.auth.uid == resource.data.postedBy);
+    }
+
+    // Private per-job contact details (phone/WhatsApp/email).
+    //
+    // The public privateJobs documents carry only the enable flags;
+    // the actual contact details live here. Guests (not signed in)
+    // cannot read them — Firebase enforces this, not just the app UI.
+    // Read: owner, admin, or any signed-in user (applicants).
+    // Write: owner (their own jobs) or admin.
+    match /privateJobContacts/{jobId} {
+      allow get: if isAdmin()
+        || (request.auth != null
+            && request.auth.uid == resource.data.postedBy)
+        || request.auth != null;
+      allow list: if false;
+      allow create: if isAdmin()
+        || (request.auth != null
+            && request.resource.data.postedBy == request.auth.uid);
+      allow update: if isAdmin()
+        || (request.auth != null
+            && request.auth.uid == resource.data.postedBy
+            && request.resource.data.postedBy == resource.data.postedBy);
+      allow delete: if isAdmin()
+        || (request.auth != null
+            && request.auth.uid == resource.data.postedBy);
+    }
+
     // Welcome-carousel slides. Public read (the app's home/teaching
     // headers); admin-only write (managed in the admin panel).
     match /carouselSlides/{slideId} {

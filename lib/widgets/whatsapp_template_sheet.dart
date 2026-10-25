@@ -8,10 +8,38 @@ import '../models/teaching_vacancy.dart';
 /// Bottom sheet for choosing a WhatsApp application message: version 1–3
 /// and English/Urdu, with a live preview. The applicant reviews the
 /// message and taps "Open WhatsApp" to send it manually.
+///
+/// Generic over the posting type: [show] covers teaching vacancies and
+/// [showForJob] covers private jobs. Both fill the same templates with
+/// the job title, poster name and city.
 class WhatsappTemplateSheet extends StatefulWidget {
-  const WhatsappTemplateSheet({super.key, required this.vacancy});
+  const WhatsappTemplateSheet({
+    super.key,
+    required this.jobTitle,
+    required this.posterName,
+    required this.city,
+    required this.whatsappInternational,
+  });
 
-  final TeachingVacancy vacancy;
+  /// Teaching vacancy convenience: maps vacancy fields onto the generic
+  /// sheet inputs.
+  factory WhatsappTemplateSheet.forVacancy(TeachingVacancy vacancy) {
+    final city = vacancy.city?.trim();
+    return WhatsappTemplateSheet(
+      jobTitle: vacancy.jobTitle,
+      posterName: vacancy.institutionName,
+      city: (city != null && city.isNotEmpty) ? city : vacancy.district,
+      whatsappInternational: vacancy.whatsappInternational,
+    );
+  }
+
+  final String jobTitle;
+  final String posterName;
+  final String city;
+
+  /// International-format number for the wa.me link (null when the
+  /// posting has no valid WhatsApp channel).
+  final String? whatsappInternational;
 
   static Future<void> show(BuildContext context, TeachingVacancy vacancy) {
     return showModalBottomSheet<void>(
@@ -20,7 +48,29 @@ class WhatsappTemplateSheet extends StatefulWidget {
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
-      builder: (_) => WhatsappTemplateSheet(vacancy: vacancy),
+      builder: (_) => WhatsappTemplateSheet.forVacancy(vacancy),
+    );
+  }
+
+  static Future<void> showForJob(
+    BuildContext context, {
+    required String jobTitle,
+    required String posterName,
+    required String city,
+    required String? whatsappInternational,
+  }) {
+    return showModalBottomSheet<void>(
+      context: context,
+      isScrollControlled: true,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (_) => WhatsappTemplateSheet(
+        jobTitle: jobTitle,
+        posterName: posterName,
+        city: city,
+        whatsappInternational: whatsappInternational,
+      ),
     );
   }
 
@@ -47,21 +97,16 @@ class _WhatsappTemplateSheetState extends State<WhatsappTemplateSheet> {
     });
   }
 
-  String get _city {
-    final c = (widget.vacancy.city ?? '').trim();
-    return c.isNotEmpty ? c : widget.vacancy.district;
-  }
-
   String get _message => WhatsappTemplates.fill(
     version: _version,
     urdu: _urdu,
-    jobTitle: widget.vacancy.jobTitle,
-    schoolName: widget.vacancy.institutionName,
-    city: _city,
+    jobTitle: widget.jobTitle,
+    schoolName: widget.posterName,
+    city: widget.city,
   );
 
   Future<void> _openWhatsapp() async {
-    final number = widget.vacancy.whatsappInternational;
+    final number = widget.whatsappInternational;
     if (number == null) return;
     await WhatsappTemplates.saveLastChoice(version: _version, urdu: _urdu);
     final text = Uri.encodeComponent(_message);

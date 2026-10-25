@@ -93,6 +93,36 @@ class AppConstants {
       'teachingVacancyContacts';
   static const String teachingApplicationsCollection = 'teachingApplications';
 
+  // Private Jobs module Firestore collections.
+  static const String privateJobsCollection = 'privateJobs';
+  static const String privateJobContactsCollection = 'privateJobContacts';
+
+  /// KPK cities offered by the Private Jobs city filter (spec order).
+  /// Separate from [kpDistricts]: the filter uses city names such as
+  /// "Dir" and "Bajaur" that are not district names.
+  static const List<String> kpkJobCities = <String>[
+    'Peshawar',
+    'Mardan',
+    'Swat',
+    'Abbottabad',
+    'Kohat',
+    'Bannu',
+    'Dera Ismail Khan',
+    'Charsadda',
+    'Nowshera',
+    'Swabi',
+    'Mansehra',
+    'Haripur',
+    'Malakand',
+    'Dir',
+    'Chitral',
+    'Karak',
+    'Hangu',
+    'Lakki Marwat',
+    'Tank',
+    'Bajaur',
+  ];
+
   /// KP districts prioritized by the teaching module (extensible).
   static const List<String> kpDistricts = <String>[
     'Mardan',

@@ -2,12 +2,15 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
 import '../../../core/l10n/app_localizations.dart';
+import '../../../models/private_job.dart';
 import '../../../models/teaching_accounts.dart';
 import '../../../models/teaching_vacancy.dart';
+import '../../../services/private_job_service.dart';
 import '../../../services/teaching_auth.dart';
 import '../../../services/teaching_service.dart';
 import '../../../widgets/state_views.dart';
 import '../../../widgets/delete_account_button.dart';
+import '../../privatejobs/private_job_form_screen.dart';
 import '../auth/verify_email_screen.dart';
 import 'vacancy_form_screen.dart';
 
@@ -101,11 +104,16 @@ class _DashboardBody extends StatefulWidget {
 
 class _DashboardBodyState extends State<_DashboardBody> {
   late final Stream<List<TeachingVacancy>> _vacanciesStream;
+  late final Stream<List<PrivateJob>> _privateJobsStream;
+  final PrivateJobService _privateJobService = PrivateJobService();
 
   @override
   void initState() {
     super.initState();
     _vacanciesStream = widget.service.watchMyVacancies(
+      widget.auth.currentUser!.uid,
+    );
+    _privateJobsStream = _privateJobService.watchMyJobs(
       widget.auth.currentUser!.uid,
     );
   }
@@ -162,6 +170,64 @@ class _DashboardBodyState extends State<_DashboardBody> {
                       (v) => _VacancyRow(
                         vacancy: v,
                         service: service,
+                        onChanged: onChanged,
+                      ),
+                    )
+                    .toList(),
+              );
+            },
+          ),
+          const SizedBox(height: 24),
+          Row(
+            children: [
+              Expanded(
+                child: Text(
+                  AppLocalizations.of(context).myPrivateJobs,
+                  style: Theme.of(context).textTheme.titleLarge,
+                ),
+              ),
+              const SizedBox(width: 8),
+              ElevatedButton.icon(
+                onPressed: () async {
+                  final changed = await Navigator.of(context).push<bool>(
+                    MaterialPageRoute(
+                      builder: (_) => const PrivateJobFormScreen(),
+                    ),
+                  );
+                  if (changed == true) onChanged();
+                },
+                icon: const Icon(Icons.add),
+                label: Text(AppLocalizations.of(context).postPrivateJob),
+              ),
+            ],
+          ),
+          const SizedBox(height: 8),
+          StreamBuilder<List<PrivateJob>>(
+            stream: _privateJobsStream,
+            builder: (context, snapshot) {
+              if (snapshot.connectionState == ConnectionState.waiting) {
+                return const Padding(
+                  padding: EdgeInsets.only(top: 32),
+                  child: LoadingView(),
+                );
+              }
+              final jobs = snapshot.data ?? [];
+              if (jobs.isEmpty) {
+                return Padding(
+                  padding: const EdgeInsets.only(top: 24),
+                  child: EmptyView(
+                    icon: Icons.business_center_outlined,
+                    title: AppLocalizations.of(context).noPrivateJobsFound,
+                    message: AppLocalizations.of(context).noPrivateJobsHint,
+                  ),
+                );
+              }
+              return Column(
+                children: jobs
+                    .map(
+                      (j) => _PrivateJobRow(
+                        job: j,
+                        service: _privateJobService,
                         onChanged: onChanged,
                       ),
                     )
@@ -299,6 +365,170 @@ class _StatusCard extends StatelessWidget {
               const SizedBox(height: 8),
               Text(desc, style: theme.textTheme.bodySmall),
             ],
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+/// Organization's own private job row: title, company/city, deadline,
+/// approval badge, edit/delete menu. Mirrors [_VacancyRow].
+class _PrivateJobRow extends StatelessWidget {
+  const _PrivateJobRow({
+    required this.job,
+    required this.service,
+    required this.onChanged,
+  });
+
+  final PrivateJob job;
+  final PrivateJobService service;
+  final VoidCallback onChanged;
+
+  Color _statusColor(BuildContext context, String status) {
+    switch (status) {
+      case TeachingApproval.approved:
+        return Colors.green.shade700;
+      case TeachingApproval.rejected:
+      case TeachingApproval.suspended:
+        return Theme.of(context).colorScheme.error;
+      case TeachingApproval.pending:
+      default:
+        return Colors.orange.shade800;
+    }
+  }
+
+  String _statusText(AppLocalizations s, String status) {
+    switch (status) {
+      case TeachingApproval.approved:
+        return s.statusApproved;
+      case TeachingApproval.rejected:
+        return s.statusRejected;
+      case TeachingApproval.suspended:
+        return s.statusSuspended;
+      case TeachingApproval.pending:
+      default:
+        return s.statusPending;
+    }
+  }
+
+  Future<void> _delete(BuildContext context) async {
+    final s = AppLocalizations.of(context);
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text(s.deletePrivateJob),
+        content: Text(s.deletePrivateJobConfirm),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(false),
+            child: Text(s.cancel),
+          ),
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(true),
+            child: Text(s.delete),
+          ),
+        ],
+      ),
+    );
+    if (confirmed != true || !context.mounted) return;
+    try {
+      await service.deleteJob(job.id);
+      if (context.mounted) {
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text(s.privateJobUpdated)));
+      }
+    } catch (_) {
+      if (context.mounted) {
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text(s.unknownError)));
+      }
+    }
+    onChanged();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final s = AppLocalizations.of(context);
+    final j = job;
+    final color = _statusColor(context, j.approvalStatus);
+    return Card(
+      margin: const EdgeInsets.only(bottom: 10),
+      child: ListTile(
+        title: Text(j.title, maxLines: 2, overflow: TextOverflow.ellipsis),
+        subtitle: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text('${j.company} · ${j.city}'),
+            if (j.deadline != null)
+              Text(
+                '${s.applicationDeadline}: '
+                '${DateFormat('d MMM yyyy').format(j.deadline!)}',
+              ),
+            const SizedBox(height: 4),
+            Row(
+              children: [
+                Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 8,
+                    vertical: 3,
+                  ),
+                  decoration: BoxDecoration(
+                    color: color.withValues(alpha: 0.12),
+                    borderRadius: BorderRadius.circular(999),
+                  ),
+                  child: Text(
+                    _statusText(s, j.approvalStatus),
+                    style: TextStyle(
+                      fontSize: 11,
+                      fontWeight: FontWeight.w700,
+                      color: color,
+                    ),
+                  ),
+                ),
+                if (!j.active) ...[
+                  const SizedBox(width: 6),
+                  Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 8,
+                      vertical: 3,
+                    ),
+                    decoration: BoxDecoration(
+                      color: Colors.grey.withValues(alpha: 0.15),
+                      borderRadius: BorderRadius.circular(999),
+                    ),
+                    child: Text(
+                      AppLocalizations.of(context).inactive,
+                      style: const TextStyle(
+                        fontSize: 11,
+                        fontWeight: FontWeight.w700,
+                        color: Colors.grey,
+                      ),
+                    ),
+                  ),
+                ],
+              ],
+            ),
+          ],
+        ),
+        trailing: PopupMenuButton<String>(
+          onSelected: (value) async {
+            if (value == 'edit') {
+              final changed = await Navigator.of(context).push<bool>(
+                MaterialPageRoute(
+                  builder: (_) => PrivateJobFormScreen(existing: j),
+                ),
+              );
+              if (changed == true) onChanged();
+            } else if (value == 'delete') {
+              await _delete(context);
+            }
+          },
+          itemBuilder: (context) => [
+            PopupMenuItem(value: 'edit', child: Text(s.editPrivateJob)),
+            PopupMenuItem(value: 'delete', child: Text(s.deletePrivateJob)),
           ],
         ),
       ),

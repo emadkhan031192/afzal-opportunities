@@ -307,6 +307,27 @@ class AppLocalizations {
   String get vacancySubmitted => _t('vacancySubmitted');
   String get vacancySubmittedDesc => _t('vacancySubmittedDesc');
   String get vacancyUpdated => _t('vacancyUpdated');
+
+  // Private Jobs
+  String get privateJobs => _t('privateJobs');
+  String get privateJobsSubtitle => _t('privateJobsSubtitle');
+  String get searchPrivateJobsHint => _t('searchPrivateJobsHint');
+  String get allCities => _t('allCities');
+  String get noPrivateJobsFound => _t('noPrivateJobsFound');
+  String get noPrivateJobsHint => _t('noPrivateJobsHint');
+  String get privateJobsLoadFailed => _t('privateJobsLoadFailed');
+  String get privateJobsPermissionDenied => _t('privateJobsPermissionDenied');
+  String get company => _t('company');
+  String get salary => _t('salary');
+  String get postPrivateJob => _t('postPrivateJob');
+  String get myPrivateJobs => _t('myPrivateJobs');
+  String get editPrivateJob => _t('editPrivateJob');
+  String get privateJobSubmitted => _t('privateJobSubmitted');
+  String get privateJobSubmittedDesc => _t('privateJobSubmittedDesc');
+  String get privateJobUpdated => _t('privateJobUpdated');
+  String get deletePrivateJob => _t('deletePrivateJob');
+  String get deletePrivateJobConfirm => _t('deletePrivateJobConfirm');
+  String get inactive => _t('inactive');
   String get verificationRequired => _t('verificationRequired');
   String get verificationRequiredDesc => _t('verificationRequiredDesc');
   String get checkVerification => _t('checkVerification');
@@ -587,6 +608,29 @@ class AppLocalizations {
     'vacancySubmittedDesc':
         'Your vacancy is pending admin review and will appear publicly once approved.',
     'vacancyUpdated': 'Vacancy updated.',
+    'privateJobs': 'Private Jobs',
+    'privateJobsSubtitle': 'Verified jobs from private companies across KPK',
+    'searchPrivateJobsHint': 'Search private jobs…',
+    'allCities': 'All cities',
+    'noPrivateJobsFound': 'No private jobs found',
+    'noPrivateJobsHint': 'Try another city or check back later.',
+    'privateJobsLoadFailed':
+        'Could not load private jobs. Check your connection and try again.',
+    'privateJobsPermissionDenied':
+        'Private jobs are not set up yet. The database access rules need to be published — please contact support.',
+    'company': 'Company',
+    'salary': 'Salary',
+    'postPrivateJob': 'Post private job',
+    'myPrivateJobs': 'My private jobs',
+    'editPrivateJob': 'Edit private job',
+    'privateJobSubmitted': 'Private job submitted',
+    'privateJobSubmittedDesc':
+        'Your job is pending admin review and will appear publicly once approved.',
+    'privateJobUpdated': 'Private job updated.',
+    'deletePrivateJob': 'Delete private job',
+    'deletePrivateJobConfirm':
+        'Are you sure you want to delete this private job?',
+    'inactive': 'Inactive',
     'verificationRequired': 'Email verification required',
     'verificationRequiredDesc':
         'Verify your email address before posting vacancies or publishing your profile.',
@@ -868,6 +912,30 @@ class AppLocalizations {
     'vacancySubmittedDesc':
         'آپ کی آسامی ایڈمن کے جائزے کی منتظر ہے اور منظوری کے بعد عوامی طور پر نظر آئے گی۔',
     'vacancyUpdated': 'آسامی اپ ڈیٹ ہو گئی۔',
+    'privateJobs': 'پرائیویٹ نوکریاں',
+    'privateJobsSubtitle':
+        'کے پی کے بھر کی پرائیویٹ کمپنیوں کی تصدیق شدہ نوکریاں',
+    'searchPrivateJobsHint': 'پرائیویٹ نوکریاں تلاش کریں…',
+    'allCities': 'تمام شہر',
+    'noPrivateJobsFound': 'کوئی پرائیویٹ نوکری نہیں ملی',
+    'noPrivateJobsHint': 'کوئی اور شہر آزمائیں یا بعد میں دوبارہ دیکھیں۔',
+    'privateJobsLoadFailed':
+        'پرائیویٹ نوکریاں لوڈ نہیں ہو سکیں۔ کنکشن چیک کر کے دوبارہ کوشش کریں۔',
+    'privateJobsPermissionDenied':
+        'پرائیویٹ نوکریاں ابھی سیٹ اپ نہیں ہوئیں۔ ڈیٹا بیس کے اصول شائع کرنے کی ضرورت ہے — براہ کرم سپورٹ سے رابطہ کریں۔',
+    'company': 'کمپنی',
+    'salary': 'تنخواہ',
+    'postPrivateJob': 'پرائیویٹ نوکری پوسٹ کریں',
+    'myPrivateJobs': 'میری پرائیویٹ نوکریاں',
+    'editPrivateJob': 'پرائیویٹ نوکری میں ترمیم کریں',
+    'privateJobSubmitted': 'پرائیویٹ نوکری جمع ہو گئی',
+    'privateJobSubmittedDesc':
+        'آپ کی نوکری ایڈمن کے جائزے کی منتظر ہے اور منظوری کے بعد عوامی طور پر نظر آئے گی۔',
+    'privateJobUpdated': 'پرائیویٹ نوکری اپ ڈیٹ ہو گئی۔',
+    'deletePrivateJob': 'پرائیویٹ نوکری حذف کریں',
+    'deletePrivateJobConfirm':
+        'کیا آپ واقعی یہ پرائیویٹ نوکری حذف کرنا چاہتے ہیں؟',
+    'inactive': 'غیر فعال',
     'verificationRequired': 'ای میل کی تصدیق ضروری ہے',
     'verificationRequiredDesc':
         'آسامیاں پوسٹ کرنے یا پروفائل شائع کرنے سے پہلے اپنے ای میل کی تصدیق کریں۔',

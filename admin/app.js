@@ -186,7 +186,7 @@ function initFirebase() {
 /* =================================================================
    View routing (simple JS view switching)
    ================================================================= */
-const VIEWS = ["view-login", "view-dashboard", "view-editor", "view-teaching", "view-accounts"];
+const VIEWS = ["view-login", "view-dashboard", "view-editor", "view-teaching", "view-private", "view-accounts"];
 function showView(id) {
   VIEWS.forEach((v) => {
     $(v).hidden = v !== id;
@@ -1034,11 +1034,25 @@ function promptFields(title, message, fields, okLabel = "Save") {
       if (f.type === "textarea") {
         input = document.createElement("textarea");
         input.rows = 4;
+        input.value = values[f.id] || "";
+      } else if (f.type === "select") {
+        input = document.createElement("select");
+        (f.options || []).forEach((opt) => {
+          const o = document.createElement("option");
+          o.value = opt.value;
+          o.textContent = opt.label || opt.value;
+          if (opt.value === values[f.id]) o.selected = true;
+          input.appendChild(o);
+        });
+      } else if (f.type === "checkbox") {
+        input = document.createElement("input");
+        input.type = "checkbox";
+        input.checked = !!values[f.id];
       } else {
         input = document.createElement("input");
         input.type = f.type === "date" ? "date" : "text";
+        input.value = values[f.id] || "";
       }
-      input.value = values[f.id] || "";
       if (f.placeholder) input.placeholder = f.placeholder;
       label.appendChild(input);
       const err = document.createElement("small");
@@ -1067,6 +1081,10 @@ function promptFields(title, message, fields, okLabel = "Save") {
       const values = {};
       const errors = {};
       fields.forEach((f) => {
+        if (f.type === "checkbox") {
+          values[f.id] = inputs[f.id].checked;
+          return;
+        }
         const v = inputs[f.id].value.trim();
         values[f.id] = v;
         if (f.required && !v) {
@@ -1598,6 +1616,403 @@ async function vacancyEdit(doc) {
   const patch = { jobTitle: vals.jobTitle, description: vals.description };
   patch.applicationDeadline = vals.applicationDeadline || firebase.firestore.FieldValue.delete();
   teachUpdate("vacancies", doc, patch, "Vacancy updated.");
+}
+
+/* ================= Private Jobs =================
+   Admin management for the Private Jobs module.
+   Collections: privateJobs (public doc: enable flags only),
+   privateJobContacts (private phone/WhatsApp/email).
+   Admin posts go live immediately (approved + active); company posts
+   arrive pending and wait for approval, like teaching vacancies. */
+
+const PRIVATE_CITIES = [
+  "Peshawar", "Mardan", "Swat", "Abbottabad", "Kohat", "Bannu",
+  "Dera Ismail Khan", "Charsadda", "Nowshera", "Swabi", "Mansehra",
+  "Haripur", "Malakand", "Dir", "Chitral", "Karak", "Hangu",
+  "Lakki Marwat", "Tank", "Bajaur",
+];
+const PRIVATE_STATUS_FILTERS = ["pending", "approved", "rejected", "all"];
+
+let privateFilter = "pending";
+let privateSearch = "";
+let privateData = [];
+let privateError = null;
+
+$("btn-private").addEventListener("click", () => {
+  showView("view-private");
+  loadPrivateJobs();
+});
+$("btn-private-back").addEventListener("click", () => showView("view-dashboard"));
+$("btn-private-retry").addEventListener("click", loadPrivateJobs);
+$("btn-private-new").addEventListener("click", () => privateJobEdit(null));
+$("private-search-input").addEventListener("input", (e) => {
+  privateSearch = e.target.value.trim().toLowerCase();
+  renderPrivateJobs();
+});
+
+document.querySelectorAll(".ptab").forEach((tab) => {
+  tab.addEventListener("click", () => {
+    privateFilter = tab.dataset.ptab;
+    privateSearch = "";
+    $("private-search-input").value = "";
+    document.querySelectorAll(".ptab").forEach((t) => {
+      const on = t === tab;
+      t.classList.toggle("active", on);
+      t.setAttribute("aria-selected", on ? "true" : "false");
+    });
+    renderPrivateJobs();
+  });
+});
+
+/* ---------- loading ---------- */
+async function loadPrivateJobs() {
+  $("private-list-loading").hidden = false;
+  $("private-list-error").hidden = true;
+  $("private-list-empty").hidden = true;
+  $("private-list").innerHTML = "";
+  $("private-status").textContent = "";
+  privateError = null;
+  try {
+    const snap = await db
+      .collection("privateJobs")
+      .orderBy("updatedAt", "desc")
+      .limit(500)
+      .get();
+    privateData = snap.docs.map((d) => ({ id: d.id, ...d.data() }));
+  } catch (err) {
+    console.error("loadPrivateJobs failed:", err);
+    privateData = [];
+    privateError = (err && err.message) || "Unknown error.";
+  } finally {
+    $("private-list-loading").hidden = true;
+    renderPrivateJobs();
+  }
+}
+
+/** Deadline label for a private job: reads doc.deadline (YYYY-MM-DD
+    string, Timestamp, or missing) and mirrors the ad deadline logic. */
+function privateDeadlineInfo(doc) {
+  const info = teachDeadlineInfo({ applicationDeadline: doc.deadline });
+  return info.label;
+}
+
+function privateMatchesFilter(doc, filter) {
+  const status = doc.approvalStatus || "pending";
+  if (filter === "all") return true;
+  return status === filter;
+}
+
+function privateSearchText(doc) {
+  return [doc.title, doc.company, doc.city, doc.id]
+    .filter(Boolean)
+    .join(" ")
+    .toLowerCase();
+}
+
+function filteredPrivateJobs() {
+  let list = privateData.filter((d) => privateMatchesFilter(d, privateFilter));
+  if (privateSearch) {
+    list = list.filter((d) => privateSearchText(d).includes(privateSearch));
+  }
+  return list;
+}
+
+function renderPrivateJobs() {
+  PRIVATE_STATUS_FILTERS.forEach((f) => {
+    const n = f === "all"
+      ? privateData.length
+      : privateData.filter((d) => privateMatchesFilter(d, f)).length;
+    $("count-p-" + f).textContent = n;
+  });
+
+  const err = privateError;
+  const list = err ? [] : filteredPrivateJobs();
+  $("private-list-error").hidden = !err;
+  if (err) $("private-list-error-detail").textContent = err;
+  $("private-list-empty").hidden = err || list.length !== 0;
+  $("private-status").textContent =
+    err || list.length === 0 ? "" : `${list.length} job${list.length === 1 ? "" : "s"}`;
+
+  const wrap = $("private-list");
+  wrap.innerHTML = "";
+  list.forEach((d) => wrap.appendChild(privateJobCard(d)));
+}
+
+/* ---------- card ---------- */
+function privateJobCard(doc) {
+  const dl = privateDeadlineInfo(doc);
+  const dlTone = dl.tone === "expired" ? "badge-expired" : `badge-deadline${dl.tone === "neutral" ? "" : " " + dl.tone}`;
+  const methods = [
+    doc.enableCall ? "Call" : null,
+    doc.enableWhatsapp ? "WhatsApp" : null,
+    doc.enableEmail ? "Email" : null,
+  ].filter(Boolean).join(", ") || "None";
+  const rows = [
+    ["Company", doc.company || "—"],
+    ["City", doc.city || "—"],
+    ["Salary", doc.salary || "—"],
+    ["Apply via", methods],
+    ["Posted by", doc.postedByType === "admin" ? "Admin" : "Company"],
+    ["Active", doc.active === false ? "No (hidden)" : "Yes"],
+    ["Submitted", fmtTs(doc.createdAt)],
+    ["Published", fmtTs(doc.publishedAt)],
+  ];
+  if (doc.rejectionReason) rows.push(["Rejection reason", doc.rejectionReason]);
+  const card = teachCardShell(
+    `${teachStatusBadge(doc.approvalStatus)}<span class="badge ${dlTone}">${esc(dl.text)}</span>`,
+    doc.title || "Untitled job",
+    [doc.company, doc.city].filter(Boolean).join(" · "),
+    rows,
+    doc.description
+      ? `<p class="small muted" style="margin:0.5rem 0 0">${esc(trunc(doc.description, 220))}</p>`
+      : ""
+  );
+  const actions = card.querySelector(".ad-card-actions");
+  const st = doc.approvalStatus || "pending";
+  if (st === "pending" || st === "rejected") {
+    teachAddBtn(actions, "Approve & publish", "primary", () => privateJobApprovePublish(doc));
+  }
+  if (st === "pending" || st === "rejected") {
+    teachAddBtn(actions, "Reject", "", () => privateJobReject(doc));
+  }
+  if (st === "approved") {
+    teachAddBtn(actions, "Unpublish", "", () => privateJobUnpublish(doc));
+  }
+  teachAddBtn(actions, doc.active === false ? "Activate" : "Deactivate", "", () =>
+    privateJobSetActive(doc, doc.active === false)
+  );
+  teachAddBtn(actions, "Edit", "", () => privateJobEdit(doc));
+  teachAddBtn(actions, "Delete", "danger", () => privateJobDelete(doc));
+  // Per-method toggles (flags only; contact values are edited via Edit).
+  teachAddBtn(actions, doc.enableCall ? "Disable Call" : "Enable Call", "", () =>
+    privateJobSetMethod(doc, "enableCall", !doc.enableCall)
+  );
+  teachAddBtn(actions, doc.enableWhatsapp ? "Disable WhatsApp" : "Enable WhatsApp", "", () =>
+    privateJobSetMethod(doc, "enableWhatsapp", !doc.enableWhatsapp)
+  );
+  teachAddBtn(actions, doc.enableEmail ? "Disable Email" : "Enable Email", "", () =>
+    privateJobSetMethod(doc, "enableEmail", !doc.enableEmail)
+  );
+  return card;
+}
+
+/* ---------- actions ---------- */
+async function privateJobUpdate(doc, patch, successMsg) {
+  try {
+    await db
+      .collection("privateJobs")
+      .doc(doc.id)
+      .update({
+        ...patch,
+        updatedAt: firebase.firestore.FieldValue.serverTimestamp(),
+      });
+    toast(successMsg);
+    loadPrivateJobs();
+  } catch (err) {
+    console.error("privateJobUpdate failed:", err);
+    toast(`Could not update: ${err.message || err}`, "error");
+  }
+}
+
+async function privateJobApprovePublish(doc) {
+  const ok = await confirmDialog(
+    "Approve and publish this private job?",
+    `"${doc.title || doc.id}" will become visible in the app.`,
+    "Approve & publish"
+  );
+  if (!ok) return;
+  privateJobUpdate(
+    doc,
+    {
+      approvalStatus: "approved",
+      publishedAt: firebase.firestore.FieldValue.serverTimestamp(),
+    },
+    "Private job approved and published."
+  );
+}
+
+async function privateJobReject(doc) {
+  const vals = await promptFields(
+    "Reject this private job?",
+    `"${doc.title || doc.id}" will be marked as rejected. A reason is optional and is stored with the record.`,
+    [
+      {
+        id: "reason",
+        label: "Rejection reason (optional)",
+        type: "textarea",
+        placeholder: "e.g. Job details could not be verified.",
+      },
+    ],
+    "Reject"
+  );
+  if (!vals) return;
+  const patch = { approvalStatus: "rejected" };
+  if (vals.reason) patch.rejectionReason = vals.reason;
+  privateJobUpdate(doc, patch, "Rejected.");
+}
+
+async function privateJobUnpublish(doc) {
+  const ok = await confirmDialog(
+    "Unpublish this private job?",
+    `"${doc.title || doc.id}" will return to pending and disappear from the app.`,
+    "Unpublish"
+  );
+  if (!ok) return;
+  privateJobUpdate(doc, { approvalStatus: "pending" }, "Unpublished.");
+}
+
+async function privateJobSetActive(doc, active) {
+  privateJobUpdate(doc, { active }, active ? "Activated." : "Deactivated.");
+}
+
+async function privateJobSetMethod(doc, flag, value) {
+  privateJobUpdate(doc, { [flag]: value }, "Apply method updated.");
+}
+
+async function privateJobDelete(doc) {
+  const ok = await confirmDialog(
+    "Delete this private job?",
+    `"${doc.title || doc.id}" will be permanently deleted, including its private contact details.`,
+    "Delete"
+  );
+  if (!ok) return;
+  try {
+    await db.collection("privateJobs").doc(doc.id).delete();
+    await db.collection("privateJobContacts").doc(doc.id).delete().catch(() => {});
+    toast("Private job deleted.");
+    loadPrivateJobs();
+  } catch (err) {
+    console.error("privateJobDelete failed:", err);
+    toast(`Could not delete: ${err.message || err}`, "error");
+  }
+}
+
+/* ---------- add / edit ---------- */
+async function privateJobEdit(doc) {
+  const isNew = !doc;
+  const contact = doc
+    ? await db.collection("privateJobContacts").doc(doc.id).get().then(
+        (s) => (s.exists ? s.data() : {}),
+        () => ({})
+      )
+    : {};
+  const vals = await promptFields(
+    isNew ? "New private job" : "Edit private job",
+    isNew
+      ? "Admin posts go live immediately (approved + active)."
+      : "Editing keeps the current approval status. Contact details stay private.",
+    [
+      { id: "title", label: "Job title", value: doc ? doc.title || "" : "", required: true },
+      { id: "company", label: "Company", value: doc ? doc.company || "" : "", required: true },
+      {
+        id: "city",
+        label: "City",
+        type: "select",
+        options: PRIVATE_CITIES.map((c) => ({ value: c, label: c })),
+        value: doc ? doc.city || PRIVATE_CITIES[0] : PRIVATE_CITIES[0],
+        required: true,
+      },
+      { id: "description", label: "Description", type: "textarea", value: doc ? doc.description || "" : "", required: true },
+      { id: "salary", label: "Salary (optional)", value: doc ? doc.salary || "" : "" },
+      {
+        id: "deadline",
+        label: "Application deadline (optional)",
+        type: "date",
+        value: doc ? dateInputValue(doc.deadline) : "",
+      },
+      { id: "applyPhone", label: "Phone (Call applications)", value: contact.applyPhone || "" },
+      { id: "applyWhatsapp", label: "WhatsApp number", value: contact.applyWhatsapp || "" },
+      { id: "applyEmail", label: "Email", value: contact.applyEmail || "" },
+      { id: "enableCall", label: "Accept applications by phone call", type: "checkbox", value: doc ? !!doc.enableCall : false },
+      { id: "enableWhatsapp", label: "Accept applications by WhatsApp", type: "checkbox", value: doc ? !!doc.enableWhatsapp : false },
+      { id: "enableEmail", label: "Accept applications by email", type: "checkbox", value: doc ? !!doc.enableEmail : false },
+      { id: "active", label: "Active (visible in the app)", type: "checkbox", value: doc ? doc.active !== false : true },
+    ],
+    isNew ? "Publish job" : "Save changes"
+  );
+  if (!vals) return;
+  if (!vals.title.trim() || !vals.company.trim() || !vals.description.trim()) {
+    toast("Title, company and description are required.", "error");
+    return;
+  }
+  if (!vals.enableCall && !vals.enableWhatsapp && !vals.enableEmail) {
+    toast("Enable at least one apply method (Call, WhatsApp or Email).", "error");
+    return;
+  }
+  const phoneOk = !vals.enableCall || String(vals.applyPhone || "").replace(/\D/g, "").length >= 7;
+  const waOk = !vals.enableWhatsapp || String(vals.applyWhatsapp || "").replace(/\D/g, "").length >= 7;
+  const emailOk = !vals.enableEmail || /^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(String(vals.applyEmail || "").trim());
+  if (!phoneOk || !waOk) {
+    toast("Enabled phone/WhatsApp numbers need at least 7 digits.", "error");
+    return;
+  }
+  if (!emailOk) {
+    toast("Enabled email address looks invalid.", "error");
+    return;
+  }
+  // NOTE: FieldValue.delete() is only legal in update() and set(...,{merge:true});
+  // add() and plain set() reject it, so optional fields are omitted (not
+  // deleted) on the create path and deleted on the edit path.
+  const publicData = {
+    title: vals.title.trim(),
+    company: vals.company.trim(),
+    city: vals.city,
+    description: vals.description.trim(),
+    enableCall: !!vals.enableCall,
+    enableWhatsapp: !!vals.enableWhatsapp,
+    enableEmail: !!vals.enableEmail,
+    active: !!vals.active,
+    updatedAt: firebase.firestore.FieldValue.serverTimestamp(),
+  };
+  if (vals.salary.trim()) publicData.salary = vals.salary.trim();
+  if (vals.deadline) publicData.deadline = vals.deadline;
+  const contactValues = {
+    applyPhone: vals.applyPhone.trim(),
+    applyWhatsapp: vals.applyWhatsapp.trim(),
+    applyEmail: vals.applyEmail.trim(),
+  };
+  try {
+    if (isNew) {
+      const ref = await db.collection("privateJobs").add({
+        ...publicData,
+        approvalStatus: "approved",
+        postedBy: firebase.auth().currentUser.uid,
+        postedByType: "admin",
+        publishedAt: firebase.firestore.FieldValue.serverTimestamp(),
+        createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+      });
+      const newContact = {
+        postedBy: firebase.auth().currentUser.uid,
+        updatedAt: firebase.firestore.FieldValue.serverTimestamp(),
+      };
+      if (contactValues.applyPhone) newContact.applyPhone = contactValues.applyPhone;
+      if (contactValues.applyWhatsapp) newContact.applyWhatsapp = contactValues.applyWhatsapp;
+      if (contactValues.applyEmail) newContact.applyEmail = contactValues.applyEmail;
+      await db.collection("privateJobContacts").doc(ref.id).set(newContact);
+      toast("Private job published.");
+    } else {
+      await db.collection("privateJobs").doc(doc.id).update({
+        ...publicData,
+        salary: vals.salary.trim() || firebase.firestore.FieldValue.delete(),
+        deadline: vals.deadline || firebase.firestore.FieldValue.delete(),
+      });
+      await db.collection("privateJobContacts").doc(doc.id).set(
+        {
+          postedBy: firebase.auth().currentUser.uid,
+          applyPhone: contactValues.applyPhone || firebase.firestore.FieldValue.delete(),
+          applyWhatsapp: contactValues.applyWhatsapp || firebase.firestore.FieldValue.delete(),
+          applyEmail: contactValues.applyEmail || firebase.firestore.FieldValue.delete(),
+          updatedAt: firebase.firestore.FieldValue.serverTimestamp(),
+        },
+        { merge: true }
+      );
+      toast("Private job updated.");
+    }
+    loadPrivateJobs();
+  } catch (err) {
+    console.error("privateJobEdit failed:", err);
+    toast(`Could not save: ${err.message || err}`, "error");
+  }
 }
 
 /* =================================================================
