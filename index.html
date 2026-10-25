@@ -58,6 +58,7 @@
         <span id="admin-email" class="muted small"></span>
         <button id="btn-new" class="btn primary">+ New advertisement</button>
         <button id="btn-teaching" class="btn">Teaching review</button>
+        <button id="btn-private" class="btn">Private jobs</button>
         <button id="btn-accounts" class="btn">Accounts</button>
         <button id="btn-logout" class="btn ghost">Sign out</button>
       </div>
@@ -150,6 +151,51 @@
   </section>
 
   <!-- ============ VIEW: Accounts ============ -->
+  <section id="view-private" class="view" hidden>
+    <header class="topbar">
+      <button id="btn-private-back" class="btn ghost">&larr; Advertisements</button>
+      <h2>Private jobs</h2>
+      <span class="muted small">Admin posts go live immediately; company posts wait for approval.</span>
+    </header>
+    <main class="dashboard">
+      <div class="tab-toolbar" style="margin-bottom: 1rem;">
+        <button id="btn-private-new" class="btn primary">+ New private job</button>
+      </div>
+      <nav class="tabs" role="tablist" aria-label="Private job status">
+        <button class="ptab active" data-ptab="pending" role="tab" aria-selected="true">
+          Pending <span class="count" id="count-p-pending">0</span>
+        </button>
+        <button class="ptab" data-ptab="approved" role="tab" aria-selected="false">
+          Approved <span class="count" id="count-p-approved">0</span>
+        </button>
+        <button class="ptab" data-ptab="rejected" role="tab" aria-selected="false">
+          Rejected <span class="count" id="count-p-rejected">0</span>
+        </button>
+        <button class="ptab" data-ptab="all" role="tab" aria-selected="false">
+          All <span class="count" id="count-p-all">0</span>
+        </button>
+      </nav>
+      <div class="tab-toolbar">
+        <input type="search" id="private-search-input" placeholder="Search private jobs..." aria-label="Search private jobs" />
+        <span id="private-status" class="muted small" role="status"></span>
+      </div>
+      <div id="private-list-loading" class="state-block" hidden>
+        <div class="spinner" aria-hidden="true"></div>
+        <p>Loading private jobs…</p>
+      </div>
+      <div id="private-list-error" class="state-block error-block" hidden>
+        <p><strong>Could not load private jobs.</strong></p>
+        <p class="muted small" id="private-list-error-detail"></p>
+        <button class="btn" id="btn-private-retry">Retry</button>
+      </div>
+      <div id="private-list-empty" class="state-block" hidden>
+        <p class="big">Nothing here</p>
+        <p class="muted small">No private jobs match this filter.</p>
+      </div>
+      <div id="private-list" class="ad-grid" aria-live="polite"></div>
+    </main>
+  </section>
+
   <section id="view-accounts" class="view" hidden>
     <header class="topbar">
       <button id="btn-accounts-back" class="btn ghost">&larr; Advertisements</button>
