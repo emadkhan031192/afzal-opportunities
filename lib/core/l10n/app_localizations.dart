@@ -148,6 +148,9 @@ class AppLocalizations {
   String get officialInfoBody => _t('officialInfoBody');
   String get linkOpenFailed => _t('linkOpenFailed');
   String get officialWebsite => _t('officialWebsite');
+  String get disclaimerNotGovernment => _t('disclaimerNotGovernment');
+  String get disclaimerVerifyDetails => _t('disclaimerVerifyDetails');
+  String get missingSourceWarning => _t('missingSourceWarning');
 
   // Deadline labels (localized equivalents of DeadlineInfo.label)
   String get lastDateNotSpecified => _t('lastDateNotSpecified');
@@ -468,6 +471,12 @@ class AppLocalizations {
         'The links below come directly from the advertising organization.',
     'linkOpenFailed': 'Could not open the link.',
     'officialWebsite': 'Official website',
+    'disclaimerNotGovernment':
+        'Afzal E Services is not a government entity and is not affiliated with, endorsed by, or representing any government body.',
+    'disclaimerVerifyDetails':
+        'The description above was entered by the Afzal E Services administrator. Always verify details on the official source before applying.',
+    'missingSourceWarning':
+        'No official source link was provided for this listing. Verify details from the advertising department before applying.',
     'lastDateNotSpecified': 'LAST DATE NOT SPECIFIED',
     'lastDateToday': 'LAST DATE TODAY',
     'closingTomorrow': 'CLOSING TOMORROW',
@@ -771,6 +780,12 @@ class AppLocalizations {
         'نیچے دیے گئے لنکس اشتہار دینے والے ادارے کی طرف سے ہیں۔',
     'linkOpenFailed': 'لنک نہیں کھولا جا سکا۔',
     'officialWebsite': 'سرکاری ویب سائٹ',
+    'disclaimerNotGovernment':
+        'افضل ای سروسز سرکاری ادارہ نہیں ہے اور نہ ہی کسی سرکاری ادارے سے وابستہ، اس کی تائید یافتہ یا اس کی نمائندگی کرتا ہے۔',
+    'disclaimerVerifyDetails':
+        'اوپر دی گئی تفصیل افضل ای سروسز کے منتظم نے درج کی ہے۔ درخواست دینے سے پہلے ہمیشہ سرکاری ماخذ سے تفصیلات کی تصدیق کریں۔',
+    'missingSourceWarning':
+        'اس اشتہار کے لیے کوئی سرکاری ماخذ لنک فراہم نہیں کیا گیا۔ درخواست دینے سے پہلے اشتہار دینے والے محکمے سے تفصیلات کی تصدیق کریں۔',
     'lastDateNotSpecified': 'آخری تاریخ درج نہیں',
     'lastDateToday': 'آج آخری تاریخ',
     'closingTomorrow': 'کل آخری تاریخ',

@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:share_plus/share_plus.dart';
 
-import '../../core/constants/app_constants.dart';
 import '../../core/l10n/app_localizations.dart';
 import '../../core/theme/brand_colors.dart';
 import '../../core/utils/deadline.dart';
@@ -134,6 +133,10 @@ class DetailsScreen extends StatelessWidget {
                         subtitle: _host(ad.sourceUrl),
                         onTap: () => _openLink(context, ad.sourceUrl, 'source'),
                       ),
+                  ],
+                  if (!hasSource) ...[
+                    const SizedBox(height: 24),
+                    _missingSourceNotice(context),
                   ],
                   const SizedBox(height: 24),
                   _disclaimer(context),
@@ -420,6 +423,7 @@ class DetailsScreen extends StatelessWidget {
   Widget _disclaimer(BuildContext context) {
     final theme = Theme.of(context);
     final dark = theme.brightness == Brightness.dark;
+    final s = AppLocalizations.of(context);
     return Container(
       padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
@@ -438,11 +442,54 @@ class DetailsScreen extends StatelessWidget {
           ),
           const SizedBox(width: 8),
           Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  s.disclaimerNotGovernment,
+                  style: theme.textTheme.bodySmall?.copyWith(
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+                const SizedBox(height: 4),
+                Text(s.disclaimerVerifyDetails, style: theme.textTheme.bodySmall),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  /// Warning shown instead of the source button when an advertisement
+  /// carries no official source link (published before the source URL
+  /// became required). Never silently hide the gap: the reader must see
+  /// that this listing has no verifiable official source.
+  Widget _missingSourceNotice(BuildContext context) {
+    final theme = Theme.of(context);
+    final s = AppLocalizations.of(context);
+    return Container(
+      padding: const EdgeInsets.all(14),
+      decoration: BoxDecoration(
+        color: BrandColors.amberTint,
+        borderRadius: BorderRadius.circular(16),
+      ),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Icon(
+            Icons.warning_amber_outlined,
+            size: 18,
+            color: BrandColors.amberStrong,
+          ),
+          const SizedBox(width: 8),
+          Expanded(
             child: Text(
-              'The description above was entered by the ${AppConstants.brandName} '
-              'administrator. Always verify details on the official source '
-              'before applying.',
-              style: theme.textTheme.bodySmall,
+              s.missingSourceWarning,
+              style: theme.textTheme.bodySmall?.copyWith(
+                color: BrandColors.amberStrong,
+                fontWeight: FontWeight.w700,
+              ),
             ),
           ),
         ],

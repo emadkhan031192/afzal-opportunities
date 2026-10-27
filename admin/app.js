@@ -618,7 +618,13 @@ function validateForm() {
   }
 
   const sourceUrl = $("f-sourceUrl").value.trim();
-  if (sourceUrl && !isHttpsUrl(sourceUrl)) {
+  if (!sourceUrl) {
+    setFieldError(
+      "sourceUrl",
+      "Official source URL is required. Paste the official source of this advertisement (https://...).",
+    );
+    ok = false;
+  } else if (!isHttpsUrl(sourceUrl)) {
     setFieldError("sourceUrl", "Official source URL must start with https://");
     ok = false;
   } else setFieldError("sourceUrl");
