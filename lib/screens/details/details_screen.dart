@@ -452,7 +452,10 @@ class DetailsScreen extends StatelessWidget {
                   ),
                 ),
                 const SizedBox(height: 4),
-                Text(s.disclaimerVerifyDetails, style: theme.textTheme.bodySmall),
+                Text(
+                  s.disclaimerVerifyDetails,
+                  style: theme.textTheme.bodySmall,
+                ),
               ],
             ),
           ),
