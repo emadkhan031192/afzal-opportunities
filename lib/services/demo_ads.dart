@@ -68,6 +68,7 @@ class DemoAds {
             'PTC/CT. Applications are submitted through the official testing '
             'service portal before the last date.',
         location: 'Khyber Pakhtunkhwa',
+        sourceUrl: 'https://etea.edu.pk',
         publishedAt: _hoursAgo(50),
         lastDate: _pktDate(1),
         status: AppConstants.statusPublished,
@@ -83,6 +84,7 @@ class DemoAds {
             'tuition fee plus a monthly stipend. Applicants must have secured '
             'admission on merit and demonstrate financial need.',
         location: 'All Pakistan',
+        sourceUrl: 'https://hec.gov.pk',
         publishedAt: _hoursAgo(150),
         lastDate: _pktDate(5),
         status: AppConstants.statusPublished,
@@ -130,6 +132,7 @@ class DemoAds {
             'official testing service. This advertisement is kept for archive '
             'purposes only.',
         location: 'Khyber Pakhtunkhwa',
+        sourceUrl: 'https://etea.edu.pk',
         publishedAt: _hoursAgo(960),
         lastDate: _pktDate(-10),
         status: AppConstants.statusPublished,

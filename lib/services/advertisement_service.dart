@@ -29,9 +29,13 @@ class AdvertisementService {
   FirebaseFirestore get _db => _firestore ?? FirebaseFirestore.instance;
 
   /// Live stream of published advertisements, newest first.
+  ///
+  /// Advertisements without an official source link never reach the
+  /// public feed (see [filterSourcedAds]); they stay visible in the
+  /// admin panel under "Needs source link" until an editor adds one.
   Stream<List<Advertisement>> watchPublished() {
     if (!FirebaseConfig.isConfigured) {
-      return Stream<List<Advertisement>>.value(DemoAds.ads);
+      return Stream<List<Advertisement>>.value(filterSourcedAds(DemoAds.ads));
     }
     return _db
         .collection(AppConstants.advertisementsCollection)
@@ -43,7 +47,7 @@ class AdvertisementService {
   /// One-shot fetch of published advertisements, newest first.
   Future<List<Advertisement>> fetchPublished() async {
     if (!FirebaseConfig.isConfigured) {
-      return DemoAds.ads;
+      return filterSourcedAds(DemoAds.ads);
     }
     final snapshot = await _db
         .collection(AppConstants.advertisementsCollection)
@@ -79,7 +83,14 @@ class AdvertisementService {
     final ads = <Advertisement>[];
     for (final doc in snapshot.docs) {
       try {
-        ads.add(Advertisement.fromJson(doc.id, doc.data()));
+        final ad = Advertisement.fromJson(doc.id, doc.data());
+        if (!ad.hasSourceUrl) {
+          debugPrint(
+            'Skipping advertisement ${doc.id}: no official source URL.',
+          );
+          continue;
+        }
+        ads.add(ad);
       } on FormatException catch (error) {
         debugPrint('Skipping invalid advertisement ${doc.id}: $error');
       }
@@ -110,6 +121,15 @@ class AdvertisementService {
 List<Advertisement> filterActiveAds(List<Advertisement> ads, {DateTime? now}) {
   final clock = now ?? DateTime.now();
   return ads.where((ad) => ad.isActiveAt(clock)).toList();
+}
+
+/// Keeps only advertisements with a usable official source link
+/// (see [Advertisement.hasSourceUrl]). This is the public-feed gate for
+/// the Misleading Claims policy: a listing without an official source
+/// must never be shown to users, even if it is published and unexpired.
+/// The admin panel lists everything and filters separately.
+List<Advertisement> filterSourcedAds(List<Advertisement> ads) {
+  return ads.where((ad) => ad.hasSourceUrl).toList();
 }
 
 /// Keeps advertisements of [category], or all when [category] is 'all'.

@@ -1,5 +1,7 @@
 import 'package:afzal_opportunities/core/l10n/app_localizations.dart';
 import 'package:afzal_opportunities/core/utils/url_utils.dart';
+import 'package:afzal_opportunities/models/advertisement.dart';
+import 'package:afzal_opportunities/services/advertisement_service.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -11,6 +13,13 @@ import 'package:flutter_test/flutter_test.dart';
 /// The details screen shows the missing-source notice exactly when the
 /// advertisement has no safe source URL, i.e. when
 /// `isSafeHttpUrl(ad.sourceUrl)` is false.
+///
+/// v1.4.1+9 goes further: the public feed itself hides advertisements
+/// without a usable official source link ([Advertisement.hasSourceUrl] /
+/// [filterSourcedAds]), so the store description's "every government
+/// listing links to its original official source" is true at all times.
+/// Unsourced advertisements stay visible in the admin panel under
+/// "Needs source link" until an editor adds the source.
 void main() {
   group('missing-source notice condition (isSafeHttpUrl)', () {
     test('null, empty and blank source URLs count as missing', () {
@@ -30,6 +39,66 @@ void main() {
       expect(isSafeHttpUrl('https://kppsc.gov.pk'), isTrue);
       expect(isSafeHttpUrl('http://healthkp.gov.pk/jobs'), isTrue);
       expect(isSafeHttpUrl('  https://njp.gov.pk  '), isTrue);
+    });
+  });
+
+  group('public feed source gate (v1.4.1+9)', () {
+    Advertisement makeAd(String id, {String? sourceUrl}) {
+      return Advertisement(
+        id: id,
+        title: 'Title $id',
+        organization: 'Org',
+        category: 'jobs',
+        description: 'Description',
+        status: 'published',
+        sourceUrl: sourceUrl,
+      );
+    }
+
+    test('hasSourceUrl accepts http/https URLs with a host', () {
+      expect(
+        makeAd('a', sourceUrl: 'https://kppsc.gov.pk').hasSourceUrl,
+        isTrue,
+      );
+      expect(
+        makeAd('b', sourceUrl: 'http://healthkp.gov.pk/jobs').hasSourceUrl,
+        isTrue,
+      );
+      expect(
+        makeAd('c', sourceUrl: '  https://etea.edu.pk  ').hasSourceUrl,
+        isTrue,
+      );
+    });
+
+    test('hasSourceUrl rejects missing, blank and non-web sources', () {
+      expect(makeAd('a').hasSourceUrl, isFalse);
+      expect(makeAd('b', sourceUrl: '   ').hasSourceUrl, isFalse);
+      expect(makeAd('c', sourceUrl: 'not a url').hasSourceUrl, isFalse);
+      expect(makeAd('d', sourceUrl: 'https://').hasSourceUrl, isFalse);
+      expect(
+        makeAd('e', sourceUrl: 'javascript:alert(1)').hasSourceUrl,
+        isFalse,
+      );
+      expect(makeAd('f', sourceUrl: 'tel:+923001234567').hasSourceUrl, isFalse);
+    });
+
+    test('filterSourcedAds keeps only sourced ads, in order', () {
+      final ads = [
+        makeAd('sourced-1', sourceUrl: 'https://kppsc.gov.pk'),
+        makeAd('unsourced'),
+        makeAd('sourced-2', sourceUrl: 'https://etea.edu.pk'),
+        makeAd('broken', sourceUrl: 'not a url'),
+      ];
+      expect(filterSourcedAds(ads).map((a) => a.id), [
+        'sourced-1',
+        'sourced-2',
+      ]);
+    });
+
+    test('filterSourcedAds does not mutate the input list', () {
+      final ads = [makeAd('a', sourceUrl: 'https://kppsc.gov.pk'), makeAd('b')];
+      filterSourcedAds(ads);
+      expect(ads.map((a) => a.id), ['a', 'b']);
     });
   });
 

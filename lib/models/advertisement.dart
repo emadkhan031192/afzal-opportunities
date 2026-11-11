@@ -129,6 +129,26 @@ class Advertisement {
     return !info.isExpired;
   }
 
+  /// Whether this advertisement carries a usable official source link:
+  /// an http(s) URL with a host. Advertisements without one are hidden
+  /// from the public feed (Google Play Misleading Claims policy: every
+  /// government listing must link to its original official source).
+  bool get hasSourceUrl {
+    final url = sourceUrl;
+    if (url == null) {
+      return false;
+    }
+    final uri = Uri.tryParse(url.trim());
+    if (uri == null) {
+      return false;
+    }
+    final scheme = uri.scheme.toLowerCase();
+    if (scheme != 'http' && scheme != 'https') {
+      return false;
+    }
+    return uri.host.isNotEmpty;
+  }
+
   static String _requiredString(
     Map<String, dynamic> json,
     String key,

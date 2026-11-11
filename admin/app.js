@@ -317,6 +317,10 @@ function adMatchesTab(ad, tab) {
       return ad.status === "archived";
     case "expired":
       return !!expired;
+    case "needs-source":
+      // Any status: without an official source URL the app hides the
+      // advertisement from the public feed, so it needs fixing here.
+      return !ad.sourceUrl || !String(ad.sourceUrl).trim();
     default:
       return false;
   }
@@ -350,7 +354,7 @@ async function loadDashboard() {
 }
 
 function updateCounts() {
-  const tabs = ["published", "drafts", "archived", "expired"];
+  const tabs = ["published", "drafts", "archived", "expired", "needs-source"];
   tabs.forEach((t) => {
     $("count-" + t).textContent = allAds.filter((ad) => adMatchesTab(ad, t)).length;
   });
@@ -398,6 +402,7 @@ function adCard(ad) {
         <span class="badge ${badgeTone}">${esc(dl.text)}${ad.lastDate ? ` · ${esc(formatPKTDate(ad.lastDate))}` : ""}</span>
         ${isNew ? `<span class="badge badge-new">NEW</span>` : ""}
         ${ad.isFeatured ? `<span class="badge badge-deadline fine">FEATURED</span>` : ""}
+        ${ad.sourceUrl ? "" : `<span class="badge badge-expired">NO SOURCE LINK</span>`}
       </div>
       <h4>${esc(ad.title)}</h4>
       <p class="muted small" style="margin:0">${esc(ad.organization || "")}${ad.location ? " · " + esc(ad.location) : ""}</p>
@@ -430,6 +435,15 @@ function adCard(ad) {
 
 /** Status transitions (publish / unpublish / archive). */
 async function changeStatus(ad, newStatus) {
+  if (newStatus === "published" && !ad.sourceUrl) {
+    // The public app hides advertisements without an official source
+    // link, so publishing one would silently hide it from users.
+    toast(
+      "Add an official source URL before publishing this advertisement.",
+      "error"
+    );
+    return;
+  }
   const verb = { published: "publish", draft: "unpublish to drafts", archived: "archive" }[newStatus] || newStatus;
   const ok = await confirmDialog(
     `${verb[0].toUpperCase() + verb.slice(1)} advertisement?`,
